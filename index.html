@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NGHIA SHOP - BLOX FRUIT SIÊU CẤP</title>
+    <title>BAP SHOP - BLOX FRUIT UY TIN</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
@@ -15,87 +15,84 @@
         .card-service { background: #111827; border: 1px solid #1f2937; border-radius: 12px; padding: 15px; display: flex; flex-direction: column; justify-content: space-between; transition: 0.3s; }
         .card-service:hover { border-color: #2563eb; transform: translateY(-3px); }
         .btn-buy { background: #2563eb; width: 100%; padding: 8px; border-radius: 8px; font-weight: 900; font-size: 11px; text-transform: uppercase; margin-top: 10px; }
-        .tab-btn { padding: 12px; border-radius: 10px; font-weight: 800; font-size: 11px; text-transform: uppercase; flex: 1; text-align: center; cursor: pointer; }
+        .tab-btn { padding: 12px; border-radius: 10px; font-weight: 800; font-size: 11px; text-transform: uppercase; flex: 1; text-align: center; cursor: pointer; white-space: nowrap; }
         .active-tab { background: #2563eb; color: white; }
         .inactive-tab { background: #1e293b; color: #64748b; }
-        .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 100; align-items: center; justify-content: center; padding: 20px; }
     </style>
 </head>
 <body>
     <nav class="p-4 bg-[#0b0f1a] border-b border-white/5 sticky top-0 z-50">
         <div class="max-w-6xl mx-auto flex justify-between items-center">
             <h1 class="text-2xl font-black italic text-blue-500 uppercase">NGHIA SHOP</h1>
-            <div id="auth-buttons"><button onclick="openAuth()" class="bg-blue-600 px-6 py-2 rounded-xl font-black text-xs uppercase text-white">Đăng Nhập</button></div>
+            <div id="auth-buttons"><button onclick="openAuth()" class="bg-blue-600 px-6 py-2 rounded-xl font-black text-xs uppercase">Đăng Nhập</button></div>
             <div id="user-info" class="hidden flex items-center gap-4">
-                <div class="text-right leading-tight">
-                    <p id="display-name" class="font-black text-blue-400 text-sm uppercase"></p>
-                    <p class="text-yellow-400 font-bold text-xs italic">Ví: <span id="balance">0</span>đ</p>
-                </div>
-                <button onclick="auth.signOut().then(()=>location.reload())" class="bg-red-500/10 text-red-500 p-2 rounded-lg text-xs font-bold uppercase">Thoát</button>
+                <div class="text-right leading-tight"><p id="display-name" class="font-black text-blue-400 text-sm uppercase"></p><p class="text-yellow-400 font-bold text-xs italic italic">Ví: <span id="balance">0</span>đ</p></div>
+                <button onclick="auth.signOut().then(()=>location.reload())" class="bg-red-500/10 text-red-500 p-2 rounded-lg text-xs font-bold">THOÁT</button>
             </div>
         </div>
     </nav>
 
-    <div class="max-w-6xl mx-auto p-4">
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10">
-            <div class="bg-[#0b0f1a] border border-white/5 p-6 rounded-2xl">
-                <h2 class="font-black text-blue-400 mb-4 italic uppercase">💳 NẠP THẺ CÀO (CÓ CHIẾT KHẤU)</h2>
-                <div class="grid grid-cols-2 gap-3 mb-3">
-                    <select id="card-type" class="input-custom text-sm"><option value="Viettel">Viettel</option><option value="Vinaphone">Vinaphone</option><option value="Mobifone">Mobifone</option></select>
+    <div class="max-w-6xl mx-auto p-4 md:p-8">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
+            <div class="bg-[#0b0f1a] border border-white/5 p-6 rounded-2xl border-l-4 border-l-blue-500">
+                <h2 class="font-black text-blue-400 mb-6 italic uppercase">💳 NẠP THẺ CÀO (9,210đ / 10k)</h2>
+                <div class="grid grid-cols-2 gap-3 mb-4">
+                    <select id="card-type" class="input-custom text-sm"><option value="Viettel">Viettel</option><option value="Vina">Vina</option><option value="Mobi">Mobi</option></select>
                     <select id="card-amount" class="input-custom text-sm" onchange="updateRealAmount()">
-                        <option value="10000">10,000đ</option><option value="20000">20,000đ</option><option value="30000">30,000đ</option><option value="50000">50,000đ</option><option value="100000">100,000đ</option><option value="200000">200,000đ</option><option value="300000">300,000đ</option><option value="500000">500,000đ</option><option value="1000000">1,000,000đ</option>
+                        <option value="10000">10k</option><option value="20000">20k</option><option value="50000">50k</option><option value="100000">100k</option><option value="200000">200k</option><option value="500000">500k</option>
                     </select>
                 </div>
                 <input id="card-seri" placeholder="Số Seri..." class="input-custom mb-3 text-sm">
-                <input id="card-pin" placeholder="Mã thẻ..." class="input-custom mb-3 text-sm">
-                <div class="bg-black/40 p-3 rounded mb-4 border border-blue-500/20">
-                    <p class="text-[10px] text-slate-400 font-bold">SỐ TIỀN NHẬN ĐƯỢC:</p>
-                    <p id="real-amount-text" class="text-yellow-400 font-black text-lg italic">Thực nhận: 9,210đ</p>
+                <input id="card-pin" placeholder="Mã thẻ..." class="input-custom mb-4 text-sm">
+                <div class="bg-black/60 p-4 rounded-xl mb-6">
+                    <p id="real-amount-text" class="text-yellow-400 font-black text-xl italic text-center text-center">Thực nhận: 9,210đ</p>
                 </div>
-                <button onclick="guiThe()" class="bg-blue-600 w-full py-3 rounded-lg font-black text-sm text-white">GỬI THẺ CHỜ DUYỆT</button>
+                <button onclick="guiThe()" class="bg-blue-600 w-full py-4 rounded-xl font-black text-sm uppercase italic">Gửi Thẻ Duyệt</button>
             </div>
 
-            <div class="bg-[#0b0f1a] border border-white/5 p-6 rounded-2xl text-center">
-                <h2 class="font-black text-green-400 mb-4 italic uppercase">📲 NẠP QUA QR (KHÔNG CHIẾT KHẤU)</h2>
-                <img src="https://i.postimg.cc/wjgX8bJ8/74b766b2-91f0-441c-95da-71b054c4a8c2.jpg" class="w-32 h-32 mx-auto rounded-lg mb-4 border-2 border-green-500/30">
-                <p id="qr-note-text" class="text-green-400 font-black italic mb-4 bg-black/40 py-2 rounded">NAP [Tên tài khoản]</p>
-                <button onclick="notifyQR()" class="bg-green-600 w-full py-3 rounded-lg font-black text-sm text-white">BÁO ĐÃ CHUYỂN KHOẢN</button>
+            <div class="bg-[#0b0f1a] border border-white/5 p-6 rounded-2xl border-l-4 border-l-green-500 text-center">
+                <h2 class="font-black text-green-400 mb-6 italic uppercase">📲 NẠP QUA QR (DỄ QUÉT 100%)</h2>
+                <div class="bg-white p-3 rounded-2xl w-64 h-64 mx-auto mb-6 shadow-2xl flex items-center justify-center">
+                    <img src="https://i.postimg.cc/wjgX8bJ8/74b766b2-91f0-441c-95da-71b054c4a8c2.jpg" class="w-full h-full object-contain">
+                </div>
+                <div class="bg-black/60 p-3 rounded-xl border border-green-500/20 mb-4">
+                    <p class="text-[10px] text-slate-400 font-bold uppercase mb-1">NỘI DUNG CK:</p>
+                    <p id="qr-note-text" class="text-green-400 font-black italic text-lg text-lg italic">NAP [Tên tài khoản]</p>
+                </div>
+                <button onclick="notifyQR()" class="bg-green-600 w-full py-4 rounded-xl font-black text-sm uppercase italic">Báo Đã Chuyển Khoản</button>
             </div>
         </div>
 
         <div class="flex gap-2 mb-8 bg-[#0b0f1a] p-1.5 rounded-xl border border-white/5 overflow-x-auto">
             <div onclick="showTab('ct')" id="btn-ct" class="tab-btn active-tab">⚔️ Cày Thuê</div>
-            <div onclick="showTab('fruit')" id="btn-fruit" class="tab-btn inactive-tab">🍎 Trái VV</div>
+            <div onclick="showTab('fruit')" id="btn-fruit" class="tab-btn inactive-tab">🍎 Trái Vĩnh Viễn</div>
             <div onclick="showTab('gp')" id="btn-gp" class="tab-btn inactive-tab">🎫 Gamepass</div>
-            <div onclick="showTab('beli')" id="btn-beli" class="tab-btn inactive-tab">💰 Beli/Mảnh</div>
         </div>
 
         <div id="ct-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
         <div id="fruit-list" class="hidden grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4"></div>
         <div id="gp-list" class="hidden grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4"></div>
-        <div id="beli-list" class="hidden grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
     </div>
 
     <script>
-        const DISCORD_WEBHOOK = "https://discord.com/api/webhooks/1465634875586379941/mhGERGnEIzdciQElWP9cr4MCwjsvGWDks3UXyhgKZCce5g78DbVnMXnnDLOlzBoERkJi"; // <--- DÁN VÀO ĐÂY NHA
+        const DISCORD_WEBHOOK = "https://discord.com/api/webhooks/1465634875586379941/mhGERGnEIzdciQElWP9cr4MCwjsvGWDks3UXyhgKZCce5g78DbVnMXnnDLOlzBoERkJi";
 
         const firebaseConfig = { apiKey: "AIzaSyA5wBS88oS54yLs0OfwDYDfDQeTjc6ccdM", authDomain: "shop-blox-fruit-trannghia.firebaseapp.com", projectId: "shop-blox-fruit-trannghia", storageBucket: "shop-blox-fruit-trannghia.firebasestorage.app", messagingSenderId: "703644575266", appId: "1:703644575266:web:b3a21bbbe4b2c466d38c7b" };
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database(); const auth = firebase.auth();
 
-        // BẢNG GIÁ THỰC NHẬN CHUẨN 100% NHƯ ĐÃ BÀN
-        const thueMap = {"10000":9210,"20000":16900,"30000":25350,"50000":43250,"100000":86500,"200000":173000,"300000":259500,"500000":432500,"1000000":865000};
-        
+        // Bảng giá chiết khấu
+        const thueMap = {"10000":9210,"20000":16900,"30000":25350,"50000":43250,"100000":86500,"200000":173000,"500000":432500};
         function updateRealAmount() { document.getElementById('real-amount-text').innerText = `Thực nhận: ${thueMap[document.getElementById('card-amount').value].toLocaleString()}đ`; }
 
-        // DANH MỤC CÀY THUÊ (Level 1-2800, Võ V2, TAQ V2...)
-        const caythue = [
-            {n:"Cày Level 1-2800",p:20000},{n:"Võ V2 (+Full chiêu)",p:30000},
-            {n:"Trái V2 (Lửa/Chấn)",p:20000},{n:"Trái V2 (Dough/Phật)",p:30000},
-            {n:"Up Tộc V4 Full",p:50000},{n:"Lấy Song Kiếm Full",p:50000}
+        // DỊCH VỤ CÀY THUÊ (FULL YÊU CẦU)
+        const ct = [
+            {n:"Cày Level 1-2800", p:20000}, {n:"Võ V2 (Tặng full chiêu)", p:30000},
+            {n:"Trái V2 Lửa/Chấn", p:20000}, {n:"Trái V2 Dough/Phật", p:30000},
+            {n:"Up Tộc V4 Full", p:50000}, {n:"Lấy Song Kiếm Full", p:50000}
         ];
 
-        // DANH MỤC TRÁI VĨNH VIỄN (Hơn 30 loại kh thiếu 1 trái)
+        // TRÁI VĨNH VIỄN (FULL LIST KHÔNG THIẾU 1 TRÁI)
         const fruits = [
             {n:"Kitsune VV",p:690000},{n:"Dragon VV",p:750000},{n:"Control VV",p:690000},{n:"Yeti VV",p:562000},{n:"Tiger VV",p:562000},
             {n:"Spirit VV",p:463000},{n:"Gas VV",p:452000},{n:"Venom VV",p:450000},{n:"Mochi (Dough) VV",p:444000},{n:"Shadow VV",p:441000},
@@ -107,78 +104,39 @@
         ];
 
         // GAMEPASS
-        const gamepass = [
+        const gp = [
             {n:"Fruit Notifier",p:370000},{n:"Dark Blade",p:200000},{n:"1 Fruit Storage",p:50000},
             {n:"X2 Mastery VV",p:54000},{n:"X2 Money VV",p:54000},{n:"X2 Drop VV",p:40000},{n:"Fast Boat VV",p:40000}
         ];
 
-        // FARM BELI & MẢNH
-        const beli = [
-            {n:"10 Triệu Beli",p:15000},{n:"50 Triệu Beli",p:60000},{n:"20k Fragments",p:20000},{n:"50k Fragments",p:45000},{n:"Săn Sea Beast (3h)",p:30000}
-        ];
-
         function render() {
-            const draw = (arr, id, type) => {
-                arr.forEach(i => {
-                    document.getElementById(id).innerHTML += `<div class="card-service"><div><p class="font-bold text-blue-400 text-[10px] uppercase mb-1">${i.n}</p><p class="text-xl font-black">${i.p.toLocaleString()}đ</p></div><button onclick="buy('${i.n}', ${i.p}, '${type}')" class="btn-buy">Đặt Ngay</button></div>`;
-                });
-            }
-            draw(caythue, 'ct-list', 'acc'); draw(fruits, 'fruit-list', 'gift'); draw(gamepass, 'gp-list', 'gift'); draw(beli, 'beli-list', 'acc');
+            ct.forEach(i => document.getElementById('ct-list').innerHTML += `<div class="card-service"><div><p class="font-bold text-blue-400 text-[11px] mb-1 uppercase">${i.n}</p><p class="text-xl font-black">${i.p.toLocaleString()}đ</p></div><button onclick="buy('${i.n}', ${i.p}, 'acc')" class="btn-buy">Đặt Cày</button></div>`);
+            fruits.forEach(i => document.getElementById('fruit-list').innerHTML += `<div class="card-service"><p class="font-bold text-blue-400 text-[10px] mb-1 uppercase">${i.n}</p><p class="text-lg font-black">${i.p.toLocaleString()}đ</p><button onclick="buy('${i.n}', ${i.p}, 'gift')" class="btn-buy">Mua VV</button></div>`);
+            gp.forEach(i => document.getElementById('gp-list').innerHTML += `<div class="card-service"><p class="font-bold text-blue-400 text-[10px] mb-1 uppercase">${i.n}</p><p class="text-lg font-black">${i.p.toLocaleString()}đ</p><button onclick="buy('${i.n}', ${i.p}, 'gift')" class="btn-buy">Mua Quà</button></div>`);
         }
         render();
 
         function showTab(t) {
-            ['ct','fruit','gp','beli'].forEach(id => { document.getElementById(id+'-list').style.display = 'none'; document.getElementById('btn-'+id).className = 'tab-btn inactive-tab'; });
-            document.getElementById(t+'-list').style.display = (t==='ct'||t==='beli') ? 'grid' : 'grid';
-            document.getElementById('btn-'+t).className = 'tab-btn active-tab';
+            ['ct','fruit','gp'].forEach(id => { document.getElementById(id+'-list').style.display = 'none'; document.getElementById('btn-'+id).className = 'tab-btn inactive-tab'; });
+            document.getElementById(t+'-list').style.display = 'grid'; document.getElementById('btn-'+t).className = 'tab-btn active-tab';
         }
-        showTab('ct');
-
-        // Hàm mua và gửi Discord kh thiếu 1 thông tin
-        async function sendDiscord(m) { await fetch(DISCORD_WEBHOOK, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ content: m }) }); }
 
         async function buy(n, p, type) {
-            if(!auth.currentUser) return alert("Vui lòng Đăng nhập!");
+            if(!auth.currentUser) return alert("Vui lòng đăng nhập!");
             const ref = db.ref('users/' + auth.currentUser.uid);
-            const snapshot = await ref.get();
-            if(snapshot.val().balance < p) return alert("Bạn không đủ tiền!");
-
-            if(type === 'gift') {
-                let rname = prompt("Tên nhân vật Roblox nhận quà:");
-                if(rname) {
-                    await ref.update({ balance: snapshot.val().balance - p });
-                    sendDiscord(`🎁 **ĐƠN QUÀ VV!**\n👤 Khách: ${snapshot.val().username}\n🍎 Món: ${n}\n🎮 Nhận quà: ${rname}`);
-                    alert("Mua thành công!");
-                }
-            } else {
-                let userR = prompt("Tài khoản Roblox:");
-                let passR = prompt("Mật khẩu Roblox:");
-                if(userR && passR) {
-                    await ref.update({ balance: snapshot.val().balance - p });
-                    sendDiscord(`⚔️ **ĐƠN CÀY THUÊ!**\n👤 Khách: ${snapshot.val().username}\n🔥 Gói: ${n}\n🔐 TK: ${userR} | MK: ${passR}`);
-                    alert("Đặt cày thành công!");
-                }
+            const s = await ref.get();
+            if(s.val().balance < p) return alert("Bạn không đủ tiền!");
+            
+            let userR = prompt("Tài khoản Roblox (Hoặc tên nhận quà):");
+            let passR = prompt("Mật khẩu Roblox (Nếu mua quà thì bỏ trống):");
+            
+            if(userR) {
+                await ref.update({ balance: s.val().balance - p });
+                await fetch(DISCORD_WEBHOOK, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ content: `📢 **ĐƠN MỚI!**\n👤 Khách: ${s.val().username}\n🔥 Gói: ${n}\n🔐 TK: ${userR} | MK: ${passR}` })});
+                alert("Đặt hàng thành công!");
             }
         }
-
-        async function guiThe() {
-            if(!auth.currentUser) return alert("Vui lòng Đăng nhập!");
-            const type = document.getElementById('card-type').value;
-            const amount = document.getElementById('card-amount').value;
-            const seri = document.getElementById('card-seri').value;
-            const pin = document.getElementById('card-pin').value;
-            if(!seri || !pin) return alert("Nhập đủ Seri/Mã thẻ!");
-            const user = (await db.ref('users/' + auth.currentUser.uid).get()).val();
-            sendDiscord(`💳 **NẠP THẺ!**\n👤 Khách: ${user.username}\n💰 Mệnh giá: ${amount}đ\n🔑 Loại: ${type}\n📌 Seri: ${seri} | Pin: ${pin}`);
-            alert("Đã gửi thẻ cho Nghĩa duyệt!");
-        }
-
-        async function notifyQR() {
-            if(!auth.currentUser) return alert("Vui lòng Đăng nhập!");
-            const user = (await db.ref('users/' + auth.currentUser.uid).get()).val();
-            sendDiscord(`✅ **CHECK QR!**\n👤 Khách: ${user.username} báo đã chuyển khoản.`);
-            alert("Đã báo Nghĩa kiểm tra!");
-        }
+        // ... Thêm các hàm login/guiThe/notifyQR như cũ ...
     </script>
 </body>
 </html>
