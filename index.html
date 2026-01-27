@@ -10,12 +10,12 @@
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;700;900&display=swap');
-        body { background: #050810; color: white; font-family: 'Outfit', sans-serif; overflow-x: hidden; }
+        body { background: #050810; color: white; font-family: 'Outfit', sans-serif; }
         .input-custom { background: #0f172a; border: 1px solid #1e293b; padding: 12px; border-radius: 10px; width: 100%; color: white; outline: none; }
         .card-service { background: #111827; border: 1px solid #1f2937; border-radius: 15px; padding: 15px; display: flex; flex-direction: column; justify-content: space-between; transition: 0.3s; }
         .card-service:hover { border-color: #2563eb; transform: translateY(-3px); }
         .btn-buy { background: #2563eb; width: 100%; padding: 10px; border-radius: 10px; font-weight: 900; font-size: 11px; text-transform: uppercase; margin-top: 10px; color: white; }
-        .tab-btn { padding: 12px 20px; border-radius: 12px; font-weight: 800; font-size: 11px; text-transform: uppercase; flex: 1; text-align: center; cursor: pointer; white-space: nowrap; transition: 0.3s; }
+        .tab-btn { padding: 12px 20px; border-radius: 12px; font-weight: 800; font-size: 11px; text-transform: uppercase; flex: 1; text-align: center; cursor: pointer; transition: 0.3s; }
         .active-tab { background: #2563eb; color: white; box-shadow: 0 4px 15px rgba(37, 99, 235, 0.4); }
         .inactive-tab { background: #1e293b; color: #64748b; }
         .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 100; align-items: center; justify-content: center; padding: 20px; }
@@ -28,16 +28,16 @@
             <div id="auth-buttons"><button onclick="openAuth()" class="bg-blue-600 px-6 py-2 rounded-xl font-black text-xs uppercase text-white shadow-lg">Đăng Nhập</button></div>
             <div id="user-info" class="hidden flex items-center gap-4">
                 <div class="text-right leading-tight"><p id="display-name" class="font-black text-blue-400 text-sm uppercase"></p><p class="text-yellow-400 font-bold text-xs italic">Ví: <span id="balance">0</span>đ</p></div>
-                <button onclick="logout()" class="bg-red-500/10 text-red-500 p-2 rounded-lg text-xs font-bold uppercase hover:bg-red-500 hover:text-white">Thoát</button>
+                <button onclick="auth.signOut().then(()=>location.reload())" class="bg-red-500/10 text-red-500 p-2 rounded-lg text-xs font-bold uppercase">Thoát</button>
             </div>
         </div>
     </nav>
 
     <div id="auth-modal" class="modal">
-        <div class="bg-[#0f172a] p-8 rounded-[2rem] w-full max-w-sm border border-white/10 shadow-2xl">
-            <h2 class="text-2xl font-black text-blue-500 mb-6 uppercase italic text-center text-center">TÀI KHOẢN</h2>
-            <input id="auth-email" placeholder="Tên đăng nhập" class="input-custom mb-3 text-sm">
-            <input id="auth-pass" type="password" placeholder="Mật khẩu (>= 6 ký tự)" class="input-custom mb-6 text-sm">
+        <div class="bg-[#0f172a] p-8 rounded-[2rem] w-full max-w-sm border border-white/10 shadow-2xl text-center">
+            <h2 class="text-2xl font-black text-blue-500 mb-6 uppercase italic">TÀI KHOẢN</h2>
+            <input id="auth-email" placeholder="Tên đăng nhập" class="input-custom mb-3 text-sm text-center">
+            <input id="auth-pass" type="password" placeholder="Mật khẩu (>= 6 ký tự)" class="input-custom mb-6 text-sm text-center">
             <button onclick="handleAuth()" class="bg-blue-600 w-full py-4 rounded-xl font-black text-xs uppercase text-white mb-4">XÁC NHẬN</button>
             <button onclick="closeAuth()" class="w-full text-slate-500 font-bold text-[10px] uppercase">ĐÓNG</button>
         </div>
@@ -46,35 +46,43 @@
     <div class="max-w-6xl mx-auto p-4 md:p-8">
         <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
             <div class="bg-[#0b0f1a] border border-white/5 p-6 rounded-3xl border-l-4 border-l-blue-500 shadow-xl">
-                <h2 class="font-black text-blue-400 mb-6 italic uppercase">💳 NẠP THẺ (9,210đ / 10k)</h2>
+                <h2 class="font-black text-blue-400 mb-6 italic uppercase flex items-center gap-2">💳 NẠP THẺ CÀO (CÓ CHIẾT KHẤU)</h2>
                 <div class="grid grid-cols-2 gap-3 mb-4">
-                    <select id="card-type" class="input-custom text-sm"><option value="Viettel">Viettel</option><option value="Vina">Vinaphone</option><option value="Mobi">Mobifone</option></select>
-                    <select id="card-amount" class="input-custom text-sm" onchange="updateRealAmount()">
-                        <option value="10000">10k</option><option value="20000">20k</option><option value="50000">50k</option><option value="100000">100k</option>
-                    </select>
+                    <select id="card-type" class="input-custom text-sm font-bold"><option value="Viettel">Viettel</option><option value="Vinaphone">Vinaphone</option><option value="Mobifone">Mobifone</option></select>
+                    <input id="card-seri" placeholder="Số Seri..." class="input-custom text-sm">
                 </div>
-                <input id="card-seri" placeholder="Số Seri..." class="input-custom mb-3 text-sm">
-                <input id="card-pin" placeholder="Mã thẻ..." class="input-custom mb-4 text-sm">
-                <p id="real-amount-text" class="text-yellow-400 font-black text-center mb-4 italic">Thực nhận: 9,210đ</p>
-                <button onclick="guiThe()" class="bg-blue-600 w-full py-4 rounded-xl font-black text-sm uppercase italic text-white shadow-lg">Gửi Thẻ Duyệt</button>
+                <div class="grid grid-cols-2 gap-3 mb-4">
+                    <select id="card-amount" class="input-custom text-sm font-bold" onchange="updateRealAmount()">
+                        <option value="10000">10,000đ</option><option value="20000">20,000đ</option><option value="50000">50,000đ</option><option value="100000">100,000đ</option><option value="200000">200,000đ</option><option value="500000">500,000đ</option>
+                    </select>
+                    <input id="card-pin" placeholder="Mã thẻ..." class="input-custom text-sm">
+                </div>
+                <div class="bg-black/40 p-5 rounded-xl mb-6 border border-white/5 text-center leading-tight">
+                    <p class="text-slate-400 font-bold text-[10px] uppercase mb-1">SỐ TIỀN BẠN SẼ NHẬN ĐƯỢC:</p>
+                    <p id="real-amount-text" class="text-yellow-400 font-black text-2xl italic">Thực nhận: 9,210đ</p>
+                </div>
+                <button onclick="guiThe()" class="bg-blue-600 w-full py-4 rounded-xl font-black text-sm uppercase italic text-white shadow-lg">GỬI THẺ CHỜ DUYỆT</button>
             </div>
 
             <div class="bg-[#0b0f1a] border border-white/5 p-6 rounded-3xl border-l-4 border-l-green-500 text-center shadow-xl">
-                <h2 class="font-black text-green-400 mb-6 italic uppercase">📲 NẠP QUA QR (DỄ QUÉT)</h2>
-                <div class="bg-white p-3 rounded-2xl w-64 h-64 mx-auto mb-6 shadow-2xl flex items-center justify-center">
-                    <img src="https://i.postimg.cc/wjgX8bJ8/74b766b2-91f0-441c-95da-71b054c4a8c2.jpg" class="w-full h-full object-contain text-black">
+                <h2 class="font-black text-green-400 mb-6 italic uppercase flex items-center justify-center gap-2">📲 NẠP TIỀN QUA QR (KHÔNG CHIẾT KHẤU)</h2>
+                <div class="bg-white p-2 rounded-2xl w-64 h-64 mx-auto mb-6 shadow-2xl">
+                    <img src="https://i.postimg.cc/wjgX8bJ8/74b766b2-91f0-441c-95da-71b054c4a8c2.jpg" class="w-full h-full object-contain">
                 </div>
-                <p id="qr-note-text" class="text-green-400 font-black italic text-lg mb-4">NAP [Tên tài khoản]</p>
-                <button onclick="notifyQR()" class="bg-green-600 w-full py-4 rounded-xl font-black text-sm uppercase italic text-white shadow-lg">Xác Nhận Đã Chuyển</button>
+                <div class="bg-black/40 p-3 rounded-xl border border-green-500/20 mb-4">
+                    <p class="text-[10px] text-slate-400 font-bold uppercase mb-1">NỘI DUNG CHUYỂN KHOẢN:</p>
+                    <p id="qr-note-text" class="text-green-400 font-black italic text-lg">NAP [Tên tài khoản]</p>
+                </div>
+                <button onclick="notifyQR()" class="bg-green-600 w-full py-4 rounded-xl font-black text-sm uppercase italic text-white shadow-lg">BÁO ĐÃ CHUYỂN KHOẢN</button>
             </div>
         </div>
 
         <div class="mb-12 bg-[#0b0f1a] border border-white/5 p-6 rounded-3xl shadow-xl">
-            <h2 class="font-black text-yellow-400 mb-4 italic uppercase text-sm">🕒 TRẠNG THÁI DUYỆT ĐƠN CỦA BẠN</h2>
+            <h2 class="font-black text-yellow-400 mb-4 italic uppercase text-xs">🕒 TRẠNG THÁI DUYỆT ĐƠN CỦA BẠN</h2>
             <div class="overflow-x-auto">
-                <table class="w-full text-left text-sm">
-                    <tbody id="history-list" class="divide-y divide-white/5 text-xs text-xs">
-                        <tr><td class="py-4 text-slate-500 italic text-center">Vui lòng đăng nhập để xem lịch sử</td></tr>
+                <table class="w-full text-left">
+                    <tbody id="history-list" class="divide-y divide-white/5 text-[11px]">
+                        <tr><td class="py-4 text-slate-500 italic text-center">Vui lòng đăng nhập...</td></tr>
                     </tbody>
                 </table>
             </div>
@@ -98,41 +106,57 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database(); const auth = firebase.auth();
 
-        // AUTH FUNCTIONS
+        // 1. DỮ LIỆU ĐẦY ĐỦ KHÔNG THIẾU MÓN NÀO
+        const products = {
+            ct: [
+                {n:"Cày Level 1-2800", p:20000}, {n:"Võ V2 (+Full Chiêu)", p:30000}, {n:"Up Tộc V4 Full", p:50000},
+                {n:"Lấy Song Kiếm Oden", p:50000}, {n:"Full Chiêu TAQ", p:20000}, {n:"Cày Beli 100M", p:30000}
+            ],
+            fruit: [
+                {n:"Kitsune VV", p:690000}, {n:"Dragon VV", p:750000}, {n:"Leopard VV", p:550000}, {n:"Dough VV", p:444000},
+                {n:"T-Rex VV", p:420000}, {n:"Portal VV", p:250000}, {n:"Phật Tổ VV", p:250000}, {n:"Magma VV", p:150000},
+                {n:"Ice VV", p:110000}, {n:"Light VV", p:110000}, {n:"Dark VV", p:80000}, {n:"Flame VV", p:100000},
+                {n:"Mammoth VV", p:420000}, {n:"Venom VV", p:450000}, {n:"Shadow VV", p:441000}, {n:"Blade VV", p:20000}
+            ],
+            gp: [
+                {n:"Fruit Notifier", p:370000}, {n:"Dark Blade", p:200000}, {n:"Thuyền Nhanh", p:40000},
+                {n:"X2 Mastery", p:54000}, {n:"X2 Money", p:54000}, {n:"1 Fruit Storage", p:50000},
+                {n:"X2 Drop Rate", p:45000}, {n:"Permanent Fruit Slot", p:30000}
+            ]
+        };
+
+        // 2. HÀM RENDER
+        function render() {
+            Object.keys(products).forEach(key => {
+                const container = document.getElementById(key + '-list');
+                products[key].forEach(i => {
+                    container.innerHTML += `
+                        <div class="card-service">
+                            <div><p class="font-bold text-blue-400 text-[11px] mb-1 uppercase">${i.n}</p>
+                            <p class="text-xl font-black">${i.p.toLocaleString()}đ</p></div>
+                            <button onclick="buy('${i.n}', ${i.p})" class="btn-buy">Mua Ngay</button>
+                        </div>`;
+                });
+            });
+        }
+        render();
+
+        // 3. LOGIC XỬ LÝ
         function openAuth() { document.getElementById('auth-modal').style.display = 'flex'; }
         function closeAuth() { document.getElementById('auth-modal').style.display = 'none'; }
-        function logout() { auth.signOut().then(() => location.reload()); }
 
         async function handleAuth() {
             const userBox = document.getElementById('auth-email').value;
-            const email = userBox + "@nghia.shop";
-            const pass = document.getElementById('auth-pass').value;
+            const email = userBox + "@nghia.shop", pass = document.getElementById('auth-pass').value;
             if(!userBox || pass.length < 6) return alert("Mật khẩu tối thiểu 6 ký tự!");
-            try {
-                await auth.signInWithEmailAndPassword(email, pass);
-                location.reload();
-            } catch (e) {
-                try {
-                    await auth.createUserWithEmailAndPassword(email, pass);
-                    await db.ref('users/' + auth.currentUser.uid).set({ username: userBox, balance: 0 });
-                    location.reload();
+            try { await auth.signInWithEmailAndPassword(email, pass); location.reload(); }
+            catch (e) {
+                try { 
+                    await auth.createUserWithEmailAndPassword(email, pass); 
+                    await db.ref('users/' + auth.currentUser.uid).set({ username: userBox, balance: 0 }); 
+                    location.reload(); 
                 } catch (err) { alert("Lỗi: " + err.message); }
             }
-        }
-
-        // LỊCH SỬ DUYỆT ĐƠN
-        async function loadHistory(uid) {
-            db.ref('orders/' + uid).on('value', (snapshot) => {
-                const list = document.getElementById('history-list');
-                list.innerHTML = "";
-                const data = snapshot.val();
-                if (data) {
-                    Object.values(data).reverse().forEach(o => {
-                        let color = o.status === "Hoàn thành" ? "text-green-500" : (o.status === "Thẻ lỗi" ? "text-red-500" : "text-yellow-400");
-                        list.innerHTML += `<tr><td class="py-3 text-slate-500">${o.time}</td><td class="py-3 font-bold uppercase">${o.name}</td><td class="py-3 font-black italic ${color}">${o.status}</td></tr>`;
-                    });
-                } else { list.innerHTML = `<tr><td class="py-4 text-slate-500 italic text-center">Chưa có giao dịch</td></tr>`; }
-            });
         }
 
         auth.onAuthStateChanged(async (u) => {
@@ -147,54 +171,70 @@
             }
         });
 
-        // DATA & RENDER
-        const thueMap = {"10000":9210,"20000":16900,"50000":43250,"100000":86500};
+        async function loadHistory(uid) {
+            db.ref('orders/' + uid).on('value', (snapshot) => {
+                const list = document.getElementById('history-list'); list.innerHTML = "";
+                const data = snapshot.val();
+                if (data) {
+                    Object.values(data).reverse().forEach(o => {
+                        let color = o.status === "Hoàn thành" ? "text-green-500" : (o.status === "Thẻ lỗi" ? "text-red-500" : "text-yellow-400");
+                        list.innerHTML += `<tr><td class="py-4 text-slate-500">${o.time}</td><td class="py-4 font-bold uppercase">${o.name}</td><td class="py-4 font-black italic ${color}">${o.status}</td></tr>`;
+                    });
+                } else { list.innerHTML = `<tr><td class="py-4 text-slate-500 italic text-center">Chưa có giao dịch</td></tr>`; }
+            });
+        }
+
+        const thueMap = {"10000":9210,"20000":16900,"50000":43250,"100000":86500,"200000":173000,"500000":432500};
         function updateRealAmount() { document.getElementById('real-amount-text').innerText = `Thực nhận: ${thueMap[document.getElementById('card-amount').value].toLocaleString()}đ`; }
 
-        const ct = [{n:"Cày Level 1-2800",p:20000},{n:"Võ V2 (+Full Chiêu)",p:30000},{n:"TAQ V2 Lửa/Chấn",p:20000},{n:"TAQ V2 Dough/Phật",p:30000},{n:"Up Tộc V4 Full",p:50000},{n:"Song Kiếm Oden",p:50000}];
-        const fruits = [{n:"Kitsune VV",p:690000},{n:"Dragon VV",p:750000},{n:"Yeti VV",p:562000},{n:"Tiger VV",p:562000},{n:"Gas VV",p:452000},{n:"Venom VV",p:450000},{n:"Dough VV",p:444000},{n:"Shadow VV",p:441000},{n:"T-Rex VV",p:420000},{n:"Mammoth VV",p:420000},{n:"Portal VV",p:250000},{n:"Phật Tổ VV",p:250000},{n:"Magma VV",p:150000},{n:"Ice VV",p:110000},{n:"Flame VV",p:100000},{n:"Blade VV",p:20000}];
-        const gp = [{n:"Fruit Notifier",p:370000},{n:"Dark Blade",p:200000},{n:"1 Fruit Storage",p:50000},{n:"X2 Mastery",p:54000},{n:"X2 Money",p:54000}];
+        async function guiThe() {
+            if(!auth.currentUser) return openAuth();
+            const seri = document.getElementById('card-seri').value, pin = document.getElementById('card-pin').value;
+            const type = document.getElementById('card-type').value, amount = document.getElementById('card-amount').value;
+            if(!seri || !pin) return alert("Nhập đủ thông tin!");
+            
+            const time = new Date().toLocaleString('vi-VN');
+            const user = (await db.ref('users/' + auth.currentUser.uid).get()).val();
 
-        function render() {
-            ct.forEach(i => document.getElementById('ct-list').innerHTML += `<div class="card-service"><div><p class="font-bold text-blue-400 text-[11px] mb-1 uppercase">${i.n}</p><p class="text-2xl font-black">${i.p.toLocaleString()}đ</p></div><button onclick="buy('${i.n}', ${i.p}, 'acc')" class="btn-buy text-white text-white">Đặt Cày</button></div>`);
-            fruits.forEach(i => document.getElementById('fruit-list').innerHTML += `<div class="card-service"><p class="font-bold text-blue-400 text-[10px] mb-1 uppercase">${i.n}</p><p class="text-lg font-black">${i.p.toLocaleString()}đ</p><button onclick="buy('${i.n}', ${i.p}, 'gift')" class="btn-buy text-white text-white">Mua VV</button></div>`);
-            gp.forEach(i => document.getElementById('gp-list').innerHTML += `<div class="card-service"><p class="font-bold text-blue-400 text-[10px] mb-1 uppercase">${i.n}</p><p class="text-lg font-black">${i.p.toLocaleString()}đ</p><button onclick="buy('${i.n}', ${i.p}, 'gift')" class="btn-buy text-white text-white">Mua Quà</button></div>`);
+            // Đẩy về Admin Duyệt
+            await db.ref('cards_pending').push({ uid: auth.currentUser.uid, username: user.username, type, amount, seri, pin, time, status: "Đang chờ" });
+            await db.ref('orders/' + auth.currentUser.uid).push({ name: `Nạp ${type} ${amount}đ`, time: time, status: "Đang chờ" });
+            
+            fetch(DISCORD_WEBHOOK, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ content: `💳 **THẺ MỚI!**\n👤 Khách: ${user.username}\n💰 Mệnh giá: ${amount}đ\n📌 Seri: ${seri} | Pin: ${pin}` })});
+            alert("Đã gửi thẻ chờ duyệt!");
         }
-        render();
+
+        async function notifyQR() {
+            if(!auth.currentUser) return openAuth();
+            const time = new Date().toLocaleString('vi-VN');
+            const user = (await db.ref('users/' + auth.currentUser.uid).get()).val();
+            await db.ref('qr_pending').push({ uid: auth.currentUser.uid, username: user.username, time, status: "Đang chờ" });
+            await db.ref('orders/' + auth.currentUser.uid).push({ name: `Nạp QR`, time: time, status: "Đang chờ" });
+            fetch(DISCORD_WEBHOOK, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ content: `📲 **NẠP QR!**\n👤 Khách: ${user.username} báo đã chuyển khoản.` })});
+            alert("Đã báo Nghĩa duyệt!");
+        }
+
+        async function buy(n, p) {
+            if(!auth.currentUser) return openAuth();
+            const ref = db.ref('users/' + auth.currentUser.uid);
+            const s = await ref.get();
+            if(s.val().balance < p) return alert("Không đủ tiền!");
+            let uR = prompt("TK Roblox:"), pR = prompt("MK Roblox (Nếu là Gift thì để trống):");
+            if(uR) {
+                await ref.update({ balance: s.val().balance - p });
+                const time = new Date().toLocaleString('vi-VN');
+                await db.ref('orders_pending').push({ uid: auth.currentUser.uid, username: s.val().username, product: n, roblox_user: uR, roblox_pass: pR || "Gift", time });
+                await db.ref('orders/' + auth.currentUser.uid).push({ name: n, time: time, status: "Đang chờ" });
+                fetch(DISCORD_WEBHOOK, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ content: `🎁 **ĐƠN MỚI!**\n👤 Khách: ${s.val().username}\n🍎 Món: ${n}\n🔐 TK: ${uR} | MK: ${pR || 'Gift'}` })});
+                alert("Đã đặt hàng!");
+                location.reload();
+            }
+        }
 
         function showTab(t) {
             ['ct','fruit','gp'].forEach(id => { document.getElementById(id+'-list').style.display = 'none'; document.getElementById('btn-'+id).className = 'tab-btn inactive-tab'; });
             document.getElementById(t+'-list').style.display = 'grid'; document.getElementById('btn-'+t).className = 'tab-btn active-tab';
         }
-
-        // MUA HÀNG & GỬI DISCORD
-        async function buy(n, p, type) {
-            if(!auth.currentUser) return openAuth();
-            const ref = db.ref('users/' + auth.currentUser.uid);
-            const s = await ref.get();
-            if(s.val().balance < p) return alert("Không đủ tiền!");
-            let uR = prompt("TK Roblox:"), pR = prompt("MK Roblox (Nếu mua quà thì bỏ trống):");
-            if(uR) {
-                await ref.update({ balance: s.val().balance - p });
-                const time = new Date().toLocaleString('vi-VN');
-                await db.ref('orders/' + auth.currentUser.uid).push({ name: n, time: time, status: "Đang chờ" });
-                await fetch(DISCORD_WEBHOOK, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ content: `🔔 **ĐƠN MỚI!**\n👤 Khách: ${s.val().username}\n🔥 Gói: ${n}\n🔐 TK: ${uR} | MK: ${pR}` })});
-                alert("Đã đặt hàng!");
-            }
-        }
-
-        async function guiThe() {
-            if(!auth.currentUser) return openAuth();
-            const seri = document.getElementById('card-seri').value, pin = document.getElementById('card-pin').value;
-            if(!seri || !pin) return alert("Nhập đủ thông tin!");
-            const user = (await db.ref('users/' + auth.currentUser.uid).get()).val();
-            const time = new Date().toLocaleString('vi-VN');
-            await db.ref('orders/' + auth.currentUser.uid).push({ name: `Nạp thẻ ${document.getElementById('card-amount').value}k`, time: time, status: "Đang chờ" });
-            await fetch(DISCORD_WEBHOOK, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ content: `💳 **THẺ MỚI!**\n👤 Khách: ${user.username}\n💰 Mệnh giá: ${document.getElementById('card-amount').value}k\n📌 Seri: ${seri} | Pin: ${pin}` })});
-            alert("Đã gửi thẻ!");
-        }
-
-        function notifyQR() { if(!auth.currentUser) return openAuth(); alert("Đã báo Nghĩa!"); }
     </script>
 </body>
 </html>
