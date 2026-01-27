@@ -1,0 +1,61 @@
+!DOCTYPE html>
+<html>
+<head>
+    <title>ADMIN NGHĨA - DUYỆT THẺ</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
+</head>
+<body class="bg-slate-900 text-white p-6">
+    <div class="max-w-4xl mx-auto">
+        <h1 class="text-2xl font-black mb-6 text-blue-500 uppercase">Danh Sách Thẻ Chờ Duyệt</h1>
+        <div id="admin-list" class="grid gap-4"></div>
+    </div>
+
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyA5wBS88oS54yLs0OfwDYDfDQeTjc6ccdM",
+            authDomain: "shop-blox-fruit-trannghia.firebaseapp.com",
+            projectId: "shop-blox-fruit-trannghia",
+            storageBucket: "shop-blox-fruit-trannghia.firebasestorage.app",
+            messagingSenderId: "703644575266",
+            appId: "1:703644575266:web:b3a21bbbe4b2c466d38c7b"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+
+        db.ref('napthe').orderByChild('status').equalTo('pending').on('value', s => {
+            const list = document.getElementById('admin-list');
+            list.innerHTML = "";
+            if (!s.exists()) { list.innerHTML = "<p class='text-slate-500'>Hiện không có thẻ nào.</p>"; return; }
+            s.forEach(child => {
+                const data = child.val();
+                list.innerHTML += `
+                <div class="bg-slate-800 p-5 rounded-2xl border border-slate-700 flex justify-between items-center">
+                    <div>
+                        <p class="text-blue-400 font-bold uppercase text-xs">Khách: ${data.username}</p>
+                        <p class="text-xl font-black">${data.amount.toLocaleString()}đ - ${data.type}</p>
+                        <div class="bg-black/40 p-3 rounded-lg mt-3 text-xs font-mono">
+                            <p>SERI: ${data.seri}</p><p>MÃ: ${data.pin}</p>
+                        </div>
+                    </div>
+                    <div class="flex flex-col gap-2">
+                        <button onclick="approve('${child.key}', '${data.uid}', ${data.amount})" class="bg-green-600 hover:bg-green-500 py-3 px-6 rounded-xl font-black">DUYỆT + CỘNG TIỀN</button>
+                        <button onclick="reject('${child.key}')" class="text-red-500 text-[10px] font-bold uppercase">Xóa thẻ lỗi</button>
+                    </div>
+                </div>`;
+            });
+        });
+
+        async function approve(key, uid, amount) {
+            if(!confirm("Cộng " + amount + "đ cho khách này?")) return;
+            const ref = db.ref('users/' + uid + '/balance');
+            const current = (await ref.get()).val() || 0;
+            await ref.set(current + amount);
+            await db.ref('napthe/' + key).update({ status: 'done' });
+            alert("Thành công!");
+        }
+        async function reject(key) { if(confirm("Xóa thẻ này?")) await db.ref('napthe/' + key).remove(); }
+    </script>
+</body>
+</html>
