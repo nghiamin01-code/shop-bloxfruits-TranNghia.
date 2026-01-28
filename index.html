@@ -3,37 +3,34 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
-    <title>NGHIA SHOP - BLOX FRUIT</title>
+    <title>NGHIA SHOP - BLOX FRUIT SIÊU CẤP</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;700;900&display=swap');
-        body { background: #050810; color: white; font-family: 'Outfit', sans-serif; -webkit-overflow-scrolling: touch; }
+        html, body { background: #050810; color: white; font-family: 'Outfit', sans-serif; overflow-x: hidden; overflow-y: auto; -webkit-overflow-scrolling: touch; }
         .input-custom { background: #0f172a; border: 1px solid #1e293b; padding: 12px; border-radius: 12px; width: 100%; color: white; outline: none; font-size: 14px; }
-        .card-service { background: #111827; border: 1px solid #1f2937; border-radius: 20px; padding: 12px; display: flex; flex-direction: column; height: 100%; }
-        .img-product { width: 100%; aspect-ratio: 1/1; object-fit: cover; border-radius: 15px; margin-bottom: 10px; background: #000; }
+        .card-service { background: #111827; border: 1px solid #1f2937; border-radius: 20px; padding: 12px; display: flex; flex-direction: column; height: 100%; transition: 0.3s; }
+        .img-product { width: 100%; aspect-ratio: 1/1; object-fit: cover; border-radius: 15px; margin-bottom: 10px; }
         .btn-buy { background: #2563eb; width: 100%; padding: 10px; border-radius: 10px; font-weight: 900; font-size: 11px; text-transform: uppercase; margin-top: auto; color: white; }
-        .tab-btn { padding: 12px 20px; border-radius: 12px; font-weight: 800; font-size: 11px; text-transform: uppercase; white-space: nowrap; flex-shrink: 0; }
+        .tab-btn { padding: 12px 20px; border-radius: 12px; font-weight: 800; font-size: 11px; text-transform: uppercase; white-space: nowrap; flex-shrink: 0; cursor: pointer; }
         .active-tab { background: #2563eb; color: white; }
         .inactive-tab { background: #1e293b; color: #64748b; }
-        .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 1000; align-items: center; justify-content: center; padding: 20px; overflow-y: auto; }
-        .thue-label { font-size: 10px; color: #94a3b8; margin-top: 4px; display: block; }
+        .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 1000; align-items: center; justify-content: center; padding: 20px; }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
     </style>
 </head>
-<body class="overflow-y-auto">
-
+<body>
     <nav class="p-4 bg-[#0b0f1a] border-b border-white/5 sticky top-0 z-50">
         <div class="max-w-6xl mx-auto flex justify-between items-center">
             <h1 class="text-xl font-black italic text-blue-500 uppercase" onclick="location.reload()">NGHIA SHOP</h1>
-            <div id="auth-buttons">
-                <button onclick="openAuth()" class="bg-blue-600 px-4 py-2 rounded-xl font-black text-[10px] uppercase">Đăng Nhập / Ký</button>
-            </div>
+            <div id="auth-buttons"><button onclick="openAuth()" class="bg-blue-600 px-4 py-2 rounded-xl font-black text-[10px] uppercase">Đăng Nhập / Đăng Ký</button></div>
             <div id="user-info" class="hidden flex items-center gap-3">
                 <div class="text-right leading-tight">
                     <p id="display-name" class="font-black text-blue-400 text-[12px] uppercase"></p>
-                    <p class="text-yellow-400 font-bold text-[11px] italic"><span id="balance">0</span>đ</p>
+                    <p class="text-yellow-400 font-bold text-[11px] italic">Ví: <span id="balance">0</span>đ</p>
                 </div>
                 <button onclick="auth.signOut().then(()=>location.reload())" class="bg-red-500/20 text-red-500 p-2 rounded-lg text-[9px] font-bold">THOÁT</button>
             </div>
@@ -42,44 +39,34 @@
 
     <div class="max-w-6xl mx-auto p-4">
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-            <div class="bg-[#0b0f1a] border border-white/5 p-6 rounded-3xl border-l-4 border-l-blue-500 shadow-xl">
-                <h2 class="font-black text-blue-400 mb-4 text-sm uppercase italic">💳 NẠP THẺ CÀO (CHIẾT KHẤU 20%)</h2>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">
+            <div class="bg-[#0b0f1a] border border-white/5 p-6 rounded-3xl border-l-4 border-l-blue-500">
+                <h2 class="font-black text-blue-400 mb-4 text-sm uppercase italic">💳 NẠP THẺ (THUẾ 20%)</h2>
+                <div class="grid grid-cols-2 gap-2 mb-3">
                     <select id="card-type" class="input-custom font-bold"><option>Viettel</option><option>Vina</option><option>Mobi</option></select>
                     <select id="card-amount" class="input-custom font-bold" onchange="updateThue()">
-                        <option value="10000">10,000đ</option>
-                        <option value="20000">20,000đ</option>
-                        <option value="50000">50,000đ</option>
-                        <option value="100000">100,000đ</option>
-                        <option value="200000">200,000đ</option>
-                        <option value="500000">500,000đ</option>
+                        <option value="10000">10,000đ</option><option value="20000">20,000đ</option><option value="50000">50,000đ</option><option value="100000">100,000đ</option><option value="200000">200,000đ</option><option value="500000">500,000đ</option>
                     </select>
                 </div>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-3 mb-4">
-                    <input id="card-seri" placeholder="Số Seri..." class="input-custom">
-                    <input id="card-pin" placeholder="Mã thẻ..." class="input-custom">
-                </div>
+                <input id="card-seri" placeholder="Số Seri..." class="input-custom mb-3">
+                <input id="card-pin" placeholder="Mã thẻ..." class="input-custom mb-4">
                 <div class="mb-4 bg-blue-500/10 p-3 rounded-xl border border-blue-500/20">
-                    <p class="text-xs text-blue-300">Số tiền thực nhận: <b id="thuc-nhan" class="text-white text-lg">8,000đ</b> (Đã trừ 20% phí)</p>
+                    <p class="text-xs text-blue-300">Thực nhận: <b id="thuc-nhan" class="text-white text-lg">8,000đ</b></p>
                 </div>
-                <button onclick="guiThe()" class="bg-blue-600 w-full py-4 rounded-xl font-black text-sm uppercase shadow-lg">GỬI THẺ NGAY</button>
+                <button onclick="guiThe()" class="bg-blue-600 w-full py-4 rounded-xl font-black text-sm uppercase">GỬI THẺ</button>
             </div>
 
-            <div class="bg-[#0b0f1a] border border-white/5 p-6 rounded-3xl border-l-4 border-l-green-500 text-center shadow-xl">
-                <h2 class="font-black text-green-400 mb-4 text-sm uppercase italic">📲 QUÉT QR NẠP VÍ (1:1 - KHÔNG THUẾ)</h2>
-                <div class="bg-white p-3 rounded-2xl w-56 h-56 mx-auto mb-4 border-4 border-green-500/20 shadow-2xl">
+            <div class="bg-[#0b0f1a] border border-white/5 p-6 rounded-3xl border-l-4 border-l-green-500 text-center">
+                <h2 class="font-black text-green-400 mb-4 text-sm uppercase italic">📲 QUÉT QR (KHÔNG THUẾ)</h2>
+                <div class="bg-white p-2 rounded-2xl w-48 h-48 mx-auto mb-4 border-4 border-green-500/20">
                     <img src="https://i.postimg.cc/wjgX8bJ8/74b766b2-91f0-441c-95da-71b054c4a8c2.jpg" class="w-full h-full object-contain">
                 </div>
-                <div class="bg-black/60 p-3 rounded-xl mb-4 border border-green-500/30">
-                    <p class="text-[10px] text-slate-400 uppercase font-bold mb-1">Nội dung chuyển khoản:</p>
-                    <p id="qr-note-text" class="text-green-400 font-black text-xl uppercase tracking-wider">NAP NGHIA</p>
-                </div>
-                <button onclick="notifyQR()" class="bg-green-600 w-full py-4 rounded-xl font-black text-sm uppercase shadow-lg animate-pulse">BÁO NGHĨA ĐÃ CHUYỂN TIỀN</button>
+                <p id="qr-note-text" class="text-green-400 font-black text-lg uppercase mb-4">NAP NGHIA</p>
+                <button onclick="alert('Đã báo Nghĩa check bank!')" class="bg-green-600 w-full py-4 rounded-xl font-black text-sm uppercase">BÁO ĐÃ CHUYỂN</button>
             </div>
         </div>
 
         <div class="flex gap-2 mb-6 bg-[#0b0f1a] p-1.5 rounded-2xl border border-white/5 overflow-x-auto no-scrollbar">
-            <div onclick="showTab('fruit')" id="btn-fruit" class="tab-btn active-tab">🍎 Trái VV</div>
+            <div onclick="showTab('fruit')" id="btn-fruit" class="tab-btn active-tab">🍎 Trái Vĩnh Viễn</div>
             <div onclick="showTab('gp')" id="btn-gp" class="tab-btn inactive-tab">🎫 Gamepass</div>
             <div onclick="showTab('ct')" id="btn-ct" class="tab-btn inactive-tab">⚔️ Cày Thuê</div>
         </div>
@@ -87,22 +74,31 @@
         <div id="fruit-list" class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-3"></div>
         <div id="gp-list" class="hidden grid grid-cols-2 md:grid-cols-4 gap-3"></div>
         <div id="ct-list" class="hidden grid grid-cols-2 md:grid-cols-3 gap-3"></div>
+
+        <div class="mt-10 bg-[#0b0f1a] border border-white/5 p-6 rounded-3xl shadow-xl">
+            <h2 class="font-black text-blue-400 mb-4 text-sm uppercase italic">📜 LỊCH SỬ NẠP THẺ CỦA BẠN</h2>
+            <div class="overflow-x-auto">
+                <table class="w-full text-[11px] text-left">
+                    <thead class="text-slate-500 border-b border-white/5">
+                        <tr><th class="py-2">LOẠI</th><th>MỆNH GIÁ</th><th>TRẠNG THÁI</th></tr>
+                    </thead>
+                    <tbody id="history-the"></tbody>
+                </table>
+            </div>
+        </div>
     </div>
 
     <div id="auth-modal" class="modal">
-        <div class="bg-[#0f172a] p-8 rounded-[2.5rem] w-full max-w-sm border border-white/10 shadow-2xl">
-            <div class="flex gap-4 mb-8 border-b border-white/5 pb-2">
-                <button id="tab-login" onclick="switchAuth('login')" class="flex-1 font-black text-blue-500 border-b-4 border-blue-500 pb-2 uppercase text-sm">ĐĂNG NHẬP</button>
-                <button id="tab-register" onclick="switchAuth('register')" class="flex-1 font-black text-slate-500 pb-2 uppercase text-sm">ĐĂNG KÝ</button>
+        <div class="bg-[#0f172a] p-8 rounded-[2.5rem] w-full max-w-sm border border-white/10">
+            <div class="flex gap-4 mb-6 border-b border-white/5 pb-2">
+                <button id="tab-login" onclick="switchAuth('login')" class="flex-1 font-black text-blue-500 border-b-4 border-blue-500 pb-2 uppercase text-xs">Đăng Nhập</button>
+                <button id="tab-register" onclick="switchAuth('register')" class="flex-1 font-black text-slate-500 pb-2 uppercase text-xs">Đăng Ký</button>
             </div>
-            <div id="auth-form">
-                <input id="auth-user" placeholder="Tên tài khoản (viết liền)..." class="input-custom mb-4 text-center h-14">
-                <input id="auth-pass" type="password" placeholder="Mật khẩu (6 ký tự)..." class="input-custom mb-6 text-center h-14">
-                
-                <button id="btn-login" onclick="handleLogin()" class="bg-blue-600 w-full h-14 rounded-2xl font-black text-sm uppercase tracking-widest shadow-blue-500/20 shadow-lg">VÀO SHOP NGAY</button>
-                <button id="btn-register" onclick="handleRegister()" class="hidden bg-green-600 w-full h-14 rounded-2xl font-black text-sm uppercase tracking-widest shadow-green-500/20 shadow-lg">TẠO TÀI KHOẢN</button>
-            </div>
-            <button onclick="closeAuth()" class="w-full mt-6 text-slate-500 font-bold text-xs uppercase tracking-tighter">Đóng cửa sổ</button>
+            <input id="auth-user" placeholder="Tên tài khoản..." class="input-custom mb-3 text-center">
+            <input id="auth-pass" type="password" placeholder="Mật khẩu..." class="input-custom mb-4 text-center">
+            <button id="btn-login" onclick="handleLogin()" class="bg-blue-600 w-full py-4 rounded-xl font-black text-xs uppercase">VÀO SHOP</button>
+            <button id="btn-register" onclick="handleRegister()" class="hidden bg-green-600 w-full py-4 rounded-xl font-black text-xs uppercase">TẠO TÀI KHOẢN</button>
+            <button onclick="closeAuth()" class="w-full mt-4 text-slate-500 font-bold text-[10px] uppercase">Đóng</button>
         </div>
     </div>
 
@@ -112,67 +108,54 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database(); const auth = firebase.auth();
 
-        // Cập nhật hiển thị thuế 20%
-        function updateThue() {
-            const val = document.getElementById('card-amount').value;
-            const thucNhan = val * 0.8;
-            document.getElementById('thuc-nhan').innerText = thucNhan.toLocaleString() + "đ";
-        }
-
         const products = {
             fruit: [
-                {n:"Kitsune VV", p:690000, img:"https://i.postimg.cc/5yHRjSfH/Anh-chup-man-hinh-2026-01-28-113329.png"},
-                {n:"Dragon VV", p:750000, img:"https://i.postimg.cc/CLB3KS1g/Anh-chup-man-hinh-2026-01-28-113307.png"},
-                {n:"Control VV", p:690000, img:"https://i.postimg.cc/qvnH14V7/Anh-chup-man-hinh-2026-01-28-113219.png"},
-                {n:"Yeti VV", p:562000, img:"https://i.postimg.cc/dQxMvLJB/Anh-chup-man-hinh-2026-01-28-113255.png"},
-                {n:"Tiger VV", p:562000, img:"https://i.postimg.cc/3NycWF3C/Anh-chup-man-hinh-2026-01-28-113337.png"},
-                {n:"Spirit VV", p:463000, img:"https://i.postimg.cc/T1ZHb5PJ/Anh-chup-man-hinh-2026-01-28-113348.png"},
-                {n:"Gas VV", p:452000, img:"https://i.postimg.cc/L6crYwY5/Anh-chup-man-hinh-2026-01-28-113319.png"},
-                {n:"Venom VV", p:450000, img:"https://i.postimg.cc/kGtT7My6/Anh-chup-man-hinh-2026-01-28-113414.png"},
-                {n:"Mochi (Dough) VV", p:444000, img:"https://i.postimg.cc/gj6gGcKM/Anh-chup-man-hinh-2026-01-28-113428.png"},
-                {n:"Shadow VV", p:441000, img:"https://i.postimg.cc/QCWfjNqQ/Anh-chup-man-hinh-2026-01-28-113419.png"},
-                {n:"T-Rex VV", p:420000, img:"https://i.postimg.cc/CMt2XX4m/Anh-chup-man-hinh-2026-01-28-113355.png"},
-                {n:"Mammoth VV", p:420000, img:"https://i.postimg.cc/MKQLS5Pp/Anh-chup-man-hinh-2026-01-28-113409.png"},
-                {n:"Gravity VV", p:408000, img:"https://i.postimg.cc/zv39K1FV/Anh-chup-man-hinh-2026-01-28-113238.png"},
-                {n:"Blizzard VV", p:390000, img:"https://i.postimg.cc/5yLMm4SM/Anh-chup-man-hinh-2026-01-28-165200.png"},
-                {n:"Pain VV", p:350000, img:"https://i.postimg.cc/NMGhGXyx/Anh-chup-man-hinh-2026-01-28-113228.png"},
-                {n:"Lightning VV", p:350000, img:"https://i.postimg.cc/2yB0Cjxg/Anh-chup-man-hinh-2026-01-28-113433.png"},
-                {n:"Sound VV", p:310000, img:"https://i.postimg.cc/pLZbwkrN/Anh-chup-man-hinh-2026-01-28-113451.png"},
-                {n:"Love VV", p:300000, img:"https://i.postimg.cc/FHZ5MGzf/Anh-chup-man-hinh-2026-01-28-113457.png"},
-                {n:"Creation VV", p:286000, img:"https://i.postimg.cc/d3Xg9S5x/Anh-chup-man-hinh-2026-01-28-113244.png"},
-                {n:"Portal VV", p:250000, img:"https://i.postimg.cc/Z5ZzsXTM/Anh-chup-man-hinh-2026-01-28-113439.png"},
-                {n:"Phật Tổ VV", p:250000, img:"https://i.postimg.cc/tCQK78V7/Anh-chup-man-hinh-2026-01-28-113501.png"},
-                {n:"Phoenix VV", p:250000, img:"https://i.postimg.cc/0yx1Xhkg/Anh-chup-man-hinh-2026-01-28-113443.png"},
-                {n:"Spider VV", p:210000, img:"https://i.postimg.cc/Vk1PZ2f1/Anh-chup-man-hinh-2026-01-28-113448.png"},
-                {n:"Quake VV", p:210000, img:"https://i.postimg.cc/CLT3d9fn/Anh-chup-man-hinh-2026-01-28-113506.png"},
-                {n:"Ghost VV", p:150000, img:"https://i.postimg.cc/rFXBz7tx/Anh-chup-man-hinh-2026-01-28-113510.png"},
-                {n:"Magma VV", p:150000, img:"https://i.postimg.cc/m2Y09VQF/Anh-chup-man-hinh-2026-01-28-113517.png"},
-                {n:"Dark VV", p:130000, img:"https://i.postimg.cc/3wc6hqTH/Anh-chup-man-hinh-2026-01-28-113540.png"},
-                {n:"Diamond VV", p:120000, img:"https://i.postimg.cc/HswfM3Q3/Anh-chup-man-hinh-2026-01-28-113522.png"},
-                {n:"Light VV", p:120000, img:"https://i.postimg.cc/W43KQvxy/Anh-chup-man-hinh-2026-01-28-113530.png"},
-                {n:"Ice VV", p:110000, img:"https://i.postimg.cc/YSsV7PH9/Anh-chup-man-hinh-2026-01-28-113545.png"},
-                {n:"Eagle VV", p:111000, img:"https://i.postimg.cc/MGF4wLSc/Anh-chup-man-hinh-2026-01-28-113550.png"},
-                {n:"Sand VV", p:100000, img:"https://i.postimg.cc/ZqMgmQhQ/Anh-chup-man-hinh-2026-01-28-113534.png"},
-                {n:"Flame VV", p:100000, img:"https://i.postimg.cc/8zyXdYst/Anh-chup-man-hinh-2026-01-28-113555.png"},
-                {n:"Blade VV", p:20000, img:"https://i.postimg.cc/BvXYmC1p/Anh-chup-man-hinh-2026-01-28-113602.png"}
+                {n:"Kitsune VV", p:690000, img:"https://i.postimg.cc/qvnH14V7/Anh-chup-man-hinh-2026-01-28-113219.png"},
+                {n:"Dragon VV", p:750000, img:"https://i.postimg.cc/NMGhGXyx/Anh-chup-man-hinh-2026-01-28-113228.png"},
+                {n:"Control VV", p:690000, img:"https://i.postimg.cc/5yHRjSfH/Anh-chup-man-hinh-2026-01-28-113329.png"},
+                {n:"Yeti VV", p:562000, img:"https://i.postimg.cc/CLB3KS1g/Anh-chup-man-hinh-2026-01-28-113307.png"},
+                {n:"Tiger VV", p:562000, img:"https://i.postimg.cc/dQxMvLJB/Anh-chup-man-hinh-2026-01-28-113255.png"},
+                {n:"Spirit VV", p:463000, img:"https://i.postimg.cc/L6crYwY5/Anh-chup-man-hinh-2026-01-28-113319.png"},
+                {n:"Gas VV", p:452000, img:"https://i.postimg.cc/3NycWF3C/Anh-chup-man-hinh-2026-01-28-113337.png"},
+                {n:"Venom VV", p:450000, img:"https://i.postimg.cc/3NycWF3C/Anh-chup-man-hinh-2026-01-28-113337.png"},
+                {n:"Mochi (Dough) VV", p:444000, img:"https://i.postimg.cc/d3Xg9S5x/Anh-chup-man-hinh-2026-01-28-113244.png"},
+                {n:"Shadow VV", p:441000, img:"https://i.postimg.cc/T1ZHb5PJ/Anh-chup-man-hinh-2026-01-28-113348.png"},
+                {n:"T-Rex VV", p:420000, img:"https://i.postimg.cc/dQxMvLJB/Anh-chup-man-hinh-2026-01-28-113255.png"},
+                {n:"Mammoth VV", p:420000, img:"https://i.postimg.cc/CLB3KS1g/Anh-chup-man-hinh-2026-01-28-113307.png"},
+                {n:"Gravity VV", p:408000, img:"https://i.postimg.cc/PrTSgHwD/Anh-chup-man-hinh-2026-01-28-113631.png"},
+                {n:"Blizzard VV", p:390000, img:"https://i.postimg.cc/W43KQvxy/Anh-chup-man-hinh-2026-01-28-113530.png"},
+                {n:"Pain VV", p:350000, img:"https://i.postimg.cc/YSZXZm6C/Anh-chup-man-hinh-2026-01-28-113618.png"},
+                {n:"Lightning VV", p:350000, img:"https://i.postimg.cc/QCWfjNqQ/Anh-chup-man-hinh-2026-01-28-113419.png"},
+                {n:"Sound VV", p:310000, img:"https://i.postimg.cc/W43KQvxy/Anh-chup-man-hinh-2026-01-28-113530.png"},
+                {n:"Love VV", p:300000, img:"https://i.postimg.cc/3wc6hqTH/Anh-chup-man-hinh-2026-01-28-113540.png"},
+                {n:"Creation VV", p:286000, img:"https://i.postimg.cc/Vk1PZ2f1/Anh-chup-man-hinh-2026-01-28-113448.png"},
+                {n:"Portal VV", p:250000, img:"https://i.postimg.cc/CMt2XX4m/Anh-chup-man-hinh-2026-01-28-113355.png"},
+                {n:"Phật Tổ VV", p:250000, img:"https://i.postimg.cc/MKQLS5Pp/Anh-chup-man-hinh-2026-01-28-113409.png"},
+                {n:"Phoenix VV", p:250000, img:"https://i.postimg.cc/YSZXZm6C/Anh-chup-man-hinh-2026-01-28-113618.png"},
+                {n:"Spider VV", p:210000, img:"https://i.postimg.cc/ZqMgmQhQ/Anh-chup-man-hinh-2026-01-28-113534.png"},
+                {n:"Quake VV", p:210000, img:"https://i.postimg.cc/YSsV7PH9/Anh-chup-man-hinh-2026-01-28-113545.png"},
+                {n:"Ghost VV", p:150000, img:"https://i.postimg.cc/YSsV7PH9/Anh-chup-man-hinh-2026-01-28-113545.png"},
+                {n:"Magma VV", p:150000, img:"https://i.postimg.cc/kGtT7My6/Anh-chup-man-hinh-2026-01-28-113414.png"},
+                {n:"Dark VV", p:130000, img:"https://i.postimg.cc/gj6gGcKM/Anh-chup-man-hinh-2026-01-28-113428.png"},
+                {n:"Diamond VV", p:120000, img:"https://i.postimg.cc/rFXBz7tx/Anh-chup-man-hinh-2026-01-28-113510.png"},
+                {n:"Light VV", p:120000, img:"https://i.postimg.cc/QCWfjNqQ/Anh-chup-man-hinh-2026-01-28-113419.png"},
+                {n:"Ice VV", p:110000, img:"https://i.postimg.cc/FzJThFxG/Anh-chup-man-hinh-2026-01-28-113424.png"},
+                {n:"Eagle VV", p:111000, img:"https://i.postimg.cc/0yx1Xhkg/Anh-chup-man-hinh-2026-01-28-113443.png"},
+                {n:"Sand VV", p:100000, img:"https://i.postimg.cc/2yB0Cjxg/Anh-chup-man-hinh-2026-01-28-113433.png"},
+                {n:"Flame VV", p:100000, img:"https://i.postimg.cc/Z5ZzsXTM/Anh-chup-man-hinh-2026-01-28-113439.png"},
+                {n:"Blade VV", p:20000, img:"https://i.postimg.cc/44z82ym7/Anh-chup-man-hinh-2026-01-28-113623.png"}
             ],
             gp: [
-                {n:"Fruit Notifier", p:370000, img:"https://i.postimg.cc/VNdGKFbx/Anh-chup-man-hinh-2026-01-28-113608.png"},
+                {n:"Fruit Notifier", p:370000, img:"https://i.postimg.cc/HswfM3Q3/Anh-chup-man-hinh-2026-01-28-113522.png"},
                 {n:"Dark Blade", p:200000, img:"https://i.postimg.cc/d0LH59yQ/Anh-chup-man-hinh-2026-01-28-113612.png"},
-                {n:"X2 Mastery VV", p:54000, img:"https://i.postimg.cc/44z82ym7/Anh-chup-man-hinh-2026-01-28-113623.png"},
-
-                {n:"X2 Money VV", p:54000, img:"https://i.postimg.cc/8khyXcjW/Anh-chup-man-hinh-2026-01-28-113627.png"},
-                {n:"1 Fruit Storage", p:50000, img:"https://i.postimg.cc/YSZXZm6C/Anh-chup-man-hinh-2026-01-28-113618.png"},
-                {n:"X2 Drop VV", p:40000, img:"https://i.postimg.cc/PrTSgHwD/Anh-chup-man-hinh-2026-01-28-113631.png"},
-                {n:"Fast Boat VV", p:40000, img:"https://i.postimg.cc/HkLBLt3Y/Anh-chup-man-hinh-2026-01-28-113635.png"}
+                {n:"X2 Mastery VV", p:54000, img:"https://i.postimg.cc/VNdGKFbx/Anh-chup-man-hinh-2026-01-28-113608.png"},
+                {n:"X2 Money VV", p:54000, img:"https://i.postimg.cc/BvXYmC1p/Anh-chup-man-hinh-2026-01-28-113602.png"},
+                {n:"1 Fruit Storage", p:50000, img:"https://i.postimg.cc/8khyXcjW/Anh-chup-man-hinh-2026-01-28-113627.png"},
+                {n:"X2 Drop VV", p:40000, img:"https://i.postimg.cc/8zyXdYst/Anh-chup-man-hinh-2026-01-28-113555.png"},
+                {n:"Fast Boat VV", p:40000, img:"https://i.postimg.cc/PrTSgHwD/Anh-chup-man-hinh-2026-01-28-113631.png"}
             ],
             ct: [
-                {n:"Level 1-2800", p:20000, img:"https://i.postimg.cc/MKQLS5Pp/Anh-chup-man-hinh-2026-01-28-113409.png"},
-                {n:"Võ V2 + Full Chiêu", p:30000, img:"https://i.postimg.cc/kGtT7My6/Anh-chup-man-hinh-2026-01-28-113414.png"},
-                {n:"Thức Tỉnh (Lửa/Chấn)", p:20000, img:"https://i.postimg.cc/Z5ZzsXTM/Anh-chup-man-hinh-2026-01-28-113439.png"},
-                {n:"Thức Tỉnh (Dough/Phật)", p:30000, img:"https://i.postimg.cc/d3Xg9S5x/Anh-chup-man-hinh-2026-01-28-113244.png"},
-                {n:"Up V4 Full Gear", p:50000, img:"https://i.postimg.cc/8khyXcjW/Anh-chup-man-hinh-2026-01-28-113627.png"},
-                {n:"Lấy Song Kiếm Full", p:50000, img:"https://i.postimg.cc/44z82ym7/Anh-chup-man-hinh-2026-01-28-113623.png"}
+                {n:"Level 1-2800", p:20000}, {n:"Võ V2 + Full Chiêu", p:30000}, {n:"Thức Tỉnh (Lửa/Chấn)", p:20000}, {n:"Thức Tỉnh (Dough/Phật)", p:30000}, {n:"Up V4 Full Gear", p:50000}, {n:"Lấy Song Kiếm Full", p:50000}
             ]
         };
 
@@ -180,38 +163,35 @@
             Object.keys(products).forEach(tab => {
                 const box = document.getElementById(tab+'-list');
                 products[tab].forEach(i => {
-                    box.innerHTML += `<div class="card-service"><img src="${i.img}" class="img-product" loading="lazy"><p class="font-bold text-blue-400 text-[10px] uppercase mb-1">${i.n}</p><p class="text-[17px] font-black italic mb-2">${i.p.toLocaleString()}đ</p><button onclick="buy('${i.n}',${i.p})" class="btn-buy">MUA NGAY</button></div>`;
+                    const imgHtml = (tab === 'ct') ? '' : `<img src="${i.img}" class="img-product" loading="lazy">`;
+                    box.innerHTML += `<div class="card-service">${imgHtml}<p class="font-bold text-blue-400 text-[10px] uppercase mb-1">${i.n}</p><p class="text-[17px] font-black italic mb-2">${i.p.toLocaleString()}đ</p><button onclick="buy('${i.n}',${i.p})" class="btn-buy">MUA NGAY</button></div>`;
                 });
             });
         }
         render();
 
-        // AUTH LOGIC FIX
+        function updateThue() { document.getElementById('thuc-nhan').innerText = (document.getElementById('card-amount').value * 0.8).toLocaleString() + "đ"; }
         function openAuth() { document.getElementById('auth-modal').style.display = 'flex'; }
         function closeAuth() { document.getElementById('auth-modal').style.display = 'none'; }
         function switchAuth(t) {
             const isLogin = t === 'login';
             document.getElementById('btn-login').classList.toggle('hidden', !isLogin);
             document.getElementById('btn-register').classList.toggle('hidden', isLogin);
-            document.getElementById('tab-login').className = isLogin ? "flex-1 font-black text-blue-500 border-b-4 border-blue-500 pb-2 uppercase text-sm" : "flex-1 font-black text-slate-500 pb-2 uppercase text-sm";
-            document.getElementById('tab-register').className = !isLogin ? "flex-1 font-black text-green-500 border-b-4 border-green-500 pb-2 uppercase text-sm" : "flex-1 font-black text-slate-500 pb-2 uppercase text-sm";
+            document.getElementById('tab-login').className = isLogin ? "flex-1 font-black text-blue-500 border-b-4 border-blue-500 pb-2 uppercase text-xs" : "flex-1 font-black text-slate-500 pb-2 uppercase text-xs text-center";
+            document.getElementById('tab-register').className = !isLogin ? "flex-1 font-black text-green-500 border-b-4 border-green-500 pb-2 uppercase text-xs" : "flex-1 font-black text-slate-500 pb-2 uppercase text-xs text-center";
         }
 
         async function handleLogin() {
             const u = document.getElementById('auth-user').value.trim(), p = document.getElementById('auth-pass').value;
-            if(!u || !p) return alert("Nhập đủ thông tin!");
-            try { await auth.signInWithEmailAndPassword(u.toLowerCase()+"@nghia.shop", p); location.reload(); } catch(e) { alert("Sai tài khoản hoặc mật khẩu!"); }
+            try { await auth.signInWithEmailAndPassword(u.toLowerCase()+"@nghia.shop", p); location.reload(); } catch(e) { alert("Sai thông tin!"); }
         }
-
         async function handleRegister() {
             const u = document.getElementById('auth-user').value.trim(), p = document.getElementById('auth-pass').value;
-            if(u.length < 3) return alert("Tên quá ngắn!");
-            if(p.length < 6) return alert("Mật khẩu ít nhất 6 số!");
+            if(p.length < 6) return alert("Mật khẩu từ 6 ký tự!");
             try { 
                 const res = await auth.createUserWithEmailAndPassword(u.toLowerCase()+"@nghia.shop", p);
-                await db.ref('users/'+res.user.uid).set({username: u, balance: 0});
-                alert("Đăng ký thành công!"); location.reload();
-            } catch(e) { alert("Tên này đã có người dùng!"); }
+                await db.ref('users/'+res.user.uid).set({username: u, balance: 0}); location.reload();
+            } catch(e) { alert("Tên tài khoản đã tồn tại!"); }
         }
 
         auth.onAuthStateChanged(async (u) => {
@@ -222,18 +202,39 @@
                 document.getElementById('display-name').innerText = s.val().username;
                 document.getElementById('balance').innerText = s.val().balance.toLocaleString();
                 document.getElementById('qr-note-text').innerText = `NAP ${s.val().username.toUpperCase()}`;
+                // Load lịch sử nạp
+                db.ref('napthe').orderByChild('uid').equalTo(u.uid).on('value', snap => {
+                    const h = document.getElementById('history-the'); h.innerHTML = '';
+                    snap.forEach(c => {
+                        const d = c.val();
+                        let st = d.status === 'done' ? '<span class="text-green-400">Thành công</span>' : (d.status === 'error' ? '<span class="text-red-400">Sai thẻ</span>' : '<span class="text-yellow-400">Chờ duyệt</span>');
+                        h.innerHTML = `<tr><td class="py-2">${d.loai}</td><td>${d.menhGia.toLocaleString()}đ</td><td>${st}</td></tr>` + h.innerHTML;
+                    });
+                });
             }
         });
 
+        async function guiThe() {
+            if(!auth.currentUser) return openAuth();
+            const seri = document.getElementById('card-seri').value, pin = document.getElementById('card-pin').value;
+            if(!seri || !pin) return alert("Nhập đủ seri và mã!");
+            await db.ref('napthe').push({
+                uid: auth.currentUser.uid, username: document.getElementById('display-name').innerText,
+                loai: document.getElementById('card-type').value, menhGia: parseInt(document.getElementById('card-amount').value),
+                seri: seri, pin: pin, status: 'pending', time: Date.now()
+            });
+            alert("Đã gửi! Chờ Nghĩa duyệt."); document.getElementById('card-seri').value=''; document.getElementById('card-pin').value='';
+        }
+
         async function buy(n, p) {
             if(!auth.currentUser) return openAuth();
-            const ref = db.ref('users/'+auth.currentUser.uid), s = await ref.get();
-            if(s.val().balance < p) return alert("Ví không đủ tiền! Hãy nạp thêm.");
-            let rU = prompt("Tài khoản Roblox:"), rP = prompt("Mật khẩu:");
+            const r = db.ref('users/'+auth.currentUser.uid), s = await r.get();
+            if(s.val().balance < p) return alert("Ví không đủ tiền!");
+            let rU = prompt("TK Roblox:"), rP = prompt("MK Roblox:");
             if(rU && rP) {
-                await ref.update({balance: s.val().balance - p});
-                fetch(DISCORD_WEBHOOK, {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({content: `🛒 **ĐƠN MỚI!**\nKhách: ${s.val().username}\nMón: ${n}\nTK: ${rU} | MK: ${rP}`})});
-                alert("Mua thành công! Chờ Nghĩa duyệt đơn."); location.reload();
+                await r.update({balance: s.val().balance - p});
+                fetch(DISCORD_WEBHOOK, {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({content: `🛒 **ĐƠN MỚI**\nKhách: ${s.val().username}\nMón: ${n}\nTK: ${rU} | MK: ${rP}`})});
+                alert("Mua thành công!"); location.reload();
             }
         }
 
@@ -241,9 +242,6 @@
             ['ct','fruit','gp'].forEach(id => { document.getElementById(id+'-list').style.display = 'none'; document.getElementById('btn-'+id).className = 'tab-btn inactive-tab'; });
             document.getElementById(t+'-list').style.display = 'grid'; document.getElementById('btn-'+t).className = 'tab-btn active-tab';
         }
-
-        function guiThe() { if(!auth.currentUser) return openAuth(); alert("Đã gửi thẻ! Vui lòng chờ Nghĩa duyệt."); }
-        function notifyQR() { if(!auth.currentUser) return openAuth(); alert("Đã báo cho Nghĩa check bank!"); }
     </script>
 </body>
 </html>
