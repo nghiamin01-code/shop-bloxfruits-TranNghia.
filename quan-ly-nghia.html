@@ -2,15 +2,21 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <title>ADMIN - DUYỆT BANK BAP SHOP</title>
+    <title>ADMIN DUYỆT BANK - BAP SHOP</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
 </head>
-<body class="bg-[#050810] text-white p-6">
+<body class="bg-[#050810] text-white p-6 font-sans">
     <div class="max-w-3xl mx-auto">
-        <h1 class="text-2xl font-black text-blue-500 mb-6 italic uppercase">Danh Sách Khách Báo Bank</h1>
-        <div id="bank-list" class="space-y-4"></div>
+        <div class="flex justify-between items-center mb-10">
+            <h1 class="text-3xl font-black text-blue-500 italic uppercase">Duyệt Bank Shop</h1>
+            <div class="bg-blue-500/10 px-4 py-2 rounded-xl border border-blue-500/20 text-blue-400 font-bold text-xs uppercase">Chế độ Admin</div>
+        </div>
+        
+        <div id="bank-list" class="space-y-4">
+            <p class="text-slate-500 italic">Đang tải danh sách chờ...</p>
+        </div>
     </div>
 
     <script>
@@ -19,38 +25,45 @@
         const db = firebase.database();
 
         db.ref('duyet_bank').on('value', (snapshot) => {
-            const list = document.getElementById('bank-list'); list.innerHTML = '';
-            if(!snapshot.exists()) { list.innerHTML = '<p class="text-slate-500">Chưa có ai báo bank...</p>'; return; }
+            const list = document.getElementById('bank-list');
+            list.innerHTML = '';
+            
+            let hasPending = false;
             snapshot.forEach((child) => {
                 const item = child.val();
                 if(item.status === 'pending') {
+                    hasPending = true;
                     list.innerHTML += `
-                        <div class="bg-[#111827] p-5 rounded-2xl border border-white/5 flex justify-between items-center shadow-lg">
+                        <div class="bg-[#111827] p-6 rounded-[2rem] border border-white/5 flex justify-between items-center shadow-2xl animate-pulse-once">
                             <div>
-                                <p class="text-xs text-slate-500 mb-1">${new Date(item.time).toLocaleString()}</p>
-                                <p class="font-black text-lg uppercase text-blue-400">${item.username}</p>
-                                <p class="text-green-500 font-bold">Số tiền: ${item.amount.toLocaleString()}đ</p>
+                                <p class="text-[10px] text-slate-500 font-black mb-1 uppercase tracking-widest">${new Date(item.time).toLocaleString()}</p>
+                                <p class="font-black text-xl uppercase text-white">${item.username}</p>
+                                <p class="text-green-500 font-black text-lg">${item.amount.toLocaleString()} VNĐ</p>
                             </div>
                             <div class="flex gap-2">
-                                <button onclick="duyet('${child.key}', '${item.uid}', ${item.amount})" class="bg-green-600 px-6 py-3 rounded-xl font-black text-xs uppercase italic">Duyệt</button>
-                                <button onclick="xoa('${child.key}')" class="bg-red-500/10 text-red-500 px-4 py-3 rounded-xl font-black text-xs uppercase">Xóa</button>
+                                <button onclick="duyet('${child.key}', '${item.uid}', ${item.amount})" class="bg-green-600 hover:bg-green-500 px-6 py-4 rounded-2xl font-black text-xs uppercase tracking-tighter transition-all">DUYỆT TIỀN</button>
+                                <button onclick="xoa('${child.key}')" class="bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white px-5 py-4 rounded-2xl font-black text-xs uppercase transition-all">XÓA</button>
                             </div>
                         </div>
                     `;
                 }
             });
+            if(!hasPending) list.innerHTML = '<div class="text-center py-20 border-2 border-dashed border-white/5 rounded-[3rem] text-slate-600 font-bold uppercase tracking-widest">Không có yêu cầu nào mới</div>';
         });
 
         async function duyet(key, uid, amount) {
-            if(confirm("Duyệt cho khách này?")) {
+            if(confirm("Xác nhận cộng " + amount.toLocaleString() + "đ cho khách?")) {
                 const r = db.ref('users/' + uid);
                 const s = await r.get();
-                await r.update({ balance: (s.val().balance || 0) + amount });
-                await db.ref('duyet_bank/' + key).update({ status: 'success' });
-                alert("Xong!");
+                const currentBal = s.val().balance || 0;
+                
+                await r.update({ balance: currentBal + amount });
+                await db.ref('duyet_bank/' + key).update({ status: 'completed' });
+                alert("Đã cộng tiền thành công!");
             }
         }
-        function xoa(key) { if(confirm("Xóa đơn này?")) db.ref('duyet_bank/' + key).remove(); }
+
+        function xoa(key) { if(confirm("Xóa yêu cầu này?")) db.ref('duyet_bank/' + key).remove(); }
     </script>
 </body>
 </html>
