@@ -2,78 +2,55 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <title>ADIM NGHĨA - DUYỆT THẺ</title>
+    <title>ADMIN - DUYỆT BANK BAP SHOP</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
 </head>
-<body class="bg-slate-900 text-white p-5">
-    <h1 class="text-2xl font-black text-blue-500 mb-6">QUẢN LÝ NẠP THẺ</h1>
-    
-    <div class="overflow-x-auto">
-        <table class="w-full bg-slate-800 rounded-lg overflow-hidden">
-            <thead class="bg-blue-600">
-                <tr>
-                    <th class="p-3 text-left">Khách hàng</th>
-                    <th class="p-3 text-left">Thông tin thẻ</th>
-                    <th class="p-3 text-left">Hành động</th>
-                </tr>
-            </thead>
-            <tbody id="admin-list-the"></tbody>
-        </table>
+<body class="bg-[#050810] text-white p-6">
+    <div class="max-w-3xl mx-auto">
+        <h1 class="text-2xl font-black text-blue-500 mb-6 italic uppercase">Danh Sách Khách Báo Bank</h1>
+        <div id="bank-list" class="space-y-4"></div>
     </div>
 
     <script>
-        // ... (Dán Firebase Config của bạn vào đây)
+        const firebaseConfig = { apiKey: "AIzaSyA5wBS88oS54yLs0OfwDYDfDQeTjc6ccdM", authDomain: "shop-blox-fruit-trannghia.firebaseapp.com", projectId: "shop-blox-fruit-trannghia", databaseURL: "https://shop-blox-fruit-trannghia-default-rtdb.firebaseio.com" };
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
-        db.ref('napthe').on('value', (snapshot) => {
-            const list = document.getElementById('admin-list-the');
-            list.innerHTML = '';
+        db.ref('duyet_bank').on('value', (snapshot) => {
+            const list = document.getElementById('bank-list'); list.innerHTML = '';
+            if(!snapshot.exists()) { list.innerHTML = '<p class="text-slate-500">Chưa có ai báo bank...</p>'; return; }
             snapshot.forEach((child) => {
-                const data = child.val();
-                if(data.status === 'pending') {
+                const item = child.val();
+                if(item.status === 'pending') {
                     list.innerHTML += `
-                    <tr class="border-b border-slate-700">
-                        <td class="p-3">
-                            <b class="text-blue-400">${data.username}</b><br>
-                            <span class="text-xs text-slate-400">${new Date(data.time).toLocaleString()}</span>
-                        </td>
-                        <td class="p-3">
-                            <b>${data.loai} - ${data.menhGia.toLocaleString()}đ</b><br>
-                            <span class="text-xs">S: ${data.seri}</span><br>
-                            <span class="text-xs">M: ${data.pin}</span>
-                        </td>
-                        <td class="p-3 flex gap-2">
-                            <button onclick="duyet('${child.key}', '${data.uid}', ${data.menhGia})" class="bg-green-600 px-3 py-1 rounded font-bold">DUYỆT (+)</button>
-                            <button onclick="huy('${child.key}')" class="bg-red-600 px-3 py-1 rounded font-bold">HỦY (X)</button>
-                        </td>
-                    </tr>`;
+                        <div class="bg-[#111827] p-5 rounded-2xl border border-white/5 flex justify-between items-center shadow-lg">
+                            <div>
+                                <p class="text-xs text-slate-500 mb-1">${new Date(item.time).toLocaleString()}</p>
+                                <p class="font-black text-lg uppercase text-blue-400">${item.username}</p>
+                                <p class="text-green-500 font-bold">Số tiền: ${item.amount.toLocaleString()}đ</p>
+                            </div>
+                            <div class="flex gap-2">
+                                <button onclick="duyet('${child.key}', '${item.uid}', ${item.amount})" class="bg-green-600 px-6 py-3 rounded-xl font-black text-xs uppercase italic">Duyệt</button>
+                                <button onclick="xoa('${child.key}')" class="bg-red-500/10 text-red-500 px-4 py-3 rounded-xl font-black text-xs uppercase">Xóa</button>
+                            </div>
+                        </div>
+                    `;
                 }
             });
         });
 
-        async function duyet(key, uid, menhGia) {
-            if(confirm("Xác nhận cộng tiền cho khách?")) {
-                const thucNhan = menhGia * 0.8; // Thuế 20%
-                const balRef = db.ref('users/' + uid + '/balance');
-                
-                // Lấy tiền hiện tại và cộng thêm
-                const current = (await balRef.get()).val() || 0;
-                await balRef.set(current + thucNhan);
-                
-                // Cập nhật trạng thái thẻ
-                await db.ref('napthe/' + key).update({status: 'done'});
-                alert("Đã cộng " + thucNhan.toLocaleString() + "đ!");
+        async function duyet(key, uid, amount) {
+            if(confirm("Duyệt cho khách này?")) {
+                const r = db.ref('users/' + uid);
+                const s = await r.get();
+                await r.update({ balance: (s.val().balance || 0) + amount });
+                await db.ref('duyet_bank/' + key).update({ status: 'success' });
+                alert("Xong!");
             }
         }
-
-        async function huy(key) {
-            if(confirm("Hủy thẻ này (do sai mã)?")) {
-                await db.ref('napthe/' + key).update({status: 'error'});
-            }
-        }
+        function xoa(key) { if(confirm("Xóa đơn này?")) db.ref('duyet_bank/' + key).remove(); }
     </script>
 </body>
 </html>
