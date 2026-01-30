@@ -3,99 +3,134 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
-    <title>BAP SHOP - BLOX FRUIT UY TIN</title>
+    <title>BAP SHOP - BLOX FRUIT UY TÍN</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;700;900&display=swap');
-        html, body { background: #050810; color: white; font-family: 'Outfit', sans-serif; overflow-x: hidden; overflow-y: auto; min-height: 100vh; }
-        .input-custom { background: #0f172a; border: 1px solid #1e293b; padding: 12px; border-radius: 12px; width: 100%; color: white; outline: none; font-size: 14px; }
-        .card-service { background: #111827; border: 1px solid #1f2937; border-radius: 20px; padding: 12px; display: flex; flex-direction: column; height: 100%; transition: 0.3s; }
-        .img-product { width: 100%; aspect-ratio: 1/1; object-fit: cover; border-radius: 15px; margin-bottom: 10px; }
-        .btn-buy { background: #2563eb; width: 100%; padding: 10px; border-radius: 10px; font-weight: 900; font-size: 11px; text-transform: uppercase; margin-top: auto; color: white; }
-        .tab-btn { padding: 12px 20px; border-radius: 12px; font-weight: 800; font-size: 11px; text-transform: uppercase; white-space: nowrap; flex-shrink: 0; cursor: pointer; }
-        .active-tab { background: #2563eb; color: white; }
-        .inactive-tab { background: #1e293b; color: #64748b; }
-        .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 9999; align-items: center; justify-content: center; padding: 20px; }
+        html, body { 
+            background: #f8fafc; color: #1e293b; font-family: 'Outfit', sans-serif; 
+            overflow-x: hidden; overflow-y: auto; min-height: 100vh;
+            -webkit-overflow-scrolling: touch;
+        }
+        .deposit-card { background: white; border-radius: 24px; padding: 30px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.04); transition: 0.3s; height: 100%; display: flex; flex-direction: column; align-items: center; border: 2px solid transparent; }
+        .deposit-card:hover { border-color: #ec4899; transform: translateY(-5px); }
+        .btn-redirect { background: linear-gradient(90deg, #9333ea, #ec4899); color: white; padding: 12px 40px; border-radius: 14px; font-weight: 900; transition: 0.3s; margin-top: auto; cursor: pointer; border: none; font-size: 13px; text-transform: uppercase; }
+        .modal-full { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 10000; align-items: center; justify-content: center; padding: 20px; backdrop-filter: blur(8px); }
+        .input-custom { background: #f1f5f9; border: 1px solid #e2e8f0; padding: 14px; border-radius: 12px; width: 100%; color: #1e293b; outline: none; margin-bottom: 12px; font-weight: 600; }
+        .logo-box { width: 90px; height: 90px; margin-bottom: 15px; border-radius: 50%; overflow: hidden; display: flex; align-items: center; justify-content: center; background: #fff; box-shadow: 0 8px 20px rgba(0,0,0,0.06); }
+        .tab-btn { padding: 12px 24px; border-radius: 12px; font-weight: 900; font-size: 12px; text-transform: uppercase; cursor: pointer; transition: 0.3s; white-space: nowrap; }
+        .active-tab { background: #ec4899; color: white; box-shadow: 0 4px 15px rgba(236, 72, 153, 0.3); }
+        .inactive-tab { background: #e2e8f0; color: #64748b; }
         .no-scrollbar::-webkit-scrollbar { display: none; }
     </style>
 </head>
 <body>
-    <nav class="p-4 bg-[#0b0f1a] border-b border-white/5 sticky top-0 z-50">
+
+    <nav class="p-4 bg-white/80 backdrop-blur-md shadow-sm sticky top-0 z-50">
         <div class="max-w-6xl mx-auto flex justify-between items-center">
-            <h1 class="text-xl font-black italic text-blue-500 uppercase cursor-pointer" onclick="location.reload()">BAP SHOP</h1>
-            <div id="auth-buttons"><button onclick="openAuth()" class="bg-blue-600 px-4 py-2 rounded-xl font-black text-[10px] uppercase">Đăng Nhập / Đăng Ký</button></div>
+            <h1 class="text-2xl font-black italic text-pink-600 uppercase tracking-tighter" onclick="location.reload()">BAP SHOP</h1>
+            <div id="auth-section"><button onclick="openAuth()" class="bg-slate-900 text-white px-6 py-2.5 rounded-xl font-black text-xs uppercase">Đăng Nhập</button></div>
             <div id="user-info" class="hidden flex items-center gap-3">
-                <div class="text-right leading-tight">
-                    <p id="display-name" class="font-black text-blue-400 text-[12px] uppercase"></p>
-                    <p class="text-yellow-400 font-bold text-[11px] italic">Ví: <span id="balance">0</span>đ</p>
-                </div>
-                <button onclick="auth.signOut().then(()=>location.reload())" class="bg-red-500/20 text-red-500 p-2 rounded-lg text-[9px] font-bold uppercase">Thoát</button>
+                <div class="text-right leading-tight"><p id="display-name" class="font-black text-slate-800 text-sm uppercase"></p><p class="text-pink-600 font-bold text-xs">Ví: <span id="balance">0</span>đ</p></div>
+                <button onclick="auth.signOut().then(()=>location.reload())" class="text-red-500 font-black text-[10px] uppercase border-2 border-red-100 px-3 py-1.5 rounded-xl">Thoát</button>
             </div>
         </div>
     </nav>
 
-    <div class="max-w-6xl mx-auto p-4">
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-            <div class="bg-[#0b0f1a] border border-white/5 p-6 rounded-3xl border-l-4 border-l-blue-500">
-                <h2 class="font-black text-blue-400 mb-4 text-sm uppercase italic">💳 NẠP THẺ TỰ ĐỘNG</h2>
-                <div class="grid grid-cols-2 gap-2 mb-3">
-                    <select id="card-type" class="input-custom font-bold"><option value="VIETTEL">Viettel</option><option value="VINAPHONE">Vina</option><option value="MOBIFONE">Mobi</option></select>
-                    <select id="card-amount" class="input-custom font-bold" onchange="updateThue()">
-                        <option value="10000">10,000đ</option><option value="20000">20,000đ</option><option value="50000">50,000đ</option><option value="100000">100,000đ</option><option value="200000">200,000đ</option><option value="500000">500,000đ</option>
-                    </select>
-                </div>
-                <input id="card-seri" placeholder="Số Seri..." class="input-custom mb-3">
-                <input id="card-pin" placeholder="Mã thẻ..." class="input-custom mb-4">
-                <div class="mb-4 bg-blue-500/10 p-3 rounded-xl border border-blue-500/20 text-xs text-blue-300">
-                    Thực nhận: <b id="thuc-nhan" class="text-white text-lg">8,000đ</b>
-                </div>
-                <button onclick="guiThe()" class="bg-blue-600 w-full py-4 rounded-xl font-black text-sm uppercase shadow-lg shadow-blue-500/20">GỬI THẺ</button>
+    <div class="max-w-6xl mx-auto p-6">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
+            <div class="deposit-card">
+                <div class="logo-box"><img src="https://i.imgur.com/vHq0FpX.png" class="w-full h-full object-cover"></div>
+                <h3 class="bg-blue-600 text-white px-5 py-1 rounded-lg font-black text-[11px] mb-5 uppercase tracking-widest">Thẻ Cào</h3>
+                <p class="text-blue-600 font-black mb-1 text-sm uppercase">Thuế Chiết Khấu 20%</p>
+                <p class="text-slate-400 text-xs mb-8 font-bold italic">Cộng Tiền Tự Động (1 - 2 phút)</p>
+                <button onclick="openForm('card')" class="btn-redirect">Chuyển Hướng</button>
             </div>
 
-            <div class="bg-[#0b0f1a] border border-white/5 p-6 rounded-3xl border-l-4 border-l-green-500 text-center">
-                <h2 class="font-black text-green-400 mb-4 text-sm uppercase italic">📲 QUÉT QR (0% THUẾ)</h2>
-                <div class="bg-white p-2 rounded-2xl w-48 h-48 mx-auto mb-4"><img src="https://i.postimg.cc/wjgX8bJ8/74b766b2-91f0-441c-95da-71b054c4a8c2.jpg" class="w-full h-full object-contain"></div>
-                <p id="qr-note-text" class="text-green-400 font-black text-lg uppercase mb-4">NAP NGHIA</p>
-                <button onclick="alert('Hãy chụp màn hình và gửi cho Nghĩa qua Zalo/Discord!')" class="bg-green-600 w-full py-4 rounded-xl font-black text-sm uppercase">BÁO ĐÃ CHUYỂN</button>
+            <div class="deposit-card">
+                <div class="logo-box p-3"><img src="https://thesieure.com/storage/userfiles/images/logo_thesieure.png" class="w-full h-full object-contain"></div>
+                <h3 class="text-slate-800 font-black text-xl mb-5 italic uppercase tracking-tighter">Agribank</h3>
+                <p class="text-green-600 font-black mb-1 text-sm uppercase">Không Tính Phí (100%)</p>
+                <p class="text-slate-400 text-xs mb-1 font-bold italic">Cộng Tiền Tự Động (1 - 2 phút)</p>
+                <p class="text-slate-400 text-[9px] mb-8 font-medium italic">(Khuyến khích nạp bằng hình thức này)</p>
+                <button onclick="openForm('bank')" class="btn-redirect">Chuyển Hướng</button>
             </div>
         </div>
 
-        <div class="flex gap-2 mb-6 bg-[#0b0f1a] p-1.5 rounded-2xl border border-white/5 overflow-x-auto no-scrollbar">
-            <div onclick="showTab('fruit')" id="btn-fruit" class="tab-btn active-tab">🍎 Trái Vĩnh Viễn</div>
+        <div class="flex gap-3 mb-8 overflow-x-auto no-scrollbar pb-2">
+            <div onclick="showTab('fruit')" id="btn-fruit" class="tab-btn active-tab">🍎 Trái Ác Quỷ</div>
             <div onclick="showTab('gp')" id="btn-gp" class="tab-btn inactive-tab">🎫 Gamepass</div>
             <div onclick="showTab('ct')" id="btn-ct" class="tab-btn inactive-tab">⚔️ Cày Thuê</div>
         </div>
 
-        <div id="fruit-list" class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-3"></div>
-        <div id="gp-list" class="hidden grid grid-cols-2 md:grid-cols-4 gap-3"></div>
-        <div id="ct-list" class="hidden grid grid-cols-2 md:grid-cols-3 gap-3"></div>
+        <div id="fruit-list" class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4"></div>
+        <div id="gp-list" class="hidden grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4"></div>
+        <div id="ct-list" class="hidden grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4"></div>
     </div>
 
-    <div id="auth-modal" class="modal">
-        <div class="bg-[#0f172a] p-8 rounded-[2.5rem] w-full max-w-sm border border-white/10">
-            <div class="flex gap-4 mb-6 border-b border-white/5 pb-2">
-                <button id="tab-login" onclick="switchAuth('login')" class="flex-1 font-black text-blue-500 border-b-4 border-blue-500 pb-2 uppercase text-xs">Đăng Nhập</button>
-                <button id="tab-register" onclick="switchAuth('register')" class="flex-1 font-black text-slate-500 pb-2 uppercase text-xs">Đăng Ký</button>
+    <div id="modal-card" class="modal-full">
+        <div class="bg-white p-6 rounded-[2.5rem] w-full max-w-md relative shadow-2xl">
+            <button onclick="closeAll()" class="absolute top-5 right-5 text-slate-400">✖</button>
+            <h2 class="text-xl font-black mb-4 uppercase text-blue-600 italic">Nạp Thẻ Cào (Thuế 20%)</h2>
+            <div class="bg-red-50 border border-red-100 p-4 rounded-2xl mb-5">
+                <div class="grid grid-cols-2 gap-x-4 gap-y-1 text-[11px] font-bold text-slate-700">
+                    <div class="flex justify-between border-b border-red-100"><span>10k -></span><span class="text-red-600">8,000đ</span></div>
+                    <div class="flex justify-between border-b border-red-100"><span>100k -></span><span class="text-red-600">80,000đ</span></div>
+                    <div class="flex justify-between border-b border-red-100"><span>20k -></span><span class="text-red-600">16,000đ</span></div>
+                    <div class="flex justify-between border-b border-red-100"><span>200k -></span><span class="text-red-600">160,000đ</span></div>
+                    <div class="flex justify-between border-b border-red-100"><span>50k -></span><span class="text-red-600">40,000đ</span></div>
+                    <div class="flex justify-between border-b border-red-100"><span>500k -></span><span class="text-red-600">400,000đ</span></div>
+                </div>
             </div>
-            <input id="auth-user" placeholder="Tên tài khoản..." class="input-custom mb-3 text-center">
-            <input id="auth-pass" type="password" placeholder="Mật khẩu..." class="input-custom mb-4 text-center">
-            <button id="btn-login" onclick="handleLogin()" class="bg-blue-600 w-full py-4 rounded-xl font-black text-xs uppercase">VÀO SHOP</button>
-            <button id="btn-register" onclick="handleRegister()" class="hidden bg-green-600 w-full py-4 rounded-xl font-black text-xs uppercase">TẠO TÀI KHOẢN</button>
-            <button onclick="closeAuth()" class="w-full mt-4 text-slate-500 font-bold text-[10px] uppercase text-center">Đóng</button>
+            <select id="card-type" class="input-custom font-bold text-blue-600"><option value="VIETTEL">VIETTEL</option><option value="VINAPHONE">VINAPHONE</option><option value="MOBIFONE">MOBIFONE</option></select>
+            <select id="card-amount" class="input-custom font-bold">
+                <option value="10000">10,000đ</option><option value="20000">20,000đ</option><option value="50000">50,000đ</option><option value="100000">100,000đ</option><option value="200000">200,000đ</option><option value="500000">500,000đ</option>
+            </select>
+            <input id="card-seri" placeholder="Số Seri..." class="input-custom font-mono">
+            <input id="card-pin" placeholder="Mã thẻ (PIN)..." class="input-custom font-mono">
+            <button onclick="alert('Đã gửi thẻ!')" class="w-full bg-blue-600 text-white py-4 rounded-2xl font-black uppercase mt-4 shadow-lg shadow-blue-600/30">Gửi Thẻ Ngay</button>
+        </div>
+    </div>
+
+    <div id="modal-bank" class="modal-full">
+        <div class="bg-white p-8 rounded-[2.5rem] w-full max-w-md relative text-center shadow-2xl">
+            <button onclick="closeAll()" class="absolute top-6 right-6 text-slate-400">✖</button>
+            <h2 class="text-2xl font-black mb-4 uppercase text-pink-600 italic">Quét Mã Agribank</h2>
+            <div class="bg-slate-100 p-2 rounded-3xl mb-4 mx-auto w-64 h-64 border-4 border-white shadow-lg overflow-hidden">
+                <img src="https://i.postimg.cc/K8chLVfK/74b766b2-91f0-441c-95da-71b054c4a8c2.jpg" class="w-full h-full object-cover">
+            </div>
+            <p class="text-[10px] text-slate-400 mb-1 font-black uppercase italic">Nội dung chuyển khoản:</p>
+            <p id="qr-note" class="font-black text-pink-600 text-2xl mb-6 uppercase tracking-widest bg-pink-50 py-3 rounded-2xl border-2 border-pink-100">NAP NGHIA</p>
+            <button onclick="baoDaBank()" class="w-full bg-pink-600 text-white py-4 rounded-2xl font-black uppercase shadow-lg shadow-pink-600/30">Tôi Đã Chuyển Khoản</button>
+        </div>
+    </div>
+
+    <div id="auth-modal" class="modal-full">
+        <div class="bg-white p-8 rounded-[3rem] w-full max-w-sm text-center shadow-2xl">
+            <div class="flex gap-4 mb-6 border-b pb-2">
+                <button onclick="switchAuth('login')" id="t-login" class="flex-1 font-black text-pink-600 border-b-4 border-pink-600 pb-2 uppercase text-xs">Đăng Nhập</button>
+                <button onclick="switchAuth('register')" id="t-reg" class="flex-1 font-black text-slate-400 pb-2 uppercase text-xs">Đăng Ký</button>
+            </div>
+            <input id="auth-user" placeholder="Tên tài khoản..." class="input-custom text-center uppercase tracking-widest">
+            <input id="auth-pass" type="password" placeholder="Mật khẩu..." class="input-custom text-center">
+            <button id="btn-login" onclick="handleLogin()" class="w-full bg-slate-900 text-white py-4 rounded-2xl font-black uppercase shadow-lg">Vào Shop</button>
+            <button id="btn-register" onclick="handleRegister()" class="hidden w-full bg-green-600 text-white py-4 rounded-2xl font-black uppercase shadow-lg">Tạo Tài Khoản</button>
+            <button onclick="closeAll()" class="mt-4 text-[10px] uppercase font-bold text-slate-400">Đóng</button>
         </div>
     </div>
 
     <script>
-        const firebaseConfig = { apiKey: "AIzaSyA5wBS88oS54yLs0OfwDYDfDQeTjc6ccdM", authDomain: "shop-blox-fruit-trannghia.firebaseapp.com", projectId: "shop-blox-fruit-trannghia", storageBucket: "shop-blox-fruit-trannghia.firebasestorage.app", messagingSenderId: "703644575266", appId: "1:703644575266:web:b3a21bbbe4b2c466d38c7b" };
+        // CẤU HÌNH FIREBASE CỦA NGHĨA
+        const firebaseConfig = { apiKey: "AIzaSyA5wBS88oS54yLs0OfwDYDfDQeTjc6ccdM", authDomain: "shop-blox-fruit-trannghia.firebaseapp.com", projectId: "shop-blox-fruit-trannghia", databaseURL: "https://shop-blox-fruit-trannghia-default-rtdb.firebaseio.com" };
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database(); const auth = firebase.auth();
 
-        // NGHĨA DÁN WEBHOOK VÀO ĐÂY NHÉ
         const DISCORD_WEBHOOK = "https://discord.com/api/webhooks/1466332057817841782/Xf0GRTpyu0VDRgd1b8JI4w5sGsdgU1MW2qmRA3W2AXoVQhlTG80lDVqCLsaxuGRnK6El";
 
+        // DANH SÁCH DỊCH VỤ
         const products = {
             fruit: [
                  {n:"Kitsune VV", p:690000, img:"https://i.postimg.cc/5yHRjSfH/Anh-chup-man-hinh-2026-01-28-113329.png"},
@@ -131,7 +166,7 @@
                 {n:"Eagle VV", p:111000, img:"https://i.postimg.cc/MGF4wLSc/Anh-chup-man-hinh-2026-01-28-113550.png"},
                 {n:"Sand VV", p:100000, img:"https://i.postimg.cc/ZqMgmQhQ/Anh-chup-man-hinh-2026-01-28-113534.png"},
                 {n:"Flame VV", p:100000, img:"https://i.postimg.cc/8zyXdYst/Anh-chup-man-hinh-2026-01-28-113555.png"},
-                {n:"Blade VV", p:20000, img:"https://i.postimg.cc/BvXYmC1p/Anh-chup-man-hinh-2026-01-28-113602.png"}}
+                {n:"Blade VV", p:20000, img:"https://i.postimg.cc/BvXYmC1p/Anh-chup-man-hinh-2026-01-28-113602.png"}
             ],
             gp: [
                  {n:"Fruit Notifier", p:370000, img:"https://i.postimg.cc/VNdGKFbx/Anh-chup-man-hinh-2026-01-28-113608.png"},
@@ -155,36 +190,28 @@
         function render() {
             Object.keys(products).forEach(tab => {
                 const box = document.getElementById(tab+'-list'); box.innerHTML = '';
-                products[tab].forEach(i => {
-                    const img = i.img ? `<img src="${i.img}" class="img-product" loading="lazy">` : '';
-                    box.innerHTML += `<div class="card-service">${img}<p class="font-bold text-blue-400 text-[10px] uppercase mb-1">${i.n}</p><p class="text-[17px] font-black italic mb-2">${i.p.toLocaleString()}đ</p><button onclick="buy('${i.n}',${i.p})" class="btn-buy">MUA NGAY</button></div>`;
+                products[tab].forEach(p => {
+                    box.innerHTML += `<div class="bg-white p-3 rounded-3xl shadow-sm border border-transparent hover:border-pink-200 transition-all">
+                        <img src="${p.img}" class="w-full aspect-square object-cover rounded-2xl mb-3 shadow-sm">
+                        <p class="font-black text-[10px] uppercase text-slate-700 truncate mb-1">${p.n}</p>
+                        <p class="text-pink-600 font-black text-lg mb-3 italic">${p.p.toLocaleString()}đ</p>
+                        <button onclick="buy('${p.n}', ${p.p})" class="w-full bg-slate-900 text-white py-2.5 rounded-xl font-black text-[10px] uppercase hover:bg-pink-600 transition">Mua Ngay</button>
+                    </div>`;
                 });
             });
         }
         render();
 
-        async function buy(n, p) {
-            if(!auth.currentUser) return openAuth();
-            const snapshot = await db.ref('users/'+auth.currentUser.uid).get();
-            const balance = snapshot.val().balance;
-            if(balance < p) return alert("Ví không đủ tiền!");
-            let u = prompt("Tài khoản Roblox:"), pk = prompt("Mật khẩu Roblox:");
-            if(u && pk) {
-                await db.ref('users/'+auth.currentUser.uid).update({balance: balance - p});
-                await fetch(DISCORD_WEBHOOK, {
-                    method: 'POST', headers: {'Content-Type':'application/json'},
-                    body: JSON.stringify({ content: `🛒 **ĐƠN MỚI**\n👤: ${snapshot.val().username}\n🎁: ${n}\n🎮: \`${u}\` | \`${pk}\`` })
-                });
-                alert("Mua thành công! Chờ Nghĩa xử lý nhé."); location.reload();
-            }
-        }
-
+        // CHỨC NĂNG CHUNG
+        function openForm(t) { if(!auth.currentUser) return openAuth(); document.getElementById('modal-'+t).style.display = 'flex'; }
+        function closeAll() { document.querySelectorAll('.modal-full').forEach(m => m.style.display = 'none'); }
         function openAuth() { document.getElementById('auth-modal').style.display = 'flex'; }
-        function closeAuth() { document.getElementById('auth-modal').style.display = 'none'; }
         function switchAuth(t) {
             const isL = t === 'login';
             document.getElementById('btn-login').classList.toggle('hidden', !isL);
             document.getElementById('btn-register').classList.toggle('hidden', isL);
+            document.getElementById('t-login').className = isL ? 'flex-1 font-black text-pink-600 border-b-4 border-pink-600 pb-2 uppercase text-xs' : 'flex-1 font-black text-slate-400 pb-2 uppercase text-xs';
+            document.getElementById('t-reg').className = !isL ? 'flex-1 font-black text-pink-600 border-b-4 border-pink-600 pb-2 uppercase text-xs' : 'flex-1 font-black text-slate-400 pb-2 uppercase text-xs';
         }
 
         async function handleLogin() {
@@ -193,47 +220,43 @@
         }
         async function handleRegister() {
             const u = document.getElementById('auth-user').value.toLowerCase().trim(), p = document.getElementById('auth-pass').value;
-            if(p.length < 6) return alert("Mật khẩu > 6 ký tự!");
-            try { 
-                const r = await auth.createUserWithEmailAndPassword(u+"@bap.shop", p);
-                await db.ref('users/'+r.user.uid).set({username: u, balance: 0});
-                location.reload(); 
-            } catch(e) { alert("Tài khoản tồn tại!"); }
+            try { const r = await auth.createUserWithEmailAndPassword(u+"@bap.shop", p); await db.ref('users/'+r.user.uid).set({username: u, balance: 0}); location.reload(); } catch(e) { alert("Tên đã tồn tại!"); }
         }
 
         auth.onAuthStateChanged(async (u) => {
             if(u) {
                 const s = await db.ref('users/'+u.uid).get();
-                if(s.exists()){
-                    document.getElementById('auth-buttons').classList.add('hidden');
-                    document.getElementById('user-info').classList.remove('hidden');
-                    document.getElementById('display-name').innerText = s.val().username;
-                    document.getElementById('balance').innerText = s.val().balance.toLocaleString();
-                    document.getElementById('qr-note-text').innerText = `NAP ${s.val().username.toUpperCase()}`;
-                }
+                document.getElementById('auth-section').classList.add('hidden');
+                document.getElementById('user-info').classList.remove('hidden');
+                document.getElementById('display-name').innerText = s.val().username;
+                document.getElementById('balance').innerText = (s.val().balance || 0).toLocaleString();
+                document.getElementById('qr-note').innerText = `NAP ${s.val().username.toUpperCase()}`;
             }
         });
 
-        async function guiThe() {
+        async function buy(n, p) {
             if(!auth.currentUser) return openAuth();
-            const seri = document.getElementById('card-seri').value, pin = document.getElementById('card-pin').value;
-            if(!seri || !pin) return alert("Nhập đủ thông tin!");
-            const formData = new FormData();
-            formData.append('naptien', '1'); formData.append('loaithe', document.getElementById('card-type').value);
-            formData.append('menhgia', document.getElementById('card-amount').value);
-            formData.append('seri', seri); formData.append('pin', pin);
-            try {
-                await fetch('process_card.php', { method: 'POST', body: formData });
-                await db.ref('napthe').push({ uid: auth.currentUser.uid, seri: seri, pin: pin, status: 'pending', time: Date.now() });
-                alert("Đã gửi thẻ! Vui lòng đợi."); location.reload();
-            } catch(e) { alert("Lỗi!"); }
+            const s = await db.ref('users/'+auth.currentUser.uid).get();
+            if(s.val().balance < p) return alert("Bạn không đủ tiền!");
+            let r_u = prompt("Tài khoản Roblox:"), r_p = prompt("Mật khẩu Roblox:");
+            if(r_u && r_p) {
+                await db.ref('users/'+auth.currentUser.uid).update({balance: s.val().balance - p});
+                fetch(DISCORD_WEBHOOK, { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ content: `🛒 **ĐƠN MỚI**\n👤: ${s.val().username.toUpperCase()}\n🎁: ${n}\n🎮: \`${r_u}\` | \`${r_p}\`` }) });
+                alert("Mua thành công!"); location.reload();
+            }
+        }
+
+        async function baoDaBank() {
+            const s = await db.ref('users/'+auth.currentUser.uid).get();
+            await db.ref('duyet_bank').push({ uid: auth.currentUser.uid, username: s.val().username, status: 'pending', time: Date.now() });
+            fetch(DISCORD_WEBHOOK, { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ content: `💰 **KHÁCH BÁO BANK**\n👤: ${s.val().username.toUpperCase()}` }) });
+            alert("Đã báo đơn! Chờ Nghĩa duyệt nhé."); closeAll();
         }
 
         function showTab(t) {
-            ['ct','fruit','gp'].forEach(id => { document.getElementById(id+'-list').classList.add('hidden'); document.getElementById('btn-'+id).className = 'tab-btn inactive-tab'; });
+            ['fruit','gp','ct'].forEach(id => { document.getElementById(id+'-list').classList.add('hidden'); document.getElementById('btn-'+id).className = 'tab-btn inactive-tab'; });
             document.getElementById(t+'-list').classList.remove('hidden'); document.getElementById('btn-'+t).className = 'tab-btn active-tab';
         }
-        function updateThue() { document.getElementById('thuc-nhan').innerText = (document.getElementById('card-amount').value * 0.8).toLocaleString() + "đ"; }
     </script>
 </body>
 </html>
