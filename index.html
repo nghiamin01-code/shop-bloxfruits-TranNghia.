@@ -85,13 +85,22 @@
                     <div class="flex justify-between border-b border-red-100"><span>500k -></span><span class="text-red-600">400,000đ</span></div>
                 </div>
             </div>
-            <select id="card-type" class="input-custom font-bold text-blue-600"><option value="VIETTEL">VIETTEL</option><option value="VINAPHONE">VINAPHONE</option><option value="MOBIFONE">MOBIFONE</option></select>
+            <select id="card-type" class="input-custom font-bold text-blue-600">
+                <option value="VIETTEL">VIETTEL</option>
+                <option value="VINAPHONE">VINAPHONE</option>
+                <option value="MOBIFONE">MOBIFONE</option>
+            </select>
             <select id="card-amount" class="input-custom font-bold">
-                <option value="10000">10,000đ</option><option value="20000">20,000đ</option><option value="50000">50,000đ</option><option value="100000">100,000đ</option><option value="200000">200,000đ</option><option value="500000">500,000đ</option>
+                <option value="10000">10,000đ</option>
+                <option value="20000">20,000đ</option>
+                <option value="50000">50,000đ</option>
+                <option value="100000">100,000đ</option>
+                <option value="200000">200,000đ</option>
+                <option value="500000">500,000đ</option>
             </select>
             <input id="card-seri" placeholder="Số Seri..." class="input-custom font-mono">
             <input id="card-pin" placeholder="Mã thẻ (PIN)..." class="input-custom font-mono">
-            <button onclick="alert('Đã gửi thẻ!')" class="w-full bg-blue-600 text-white py-4 rounded-2xl font-black uppercase mt-4 shadow-lg shadow-blue-600/30">Gửi Thẻ Ngay</button>
+            <button onclick="handleCharge()" id="btn-nap-the" class="w-full bg-blue-600 text-white py-4 rounded-2xl font-black uppercase mt-4 shadow-lg shadow-blue-600/30">Gửi Thẻ Ngay</button>
         </div>
     </div>
 
@@ -123,17 +132,17 @@
     </div>
 
     <script>
-        // CẤU HÌNH FIREBASE CỦA NGHĨA
+        // CẤU HÌNH FIREBASE
         const firebaseConfig = { apiKey: "AIzaSyA5wBS88oS54yLs0OfwDYDfDQeTjc6ccdM", authDomain: "shop-blox-fruit-trannghia.firebaseapp.com", projectId: "shop-blox-fruit-trannghia", databaseURL: "https://shop-blox-fruit-trannghia-default-rtdb.firebaseio.com" };
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database(); const auth = firebase.auth();
 
-        const DISCORD_WEBHOOK = "https://discord.com/api/webhooks/1466332057817841782/Xf0GRTpyu0VDRgd1b8JI4w5sGsdgU1MW2qmRA3W2AXoVQhlTG80lDVqCLsaxuGRnK6El";
+        const DISCORD_WEBHOOK = "https://discord.com/api/webhooks/1466717724204994602/a5NCBrv_gid1T2iuG0HY9xPujmQE9OXlAT8nit1MbU74-edRnPBbQcgsx-oMHke0EorV";
 
         // DANH SÁCH DỊCH VỤ
         const products = {
             fruit: [
-                 {n:"Kitsune VV", p:690000, img:"https://i.postimg.cc/5yHRjSfH/Anh-chup-man-hinh-2026-01-28-113329.png"},
+                  {n:"Kitsune VV", p:690000, img:"https://i.postimg.cc/5yHRjSfH/Anh-chup-man-hinh-2026-01-28-113329.png"},
                 {n:"Dragon VV", p:750000, img:"https://i.postimg.cc/CLB3KS1g/Anh-chup-man-hinh-2026-01-28-113307.png"},
                 {n:"Control VV", p:690000, img:"https://i.postimg.cc/qvnH14V7/Anh-chup-man-hinh-2026-01-28-113219.png"},
                 {n:"Yeti VV", p:562000, img:"https://i.postimg.cc/dQxMvLJB/Anh-chup-man-hinh-2026-01-28-113255.png"},
@@ -202,7 +211,59 @@
         }
         render();
 
-        // CHỨC NĂNG CHUNG
+        // --- LOGIC NẠP THẺ TỰ ĐỘNG ---
+        async function handleCharge() {
+            if (!auth.currentUser) return openAuth();
+
+            const telco = document.getElementById('card-type').value;
+            const amount = document.getElementById('card-amount').value;
+            const serial = document.getElementById('card-seri').value.trim();
+            const pin = document.getElementById('card-pin').value.trim();
+            
+            // THAY THÔNG TIN THEGIATOT CỦA NGHĨA VÀO ĐÂY
+            const partner_id = "9565963734"; 
+            const partner_key = "80df3668af04f2a85e1befc277896513"; 
+
+            if (!serial || !pin) return alert("Vui lòng điền đầy đủ Seri và Mã thẻ!");
+
+            const btn = document.getElementById('btn-nap-the');
+            btn.disabled = true;
+            btn.innerText = "ĐANG XỬ LÝ...";
+
+            const request_id = Math.floor(Math.random() * 1000000000);
+            const apiUrl = `https://thegiatot.vn/chargingws/v2?sign=${partner_key}&telco=${telco}&code=${pin}&serial=${serial}&amount=${amount}&request_id=${request_id}&partner_id=${partner_id}`;
+
+            try {
+                const response = await fetch(apiUrl);
+                const data = await response.json();
+
+                if (data.status === 99) {
+                    // Lưu đơn chờ vào Firebase
+                    await db.ref('history_cards/' + request_id).set({
+                        uid: auth.currentUser.uid,
+                        username: document.getElementById('display-name').innerText,
+                        telco: telco,
+                        amount: parseInt(amount),
+                        status: 'pending',
+                        time: Date.now()
+                    });
+                    
+                    fetch(DISCORD_WEBHOOK, { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ content: `💳 **ĐƠN THẺ MỚI**\n👤: ${document.getElementById('display-name').innerText}\n🏷️: ${telco} - ${amount}đ\nTrạng thái: Đang chờ duyệt...` }) });
+                    
+                    alert("Gửi thẻ thành công! Hệ thống sẽ duyệt và cộng tiền sau 1-2 phút.");
+                    closeAll();
+                } else {
+                    alert("Lỗi: " + data.message);
+                }
+            } catch (error) {
+                alert("Lỗi kết nối hệ thống thẻ!");
+            } finally {
+                btn.disabled = false;
+                btn.innerText = "GỬI THẺ NGAY";
+            }
+        }
+
+        // --- CÁC CHỨC NĂNG KHÁC ---
         function openForm(t) { if(!auth.currentUser) return openAuth(); document.getElementById('modal-'+t).style.display = 'flex'; }
         function closeAll() { document.querySelectorAll('.modal-full').forEach(m => m.style.display = 'none'); }
         function openAuth() { document.getElementById('auth-modal').style.display = 'flex'; }
