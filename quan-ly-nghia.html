@@ -2,68 +2,82 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <title>ADMIN DUYỆT BANK - BAP SHOP</title>
+    <title>DUYỆT BANK NHANH - BAP SHOP</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;700;900&display=swap');
+        body { font-family: 'Outfit', sans-serif; background: #f8fafc; }
+    </style>
 </head>
-<body class="bg-[#050810] text-white p-6 font-sans">
-    <div class="max-w-3xl mx-auto">
-        <div class="flex justify-between items-center mb-10">
-            <h1 class="text-3xl font-black text-blue-500 italic uppercase">Duyệt Bank Shop</h1>
-            <div class="bg-blue-500/10 px-4 py-2 rounded-xl border border-blue-500/20 text-blue-400 font-bold text-xs uppercase">Chế độ Admin</div>
-        </div>
+<body class="p-6">
+    <div class="max-w-2xl mx-auto">
+        <h1 class="text-2xl font-black text-slate-800 mb-6 uppercase">Quản lý duyệt Bank</h1>
         
         <div id="bank-list" class="space-y-4">
-            <p class="text-slate-500 italic">Đang tải danh sách chờ...</p>
+            <p class="text-slate-400">Đang đợi khách báo bank...</p>
         </div>
     </div>
 
     <script>
-        const firebaseConfig = { apiKey: "AIzaSyA5wBS88oS54yLs0OfwDYDfDQeTjc6ccdM", authDomain: "shop-blox-fruit-trannghia.firebaseapp.com", projectId: "shop-blox-fruit-trannghia", databaseURL: "https://shop-blox-fruit-trannghia-default-rtdb.firebaseio.com" };
+        const firebaseConfig = { 
+            apiKey: "AIzaSyA5wBS88oS54yLs0OfwDYDfDQeTjc6ccdM", 
+            authDomain: "shop-blox-fruit-trannghia.firebaseapp.com", 
+            projectId: "shop-blox-fruit-trannghia", 
+            databaseURL: "https://shop-blox-fruit-trannghia-default-rtdb.firebaseio.com" 
+        };
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
+        // Lấy danh sách khách báo bank
         db.ref('duyet_bank').on('value', (snapshot) => {
             const list = document.getElementById('bank-list');
             list.innerHTML = '';
             
-            let hasPending = false;
             snapshot.forEach((child) => {
-                const item = child.val();
-                if(item.status === 'pending') {
-                    hasPending = true;
+                const data = child.val();
+                if (data.status === 'pending') {
                     list.innerHTML += `
-                        <div class="bg-[#111827] p-6 rounded-[2rem] border border-white/5 flex justify-between items-center shadow-2xl animate-pulse-once">
+                        <div class="bg-white p-5 rounded-2xl shadow-sm border-2 border-slate-100 flex justify-between items-center">
                             <div>
-                                <p class="text-[10px] text-slate-500 font-black mb-1 uppercase tracking-widest">${new Date(item.time).toLocaleString()}</p>
-                                <p class="font-black text-xl uppercase text-white">${item.username}</p>
-                                <p class="text-green-500 font-black text-lg">${item.amount.toLocaleString()} VNĐ</p>
+                                <p class="text-xs text-slate-400 font-bold uppercase tracking-widest">Khách hàng</p>
+                                <p class="font-black text-lg text-slate-800">${data.username.toUpperCase()}</p>
+                                <p class="text-pink-600 font-black">Số tiền: ${data.amount.toLocaleString()}đ</p>
                             </div>
-                            <div class="flex gap-2">
-                                <button onclick="duyet('${child.key}', '${item.uid}', ${item.amount})" class="bg-green-600 hover:bg-green-500 px-6 py-4 rounded-2xl font-black text-xs uppercase tracking-tighter transition-all">DUYỆT TIỀN</button>
-                                <button onclick="xoa('${child.key}')" class="bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white px-5 py-4 rounded-2xl font-black text-xs uppercase transition-all">XÓA</button>
-                            </div>
+                            <button onclick="approve('${child.key}', '${data.uid}', ${data.amount})" 
+                                class="bg-blue-600 hover:bg-green-600 text-white px-6 py-3 rounded-xl font-black text-xs uppercase transition-all shadow-lg shadow-blue-200">
+                                XÁC NHẬN (+ TIỀN)
+                            </button>
                         </div>
                     `;
                 }
             });
-            if(!hasPending) list.innerHTML = '<div class="text-center py-20 border-2 border-dashed border-white/5 rounded-[3rem] text-slate-600 font-bold uppercase tracking-widest">Không có yêu cầu nào mới</div>';
+            if (list.innerHTML === '') list.innerHTML = '<p class="text-center text-slate-400 py-10 font-bold">Hiện chưa có ai báo chuyển khoản.</p>';
         });
 
-        async function duyet(key, uid, amount) {
-            if(confirm("Xác nhận cộng " + amount.toLocaleString() + "đ cho khách?")) {
-                const r = db.ref('users/' + uid);
-                const s = await r.get();
-                const currentBal = s.val().balance || 0;
-                
-                await r.update({ balance: currentBal + amount });
-                await db.ref('duyet_bank/' + key).update({ status: 'completed' });
-                alert("Đã cộng tiền thành công!");
+        // Hàm xử lý cộng tiền tự động khi Nghĩa bấm nút
+        async function approve(orderKey, userUid, amount) {
+            if (confirm("Nghĩa đã thấy tiền trong App Agribank chưa? Bấm OK để cộng tiền cho khách.")) {
+                try {
+                    const userRef = db.ref('users/' + userUid + '/balance');
+                    
+                    // Lấy số dư hiện tại của khách
+                    const snapshot = await userRef.get();
+                    const currentBalance = snapshot.val() || 0;
+                    
+                    // 1. Cộng tiền vào ví khách
+                    await userRef.set(currentBalance + amount);
+                    
+                    // 2. Đổi trạng thái đơn sang thành công để biến mất khỏi danh sách chờ
+                    await db.ref('duyet_bank/' + orderKey).update({ status: 'success' });
+                    
+                    alert("Thành công! Đã cộng " + amount.toLocaleString() + "đ vào tài khoản khách.");
+                } catch (e) {
+                    alert("Lỗi: " + e.message);
+                }
             }
         }
-
-        function xoa(key) { if(confirm("Xóa yêu cầu này?")) db.ref('duyet_bank/' + key).remove(); }
     </script>
 </body>
 </html>
