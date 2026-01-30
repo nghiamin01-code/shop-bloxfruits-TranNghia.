@@ -47,16 +47,15 @@
                 <h3 class="bg-blue-600 text-white px-5 py-1 rounded-lg font-black text-[11px] mb-5 uppercase tracking-widest">Thẻ Cào</h3>
                 <p class="text-blue-600 font-black mb-1 text-sm uppercase">Thuế Chiết Khấu 20%</p>
                 <p class="text-slate-400 text-xs mb-8 font-bold italic">Cộng Tiền Tự Động (1 - 2 phút)</p>
-                <button onclick="openForm('card')" class="btn-redirect">Chuyển Hướng</button>
+                <button onclick="openForm('card')" class="btn-redirect">Nạp Ngay</button>
             </div>
 
             <div class="deposit-card">
                 <div class="logo-box p-3"><img src="https://thesieure.com/storage/userfiles/images/logo_thesieure.png" class="w-full h-full object-contain"></div>
                 <h3 class="text-slate-800 font-black text-xl mb-5 italic uppercase tracking-tighter">Agribank</h3>
                 <p class="text-green-600 font-black mb-1 text-sm uppercase">Không Tính Phí (100%)</p>
-                <p class="text-slate-400 text-xs mb-1 font-bold italic">Cộng Tiền Tự Động (1 - 2 phút)</p>
-                <p class="text-slate-400 text-[9px] mb-8 font-medium italic">(Khuyến khích nạp bằng hình thức này)</p>
-                <button onclick="openForm('bank')" class="btn-redirect">Chuyển Hướng</button>
+                <p class="text-slate-400 text-xs mb-1 font-bold italic">Cộng Tiền Qua Duyệt Bank</p>
+                <button onclick="openForm('bank')" class="btn-redirect">Nạp Ngay</button>
             </div>
         </div>
 
@@ -75,32 +74,11 @@
         <div class="bg-white p-6 rounded-[2.5rem] w-full max-w-md relative shadow-2xl">
             <button onclick="closeAll()" class="absolute top-5 right-5 text-slate-400">✖</button>
             <h2 class="text-xl font-black mb-4 uppercase text-blue-600 italic">Nạp Thẻ Cào (Thuế 20%)</h2>
-            <div class="bg-red-50 border border-red-100 p-4 rounded-2xl mb-5">
-                <div class="grid grid-cols-2 gap-x-4 gap-y-1 text-[11px] font-bold text-slate-700">
-                    <div class="flex justify-between border-b border-red-100"><span>10k -></span><span class="text-red-600">8,000đ</span></div>
-                    <div class="flex justify-between border-b border-red-100"><span>100k -></span><span class="text-red-600">80,000đ</span></div>
-                    <div class="flex justify-between border-b border-red-100"><span>20k -></span><span class="text-red-600">16,000đ</span></div>
-                    <div class="flex justify-between border-b border-red-100"><span>200k -></span><span class="text-red-600">160,000đ</span></div>
-                    <div class="flex justify-between border-b border-red-100"><span>50k -></span><span class="text-red-600">40,000đ</span></div>
-                    <div class="flex justify-between border-b border-red-100"><span>500k -></span><span class="text-red-600">400,000đ</span></div>
-                </div>
-            </div>
-            <select id="card-type" class="input-custom font-bold text-blue-600">
-                <option value="VIETTEL">VIETTEL</option>
-                <option value="VINAPHONE">VINAPHONE</option>
-                <option value="MOBIFONE">MOBIFONE</option>
-            </select>
-            <select id="card-amount" class="input-custom font-bold">
-                <option value="10000">10,000đ</option>
-                <option value="20000">20,000đ</option>
-                <option value="50000">50,000đ</option>
-                <option value="100000">100,000đ</option>
-                <option value="200000">200,000đ</option>
-                <option value="500000">500,000đ</option>
-            </select>
+            <select id="card-type" class="input-custom font-bold text-blue-600"><option value="VIETTEL">VIETTEL</option><option value="VINAPHONE">VINAPHONE</option><option value="MOBIFONE">MOBIFONE</option></select>
+            <select id="card-amount" class="input-custom font-bold"><option value="10000">10,000đ</option><option value="20000">20,000đ</option><option value="50000">50,000đ</option><option value="100000">100,000đ</option><option value="200000">200,000đ</option><option value="500000">500,000đ</option></select>
             <input id="card-seri" placeholder="Số Seri..." class="input-custom font-mono">
             <input id="card-pin" placeholder="Mã thẻ (PIN)..." class="input-custom font-mono">
-            <button onclick="handleCharge()" id="btn-nap-the" class="w-full bg-blue-600 text-white py-4 rounded-2xl font-black uppercase mt-4 shadow-lg shadow-blue-600/30">Gửi Thẻ Ngay</button>
+            <button id="btn-nap" onclick="handleCharge()" class="w-full bg-blue-600 text-white py-4 rounded-2xl font-black uppercase mt-4 shadow-lg shadow-blue-600/30">Gửi Thẻ Ngay</button>
         </div>
     </div>
 
@@ -127,7 +105,6 @@
             <input id="auth-pass" type="password" placeholder="Mật khẩu..." class="input-custom text-center">
             <button id="btn-login" onclick="handleLogin()" class="w-full bg-slate-900 text-white py-4 rounded-2xl font-black uppercase shadow-lg">Vào Shop</button>
             <button id="btn-register" onclick="handleRegister()" class="hidden w-full bg-green-600 text-white py-4 rounded-2xl font-black uppercase shadow-lg">Tạo Tài Khoản</button>
-            <button onclick="closeAll()" class="mt-4 text-[10px] uppercase font-bold text-slate-400">Đóng</button>
         </div>
     </div>
 
@@ -136,10 +113,9 @@
         const firebaseConfig = { apiKey: "AIzaSyA5wBS88oS54yLs0OfwDYDfDQeTjc6ccdM", authDomain: "shop-blox-fruit-trannghia.firebaseapp.com", projectId: "shop-blox-fruit-trannghia", databaseURL: "https://shop-blox-fruit-trannghia-default-rtdb.firebaseio.com" };
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database(); const auth = firebase.auth();
-
         const DISCORD_WEBHOOK = "https://discord.com/api/webhooks/1466717724204994602/a5NCBrv_gid1T2iuG0HY9xPujmQE9OXlAT8nit1MbU74-edRnPBbQcgsx-oMHke0EorV";
 
-        // DANH SÁCH DỊCH VỤ
+        // SẢN PHẨM
         const products = {
             fruit: [
                   {n:"Kitsune VV", p:690000, img:"https://i.postimg.cc/5yHRjSfH/Anh-chup-man-hinh-2026-01-28-113329.png"},
@@ -178,7 +154,7 @@
                 {n:"Blade VV", p:20000, img:"https://i.postimg.cc/BvXYmC1p/Anh-chup-man-hinh-2026-01-28-113602.png"}
             ],
             gp: [
-                 {n:"Fruit Notifier", p:370000, img:"https://i.postimg.cc/VNdGKFbx/Anh-chup-man-hinh-2026-01-28-113608.png"},
+                {n:"Fruit Notifier", p:370000, img:"https://i.postimg.cc/VNdGKFbx/Anh-chup-man-hinh-2026-01-28-113608.png"},
                 {n:"Dark Blade", p:200000, img:"https://i.postimg.cc/d0LH59yQ/Anh-chup-man-hinh-2026-01-28-113612.png"},
                 {n:"X2 Mastery VV", p:54000, img:"https://i.postimg.cc/44z82ym7/Anh-chup-man-hinh-2026-01-28-113623.png
                 {n:"X2 Money VV", p:54000, img:"https://i.postimg.cc/8khyXcjW/Anh-chup-man-hinh-2026-01-28-113627.png"},
@@ -208,80 +184,55 @@
                     </div>`;
                 });
             });
-        }
-        render();
+        } render();
 
-        // --- LOGIC NẠP THẺ TỰ ĐỘNG ---
+        // NẠP THẺ TỰ ĐỘNG
         async function handleCharge() {
-            if (!auth.currentUser) return openAuth();
-
-            const telco = document.getElementById('card-type').value;
-            const amount = document.getElementById('card-amount').value;
-            const serial = document.getElementById('card-seri').value.trim();
-            const pin = document.getElementById('card-pin').value.trim();
+            if(!auth.currentUser) return openAuth();
+            const telco = document.getElementById('card-type').value, amount = document.getElementById('card-amount').value, seri = document.getElementById('card-seri').value.trim(), pin = document.getElementById('card-pin').value.trim();
+            if(!seri || !pin) return alert("Nhập đủ seri và mã thẻ!");
             
-            // THAY THÔNG TIN THEGIATOT CỦA NGHĨA VÀO ĐÂY
-            const partner_id = "9565963734"; 
-            const partner_key = "80df3668af04f2a85e1befc277896513"; 
-
-            if (!serial || !pin) return alert("Vui lòng điền đầy đủ Seri và Mã thẻ!");
-
-            const btn = document.getElementById('btn-nap-the');
-            btn.disabled = true;
-            btn.innerText = "ĐANG XỬ LÝ...";
-
-            const request_id = Math.floor(Math.random() * 1000000000);
-            const apiUrl = `https://thegiatot.vn/chargingws/v2?sign=${partner_key}&telco=${telco}&code=${pin}&serial=${serial}&amount=${amount}&request_id=${request_id}&partner_id=${partner_id}`;
+            const btn = document.getElementById('btn-nap'); btn.disabled = true; btn.innerText = "ĐANG GỬI...";
+            const partner_id = "9565963734", partner_key = "80df3668af04f2a85e1befc277896513", request_id = Math.floor(Math.random() * 100000000);
+            const apiUrl = `https://thegiatot.vn/chargingws/v2?sign=${partner_key}&telco=${telco}&code=${pin}&serial=${seri}&amount=${amount}&request_id=${request_id}&partner_id=${partner_id}`;
 
             try {
-                const response = await fetch(apiUrl);
-                const data = await response.json();
+                const res = await fetch(apiUrl); const data = await res.json();
+                if(data.status === 99) {
+                    await db.ref('history_cards/'+request_id).set({ uid: auth.currentUser.uid, username: document.getElementById('display-name').innerText, telco, amount: parseInt(amount), status: 'pending', time: Date.now() });
+                    alert("Gửi thẻ thành công! Chờ 1-2p hệ thống tự cộng tiền."); closeAll();
+                } else alert("Lỗi: " + data.message);
+            } catch(e) { alert("Lỗi kết nối!"); } finally { btn.disabled = false; btn.innerText = "GỬI THẺ NGAY"; }
+        }
 
-                if (data.status === 99) {
-                    // Lưu đơn chờ vào Firebase
-                    await db.ref('history_cards/' + request_id).set({
-                        uid: auth.currentUser.uid,
-                        username: document.getElementById('display-name').innerText,
-                        telco: telco,
-                        amount: parseInt(amount),
-                        status: 'pending',
-                        time: Date.now()
-                    });
-                    
-                    fetch(DISCORD_WEBHOOK, { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ content: `💳 **ĐƠN THẺ MỚI**\n👤: ${document.getElementById('display-name').innerText}\n🏷️: ${telco} - ${amount}đ\nTrạng thái: Đang chờ duyệt...` }) });
-                    
-                    alert("Gửi thẻ thành công! Hệ thống sẽ duyệt và cộng tiền sau 1-2 phút.");
-                    closeAll();
-                } else {
-                    alert("Lỗi: " + data.message);
-                }
-            } catch (error) {
-                alert("Lỗi kết nối hệ thống thẻ!");
-            } finally {
-                btn.disabled = false;
-                btn.innerText = "GỬI THẺ NGAY";
+        // BÁO BANK ĐỂ NGHĨA DUYỆT NHANH
+        async function baoDaBank() {
+            if(!auth.currentUser) return openAuth();
+            const money = prompt("Nhập số tiền bạn đã chuyển (Ví dụ: 50000):");
+            if(money && !isNaN(money)) {
+                const s = await db.ref('users/'+auth.currentUser.uid).get();
+                await db.ref('duyet_bank').push({ uid: auth.currentUser.uid, username: s.val().username, amount: parseInt(money), status: 'pending', time: Date.now() });
+                fetch(DISCORD_WEBHOOK, { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ content: `💰 **KHÁCH BÁO BANK**\n👤: ${s.val().username.toUpperCase()}\n💵: ${parseInt(money).toLocaleString()}đ` }) });
+                alert("Đã báo đơn! Nghĩa sẽ duyệt cho bạn ngay."); closeAll();
             }
         }
 
-        // --- CÁC CHỨC NĂNG KHÁC ---
-        function openForm(t) { if(!auth.currentUser) return openAuth(); document.getElementById('modal-'+t).style.display = 'flex'; }
-        function closeAll() { document.querySelectorAll('.modal-full').forEach(m => m.style.display = 'none'); }
-        function openAuth() { document.getElementById('auth-modal').style.display = 'flex'; }
+        // HÀM CHUNG
+        function openForm(t) { if(!auth.currentUser) return openAuth(); document.getElementById('modal-'+t).style.display='flex'; }
+        function closeAll() { document.querySelectorAll('.modal-full').forEach(m => m.style.display='none'); }
+        function openAuth() { document.getElementById('auth-modal').style.display='flex'; }
         function switchAuth(t) {
             const isL = t === 'login';
             document.getElementById('btn-login').classList.toggle('hidden', !isL);
             document.getElementById('btn-register').classList.toggle('hidden', isL);
-            document.getElementById('t-login').className = isL ? 'flex-1 font-black text-pink-600 border-b-4 border-pink-600 pb-2 uppercase text-xs' : 'flex-1 font-black text-slate-400 pb-2 uppercase text-xs';
-            document.getElementById('t-reg').className = !isL ? 'flex-1 font-black text-pink-600 border-b-4 border-pink-600 pb-2 uppercase text-xs' : 'flex-1 font-black text-slate-400 pb-2 uppercase text-xs';
         }
-
         async function handleLogin() {
             const u = document.getElementById('auth-user').value.toLowerCase().trim(), p = document.getElementById('auth-pass').value;
-            try { await auth.signInWithEmailAndPassword(u+"@bap.shop", p); location.reload(); } catch(e) { alert("Sai tài khoản!"); }
+            try { await auth.signInWithEmailAndPassword(u+"@bap.shop", p); location.reload(); } catch(e) { alert("Sai thông tin!"); }
         }
         async function handleRegister() {
             const u = document.getElementById('auth-user').value.toLowerCase().trim(), p = document.getElementById('auth-pass').value;
-            try { const r = await auth.createUserWithEmailAndPassword(u+"@bap.shop", p); await db.ref('users/'+r.user.uid).set({username: u, balance: 0}); location.reload(); } catch(e) { alert("Tên đã tồn tại!"); }
+            try { const r = await auth.createUserWithEmailAndPassword(u+"@bap.shop", p); await db.ref('users/'+r.user.uid).set({username: u, balance: 0}); location.reload(); } catch(e) { alert("Lỗi đăng ký!"); }
         }
 
         auth.onAuthStateChanged(async (u) => {
@@ -298,20 +249,13 @@
         async function buy(n, p) {
             if(!auth.currentUser) return openAuth();
             const s = await db.ref('users/'+auth.currentUser.uid).get();
-            if(s.val().balance < p) return alert("Bạn không đủ tiền!");
+            if(s.val().balance < p) return alert("Không đủ tiền!");
             let r_u = prompt("Tài khoản Roblox:"), r_p = prompt("Mật khẩu Roblox:");
             if(r_u && r_p) {
                 await db.ref('users/'+auth.currentUser.uid).update({balance: s.val().balance - p});
-                fetch(DISCORD_WEBHOOK, { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ content: `🛒 **ĐƠN MỚI**\n👤: ${s.val().username.toUpperCase()}\n🎁: ${n}\n🎮: \`${r_u}\` | \`${r_p}\`` }) });
+                fetch(DISCORD_WEBHOOK, { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ content: `🛒 **ĐƠN MỚI**\n👤: ${s.val().username}\n🎁: ${n}\n🎮: \`${r_u}\` | \`${r_p}\`` }) });
                 alert("Mua thành công!"); location.reload();
             }
-        }
-
-        async function baoDaBank() {
-            const s = await db.ref('users/'+auth.currentUser.uid).get();
-            await db.ref('duyet_bank').push({ uid: auth.currentUser.uid, username: s.val().username, status: 'pending', time: Date.now() });
-            fetch(DISCORD_WEBHOOK, { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ content: `💰 **KHÁCH BÁO BANK**\n👤: ${s.val().username.toUpperCase()}` }) });
-            alert("Đã báo đơn! Chờ Nghĩa duyệt nhé."); closeAll();
         }
 
         function showTab(t) {
