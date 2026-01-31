@@ -1,28 +1,32 @@
 <?php
-// FIREBASE URL CỦA NGHĨA
+// FIREBASE CỦA NGHĨA
 $FIREBASE_URL = "https://shop-blox-fruit-trannghia-default-rtdb.firebaseio.com";
 
-$status = $_GET['status'] ?? null;
-$amount = $_GET['amount'] ?? 0;
-$uid = $_GET['content'] ?? null;
+$trạng_thái = $_GET['status'] ?? null; // Trạng thái thẻ
+$số_lượng = $_GET['amount'] ?? 0;      // Mệnh giá thẻ thực nhận
+$uid = $_GET['content'] ?? null;      // UID người nạp (truyền qua content)
 
-if ($status == 1 && $uid) {
-    // 1. Lấy ví khách
+if ($trạng_thái == 1 && $uid) {
+    // 1. Lấy thông tin khách hàng từ Firebase
     $url = $FIREBASE_URL . "/users/" . $uid . ".json";
-    $user = json_decode(file_get_contents($url), true);
-    
+    $ch = curl_init();
+    curl_setopt($ch, CURLOPT_URL, $url);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    $response = curl_exec($ch);
+    $user = json_decode($response, true);
+
     if ($user) {
-        $new_balance = ($user['balance'] ?? 0) + $amount;
-        
-        // 2. Cập nhật số dư qua PATCH
-        $ch = curl_init($url);
+        // Tính toán số dư mới (cộng thêm số tiền thực nhận sau chiết khấu)
+        $new_balance = ($user['balance'] ?? 0) + $số_lượng;
+
+        // 2. Cập nhật số dư lên Firebase
         curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "PATCH");
         curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode(['balance' => $new_balance]));
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         curl_exec($ch);
-        curl_close($ch);
         
-        file_put_contents("nap_the_log.txt", "SUCCESS: Khach $uid nap $amount luc " . date("H:i:s") . "\n", FILE_APPEND);
+        // Ghi nhật ký nạp thành công
+        file_put_contents("nap_the_log.txt", "Thành công: UID $uid nạp $số_lượng vào lúc " . date("Y-m-d H:i:s") . "\n", FILE_APPEND);
     }
+    curl_close($ch);
 }
 ?>
