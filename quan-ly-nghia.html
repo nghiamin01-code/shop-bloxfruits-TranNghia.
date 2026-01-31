@@ -1,60 +1,31 @@
-<!DOCTYPE html>
-<html lang="vi">
-<head>
-    <meta charset="UTF-8"><title>ADMIN - BAP SHOP</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
-</head>
-<body class="bg-slate-900 text-white p-8">
-    <div class="max-w-5xl mx-auto">
-        <h1 class="text-4xl font-black text-red-500 mb-12 uppercase italic text-center tracking-tighter">Hệ Thống Quản Trị Nghĩa</h1>
-        <div class="grid md:grid-cols-2 gap-10">
-            <div class="bg-slate-800 p-8 rounded-[2.5rem] border border-slate-700 shadow-2xl">
-                <h2 class="font-black text-green-400 mb-6 uppercase tracking-widest">💰 Duyệt Bank</h2>
-                <div id="bank-list" class="space-y-4"></div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-10 p-10">
+    <div class="bg-slate-800 p-8 rounded-[2.5rem] border border-slate-700 shadow-2xl">
+        <h2 class="text-white text-2xl font-black uppercase mb-6 italic tracking-widest">Duyệt Bank/QR</h2>
+        <div id="bank-list" class="space-y-4">
             </div>
-            <div class="bg-slate-800 p-8 rounded-[2.5rem] border border-slate-700 shadow-2xl">
-                <h2 class="font-black text-blue-400 mb-6 uppercase tracking-widest">🛒 Đơn Hàng Mới</h2>
-                <div id="order-list" class="space-y-4"></div>
-            </div>
-        </div>
     </div>
-    <script>
-        firebase.initializeApp({ databaseURL: "https://shop-blox-fruit-trannghia-default-rtdb.firebaseio.com" });
-        const db = firebase.database();
 
-        // Xử lý Bank
-        db.ref('nap_bank').on('value', snap => {
-            let h = ""; snap.forEach(c => {
-                const d = c.val(); if(d.status === "Chờ duyệt") {
-                    h += `<div class="bg-slate-700 p-5 rounded-2xl flex justify-between items-center">
-                        <div><p class="font-black uppercase text-sm">${d.username}</p><p class="text-green-400 font-bold">+${d.amount.toLocaleString()}đ</p></div>
-                        <button onclick="duyetBank('${c.key}','${d.uid}',${d.amount})" class="bg-green-600 px-5 py-2 rounded-xl font-black text-[10px]">CỘNG TIỀN</button>
-                    </div>`;
-                }
-            }); document.getElementById('bank-list').innerHTML = h || "Chưa có yêu cầu";
-        });
+    <div class="bg-slate-800 p-8 rounded-[2.5rem] border border-slate-700 shadow-2xl">
+        <h2 class="text-white text-2xl font-black uppercase mb-6 italic tracking-widest">Đơn Hàng Mới</h2>
+        <div id="order-list" class="space-y-4 text-white">
+            </div>
+    </div>
+</div>
 
-        async function duyetBank(k, u, a) {
-            if(!confirm("Xác nhận cộng tiền?")) return;
-            const s = await db.ref('users/'+u+'/balance').get();
-            await db.ref('users/'+u).update({ balance: (s.val() || 0) + a });
-            await db.ref('nap_bank/'+k).update({ status: "Xong" });
-            alert("Đã cộng tiền thành công!");
-        }
-
-        // Xử lý Đơn mua
-        db.ref('orders').on('value', snap => {
-            let h = ""; snap.forEach(c => {
-                const d = c.val(); if(d.status === "Đang chờ") {
-                    h += `<div class="bg-slate-700 p-5 rounded-2xl flex justify-between items-center">
-                        <div><p class="font-black uppercase text-xs">${d.prod}</p><p class="text-[10px] text-slate-400 italic">${d.user}</p></div>
-                        <button onclick="db.ref('orders/${c.key}').update({status:'Hoàn thành'})" class="bg-blue-600 px-5 py-2 rounded-xl font-black text-[10px]">GIAO XONG</button>
-                    </div>`;
-                }
-            }); document.getElementById('order-list').innerHTML = h || "Đơn trống";
-        });
-    </script>
-</body>
-</html>
+<script>
+// Logic xử lý duyệt đơn của Nghĩa
+async function duyetDon(uid, orderKey, amount) {
+    if(confirm("Xác nhận cộng " + amount + "đ cho khách?")) {
+        const userRef = db.ref('users/' + uid);
+        const snap = await userRef.get();
+        const currentBal = snap.val().balance || 0;
+        
+        // Cộng tiền và đổi trạng thái đơn
+        await userRef.update({ balance: currentBal + parseInt(amount) });
+        await db.ref('history/' + uid + '/' + orderKey).update({ status: "Thành công" });
+        
+        alert("Đã cộng tiền và duyệt đơn thành công!");
+        location.reload();
+    }
+}
+</script>
