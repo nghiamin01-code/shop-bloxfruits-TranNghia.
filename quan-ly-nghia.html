@@ -1,31 +1,34 @@
-<div class="grid grid-cols-1 md:grid-cols-2 gap-10 p-10">
-    <div class="bg-slate-800 p-8 rounded-[2.5rem] border border-slate-700 shadow-2xl">
-        <h2 class="text-white text-2xl font-black uppercase mb-6 italic tracking-widest">Duyệt Bank/QR</h2>
-        <div id="bank-list" class="space-y-4">
-            </div>
-    </div>
+// --- CHỨC NĂNG DUYỆT ĐƠN VÀ CỘNG TIỀN CHO ADMIN ---
 
-    <div class="bg-slate-800 p-8 rounded-[2.5rem] border border-slate-700 shadow-2xl">
-        <h2 class="text-white text-2xl font-black uppercase mb-6 italic tracking-widest">Đơn Hàng Mới</h2>
-        <div id="order-list" class="space-y-4 text-white">
-            </div>
-    </div>
-</div>
-
-<script>
-// Logic xử lý duyệt đơn của Nghĩa
-async function duyetDon(uid, orderKey, amount) {
-    if(confirm("Xác nhận cộng " + amount + "đ cho khách?")) {
+// 1. Duyệt Nạp Bank/QR: Bấm là cộng tiền cho khách
+async function duyetNạpBank(uid, key, soTien) {
+    if (confirm("Xác nhận đã nhận tiền và cộng " + soTien + "đ cho khách?")) {
         const userRef = db.ref('users/' + uid);
         const snap = await userRef.get();
         const currentBal = snap.val().balance || 0;
         
-        // Cộng tiền và đổi trạng thái đơn
-        await userRef.update({ balance: currentBal + parseInt(amount) });
-        await db.ref('history/' + uid + '/' + orderKey).update({ status: "Thành công" });
+        // Tiến hành cộng tiền vào tài khoản
+        await userRef.update({ balance: currentBal + parseInt(soTien) });
         
-        alert("Đã cộng tiền và duyệt đơn thành công!");
+        // Đổi trạng thái đơn nạp thành Thành công
+        await db.ref('history/' + uid + '/' + key).update({ status: "Thành công" });
+        
+        alert("✅ Đã duyệt và cộng tiền thành công!");
         location.reload();
     }
 }
-</script>
+
+// 2. Duyệt Đơn Cày Thuê: Đổi trạng thái khi bạn đã cày xong
+async function hoanThanhCayThue(uid, key) {
+    if (confirm("Xác nhận đã cày xong đơn này?")) {
+        await db.ref('history/' + uid + '/' + key).update({ status: "Hoàn thành" });
+        alert("🚀 Đã cập nhật trạng thái đơn hàng!");
+        location.reload();
+    }
+}
+
+// 3. Hiển thị danh sách cho Admin (Hàm mẫu đổ dữ liệu)
+function renderAdminOrders(orders) {
+    // Duyệt qua danh sách đơn hàng và tạo nút bấm
+    // Nút Duyệt Bank: <button onclick="duyetNạpBank('${uid}', '${key}', ${item.amount})">Duyệt</button>
+}
