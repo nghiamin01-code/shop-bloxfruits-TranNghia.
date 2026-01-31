@@ -1,113 +1,99 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-    <meta charset="UTF-8">
-    <title>QUẢN TRỊ BAP SHOP - ADMIN NGHĨA</title>
+    <meta charset="UTF-8"><title>QUẢN TRỊ BAP SHOP</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;700;900&display=swap');
         body { background: #0f172a; font-family: 'Outfit', sans-serif; color: white; padding: 20px; }
-        .admin-card { background: #1e293b; border-radius: 20px; padding: 20px; margin-bottom: 20px; border: 1px solid #334155; }
-        .btn-action { transition: 0.3s; font-weight: 800; text-transform: uppercase; font-size: 12px; }
-        .btn-action:hover { transform: translateY(-2px); filter: brightness(1.2); }
+        .admin-card { background: #1e293b; border-radius: 20px; padding: 20px; margin-bottom: 25px; border: 1px solid #334155; }
+        .btn-bank { background: #10b981; color: white; padding: 8px 16px; font-weight: 800; border-radius: 10px; transition: 0.3s; }
+        .btn-order { background: #3b82f6; color: white; padding: 8px 16px; font-weight: 800; border-radius: 10px; transition: 0.3s; }
+        .btn-bank:hover, .btn-order:hover { transform: scale(1.05); filter: brightness(1.2); }
     </style>
 </head>
 <body>
     <div class="max-w-5xl mx-auto">
-        <div class="flex justify-between items-center mb-10">
-            <h1 class="text-3xl font-black italic text-red-500">BAP SHOP ADMIN</h1>
-            <div class="bg-slate-800 px-4 py-2 rounded-xl border border-slate-700">
-                <p class="text-[10px] text-slate-400">Trạng thái hệ thống</p>
-                <p class="text-green-400 font-bold">● Đang hoạt động</p>
-            </div>
-        </div>
+        <h1 class="text-3xl font-black text-red-500 mb-10 italic uppercase text-center">BAP SHOP - HỆ THỐNG QUẢN TRỊ</h1>
 
         <div class="admin-card">
-            <h2 class="text-blue-400 font-black mb-4 flex items-center gap-2 text-xl">
-                💳 DUYỆT BANK <span class="text-[10px] bg-blue-500/20 px-2 py-1 rounded text-blue-300">Tự cộng tiền</span>
+            <h2 class="text-xl font-black mb-6 text-green-400 border-b border-slate-700 pb-2 flex items-center gap-2">
+                💳 DUYỆT NẠP TIỀN (AGRIBANK)
             </h2>
-            <div id="bank-list" class="space-y-3">
+            <div id="bank-list" class="space-y-4 text-sm">
                 </div>
         </div>
 
         <div class="admin-card">
-            <h2 class="text-yellow-400 font-black mb-4 flex items-center gap-2 text-xl">
-                📦 QUẢN LÝ ĐƠN HÀNG <span class="text-[10px] bg-yellow-500/20 px-2 py-1 rounded text-yellow-300">Đổi trạng thái</span>
+            <h2 class="text-xl font-black mb-6 text-blue-400 border-b border-slate-700 pb-2 flex items-center gap-2">
+                📦 ĐƠN HÀNG CẦN GIAO (CHECK MK TRÊN DISCORD)
             </h2>
-            <div id="order-list" class="space-y-3">
+            <div id="order-list" class="space-y-4 text-sm">
                 </div>
         </div>
     </div>
 
     <script>
-        // Cấu hình Firebase
-        const firebaseConfig = { 
-            databaseURL: "https://shop-blox-fruit-trannghia-default-rtdb.firebaseio.com" 
-        };
+        const firebaseConfig = { databaseURL: "https://shop-blox-fruit-trannghia-default-rtdb.firebaseio.com" };
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
-        // --- XỬ LÝ DUYỆT BANK ---
-        db.ref('nap_bank').on('value', (s) => {
+        // --- XỬ LÝ DUYỆT BANK (TỰ CỘNG TIỀN) ---
+        db.ref('nap_bank').on('value', (snapshot) => {
             const list = document.getElementById('bank-list');
             list.innerHTML = "";
-            if(!s.exists()) { list.innerHTML = "<p class='text-slate-500 italic'>Chưa có đơn nạp nào...</p>"; return; }
-            
-            s.forEach((item) => {
-                const d = item.val();
-                if(d.status === "Chờ duyệt") {
+            snapshot.forEach((item) => {
+                const data = item.val();
+                if(data.status === "Chờ duyệt") {
                     list.innerHTML += `
-                    <div class="flex justify-between items-center bg-slate-800/50 p-4 rounded-2xl border border-slate-700">
+                    <div class="flex justify-between items-center bg-slate-800 p-4 rounded-xl border border-slate-700">
                         <div>
-                            <p class="font-black text-white uppercase">${d.username}</p>
-                            <p class="text-green-400 font-black text-lg">${d.amount.toLocaleString()}đ</p>
+                            <p class="font-bold text-white uppercase">${data.username}</p>
+                            <p class="text-green-400 font-black">+${data.amount.toLocaleString()}đ</p>
                         </div>
-                        <button onclick="approveBank('${item.key}', '${d.uid}', ${d.amount})" class="btn-action bg-green-600 px-6 py-3 rounded-xl shadow-lg shadow-green-900/20">Duyệt Tiền</button>
+                        <button onclick="approveBank('${item.key}', '${data.uid}', ${data.amount})" class="btn-bank">DUYỆT TIỀN</button>
                     </div>`;
                 }
             });
         });
 
         async function approveBank(key, uid, amount) {
-            if(confirm("Cộng " + amount.toLocaleString() + "đ vào ví khách?")) {
+            if(confirm("Bấm 'OK' để hệ thống TỰ CỘNG "+amount.toLocaleString()+"đ cho khách?")) {
                 const userRef = db.ref('users/' + uid + '/balance');
-                const snap = await userRef.get();
-                const newBalance = (snap.val() || 0) + amount;
+                const s = await userRef.get();
+                const newBalance = (s.val() || 0) + amount;
                 await userRef.set(newBalance);
-                await db.ref('nap_bank/' + key).update({ status: "Hoàn tất" });
-                alert("Đã cộng tiền xong!");
+                await db.ref('nap_bank/' + key).update({ status: "Xong" });
+                alert("Đã cộng tiền thành công!");
             }
         }
 
-        // --- XỬ LÝ ĐƠN HÀNG (Sản phẩm) ---
-        db.ref('orders').on('value', (s) => {
+        // --- XỬ LÝ TRẠNG THÁI ĐƠN HÀNG ---
+        db.ref('orders').on('value', (snapshot) => {
             const list = document.getElementById('order-list');
             list.innerHTML = "";
-            if(!s.exists()) { list.innerHTML = "<p class='text-slate-500 italic'>Chưa có đơn mua nào...</p>"; return; }
-
-            s.forEach((item) => {
-                const d = item.val();
-                if(d.status === "Đang chờ") {
+            snapshot.forEach((item) => {
+                const data = item.val();
+                if(data.status === "Đang chờ") {
                     list.innerHTML += `
-                    <div class="flex justify-between items-center bg-slate-800/50 p-4 rounded-2xl border border-slate-700">
+                    <div class="flex justify-between items-center bg-slate-800 p-4 rounded-xl border border-slate-700">
                         <div>
                             <p class="text-[10px] text-slate-500 font-mono">ID: #${item.key.substring(1,7).toUpperCase()}</p>
-                            <p class="font-black text-white text-lg">${d.product}</p>
-                            <p class="text-blue-400 font-bold italic">Tài khoản: ${d.acc}</p>
-                            <p class="text-[10px] text-slate-400">Khách: ${d.customer}</p>
+                            <p class="font-black text-white uppercase">${data.product}</p>
+                            <p class="text-blue-400 font-bold italic">Tài khoản: ${data.acc}</p>
                         </div>
-                        <button onclick="doneOrder('${item.key}')" class="btn-action bg-blue-600 px-6 py-3 rounded-xl shadow-lg shadow-blue-900/20">Giao Xong</button>
+                        <button onclick="doneOrder('${item.key}')" class="btn-order">GIAO XONG</button>
                     </div>`;
                 }
             });
         });
 
         async function doneOrder(key) {
-            if(confirm("Xác nhận đã gửi quà/cày xong cho đơn này?")) {
+            if(confirm("Bạn đã làm đơn xong? Bấm OK để khách thấy trạng thái 'Hoàn thành'")) {
                 await db.ref('orders/' + key).update({ status: "Hoàn thành" });
-                alert("Đã chuyển trạng thái sang Hoàn thành!");
+                alert("Đã cập nhật trạng thái đơn!");
             }
         }
     </script>
