@@ -2,80 +2,70 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <title>DUYỆT BANK NHANH - BAP SHOP</title>
+    <title>QUẢN LÝ NẠP BANK - BAP SHOP</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;700;900&display=swap');
-        body { font-family: 'Outfit', sans-serif; background: #f8fafc; }
-    </style>
 </head>
-<body class="p-6">
-    <div class="max-w-2xl mx-auto">
-        <h1 class="text-2xl font-black text-slate-800 mb-6 uppercase">Quản lý duyệt Bank</h1>
+<body class="bg-slate-900 p-8 text-white font-sans">
+    <div class="max-w-4xl mx-auto">
+        <h1 class="text-3xl font-black text-red-500 mb-8 uppercase text-center tracking-tighter">Duyệt Nạp Bank</h1>
         
-        <div id="bank-list" class="space-y-4">
-            <p class="text-slate-400">Đang đợi khách báo bank...</p>
+        <div class="bg-slate-800 rounded-3xl overflow-hidden shadow-2xl border border-slate-700">
+            <table class="w-full text-left">
+                <thead class="bg-slate-700 text-slate-300 uppercase text-xs">
+                    <tr>
+                        <th class="p-5">Khách hàng</th>
+                        <th class="p-5">Số tiền báo</th>
+                        <th class="p-5">Hành động</th>
+                    </tr>
+                </thead>
+                <tbody id="bank-list">
+                    </tbody>
+            </table>
         </div>
     </div>
 
     <script>
+        // Cấu hình Database của bạn
         const firebaseConfig = { 
-            apiKey: "AIzaSyA5wBS88oS54yLs0OfwDYDfDQeTjc6ccdM", 
-            authDomain: "shop-blox-fruit-trannghia.firebaseapp.com", 
-            projectId: "shop-blox-fruit-trannghia", 
             databaseURL: "https://shop-blox-fruit-trannghia-default-rtdb.firebaseio.com" 
         };
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
-        // Lấy danh sách khách báo bank
-        db.ref('duyet_bank').on('value', (snapshot) => {
+        // Lấy danh sách nạp bank
+        db.ref('nap_bank').on('value', (s) => {
             const list = document.getElementById('bank-list');
-            list.innerHTML = '';
-            
-            snapshot.forEach((child) => {
-                const data = child.val();
-                if (data.status === 'pending') {
+            list.innerHTML = "";
+            s.forEach((item) => {
+                const d = item.val();
+                if(d.status === "Chờ duyệt") {
                     list.innerHTML += `
-                        <div class="bg-white p-5 rounded-2xl shadow-sm border-2 border-slate-100 flex justify-between items-center">
-                            <div>
-                                <p class="text-xs text-slate-400 font-bold uppercase tracking-widest">Khách hàng</p>
-                                <p class="font-black text-lg text-slate-800">${data.username.toUpperCase()}</p>
-                                <p class="text-pink-600 font-black">Số tiền: ${data.amount.toLocaleString()}đ</p>
-                            </div>
-                            <button onclick="approve('${child.key}', '${data.uid}', ${data.amount})" 
-                                class="bg-blue-600 hover:bg-green-600 text-white px-6 py-3 rounded-xl font-black text-xs uppercase transition-all shadow-lg shadow-blue-200">
-                                XÁC NHẬN (+ TIỀN)
-                            </button>
-                        </div>
-                    `;
+                        <tr class="border-b border-slate-700 hover:bg-slate-750 transition">
+                            <td class="p-5 font-bold text-blue-400">${d.username}</td>
+                            <td class="p-5 text-green-400 font-black text-lg">${parseInt(d.amount).toLocaleString()}đ</td>
+                            <td class="p-5">
+                                <button onclick="approve('${item.key}', '${d.uid}', ${d.amount})" 
+                                    class="bg-green-600 hover:bg-green-500 px-6 py-2 rounded-xl font-black text-sm transition shadow-lg">
+                                    DUYỆT TIỀN
+                                </button>
+                            </td>
+                        </tr>`;
                 }
             });
-            if (list.innerHTML === '') list.innerHTML = '<p class="text-center text-slate-400 py-10 font-bold">Hiện chưa có ai báo chuyển khoản.</p>';
         });
 
-        // Hàm xử lý cộng tiền tự động khi Nghĩa bấm nút
-        async function approve(orderKey, userUid, amount) {
-            if (confirm("Nghĩa đã thấy tiền trong App Agribank chưa? Bấm OK để cộng tiền cho khách.")) {
-                try {
-                    const userRef = db.ref('users/' + userUid + '/balance');
-                    
-                    // Lấy số dư hiện tại của khách
-                    const snapshot = await userRef.get();
-                    const currentBalance = snapshot.val() || 0;
-                    
-                    // 1. Cộng tiền vào ví khách
-                    await userRef.set(currentBalance + amount);
-                    
-                    // 2. Đổi trạng thái đơn sang thành công để biến mất khỏi danh sách chờ
-                    await db.ref('duyet_bank/' + orderKey).update({ status: 'success' });
-                    
-                    alert("Thành công! Đã cộng " + amount.toLocaleString() + "đ vào tài khoản khách.");
-                } catch (e) {
-                    alert("Lỗi: " + e.message);
-                }
+        // Hàm duyệt tiền và cộng vào tài khoản khách
+        async function approve(key, uid, amount) {
+            if(confirm("Bạn đã nhận được " + amount.toLocaleString() + "đ từ khách?")) {
+                const userRef = db.ref('users/' + uid + '/balance');
+                const s = await userRef.get();
+                const currentBalance = s.val() || 0;
+                
+                await userRef.set(currentBalance + amount); // Cộng tiền
+                await db.ref('nap_bank/' + key).update({ status: "Đã duyệt" }); // Đánh dấu hoàn tất
+                alert("Đã cộng tiền thành công cho khách!");
             }
         }
     </script>
