@@ -1,19 +1,22 @@
 <?php
-// callback.php
-$partner_key = '80df3668af04f2a85e1befc277896513';
+// callback.php - Xử lý kết quả từ hệ thống gạch thẻ
+$partner_key = '80df3668af04f2a85e1befc277896513'; // Dán key của Nghĩa vào đây
 
 $status = $_POST['status']; 
-$amount = $_POST['amount'];
-$real_value = $_POST['value']; // Tiền sau khi web gạch thẻ trừ phí
+$amount = $_POST['amount']; // Mệnh giá thẻ nạp
 $request_id = $_POST['request_id'];
 $callback_sign = $_POST['callback_sign'];
 
-$check_sign = md5($partner_key . $status . $amount . $real_value . $request_id);
+$check_sign = md5($partner_key . $status . $amount . $request_id);
 
 if ($callback_sign == $check_sign && $status == 1) {
-    // THUẾ 20% CỦA SHOP NGHĨA
-    $money_for_user = $amount * 0.8; 
-    // SQL: UPDATE users SET money = money + $money_for_user WHERE username = ...
-    file_put_contents('log.txt', "Thanh cong ID $request_id | Thuc nhan: $money_for_user\n", FILE_APPEND);
+    // TÍNH TOÁN THUẾ 20%: Khách nạp 10,000đ nhận 8,000đ
+    $real_receive = $amount * 0.8; 
+    
+    // Lưu lịch sử nạp tiền thực nhận vào hệ thống
+    $log_data = "ID: $request_id | Mệnh giá: $amount | Thực nhận: $real_receive\n";
+    file_put_contents('naptien_success.txt', $log_data, FILE_APPEND);
+    
+    echo "SUCCESS";
 }
 ?>
