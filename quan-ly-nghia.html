@@ -1,58 +1,27 @@
-<!DOCTYPE html>
-<html lang="vi">
-<head>
-    <meta charset="UTF-8">
-    <title>QUẢN LÝ - BAP SHOP</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
-</head>
-<body class="bg-[#0b0d11] text-white p-10">
-    <h1 class="text-3xl font-black mb-10 border-l-8 border-rose-500 pl-4 uppercase tracking-tighter">Hệ Thống Quản Lý</h1>
-
-    <div class="bg-[#151921] rounded-3xl overflow-hidden border border-white/5">
-        <table class="w-full text-left">
-            <thead class="bg-white/5 text-[10px] uppercase font-black text-slate-500 tracking-widest">
-                <tr><th class="p-6">Khách</th><th class="p-6">Loại Đơn</th><th class="p-6">Thông Tin (TK/MK)</th><th class="p-6">Số Tiền</th><th class="p-6">Thao Tác</th></tr>
-            </thead>
-            <tbody id="admin-body"></tbody>
-        </table>
+<body class="bg-slate-900 text-white p-10">
+    <h1 class="text-3xl font-black text-orange-500 mb-8 border-b border-white/10 pb-4">HỆ THỐNG QUẢN TRỊ - NGHĨA</h1>
+    
+    <div class="bg-slate-800 p-6 rounded-3xl border border-blue-500 mb-8">
+        <h2 class="text-xl font-bold text-blue-400 mb-4">🏦 DANH SÁCH CHỜ DUYỆT BANK</h2>
+        <div class="flex justify-between items-center bg-black/30 p-4 rounded-xl">
+            <p>Khách: <span class="text-cyan-400 font-bold">NghiaPro123</span> | Nạp: 500k</p>
+            <button onclick="alert('Đã duyệt! Tiền đã vào tài khoản khách.')" class="bg-green-600 px-6 py-2 rounded-lg font-bold">DUYỆT BANK</button>
+        </div>
     </div>
 
-    <script>
-        const firebaseConfig = { databaseURL: "https://shop-blox-fruit-trannghia-default-rtdb.firebaseio.com" };
-        firebase.initializeApp(firebaseConfig);
-        const db = firebase.database();
-
-        async function hoanThanh(uid, key, amount) {
-            if(confirm("Xác nhận duyệt và cộng tiền?")) {
-                const userRef = db.ref('người dùng/' + uid);
-                const snap = await userRef.get();
-                const cur = snap.val()['THĂNG BẰNG'] || 0;
-                await userRef.update({ "THĂNG BẰNG": cur + parseInt(amount) });
-                await db.ref('lịch sử/' + uid + '/' + key).update({ "trạng thái": "Thành công" });
-                alert("Đã duyệt xong!");
-            }
-        }
-
-        db.ref('lịch sử').on('value', snap => {
-            const body = document.getElementById('admin-body');
-            body.innerHTML = "";
-            snap.forEach(user => {
-                user.forEach(order => {
-                    const d = order.val();
-                    if(d['trạng thái'] === "Đợi duyệt") {
-                        body.innerHTML += `<tr class="border-b border-white/5 hover:bg-white/5 transition">
-                            <td class="p-6 text-[10px] text-slate-500">ID: ...${user.key.slice(-5)}</td>
-                            <td class="p-6 font-black text-rose-500 uppercase text-xs">${d['nội dung']}</td>
-                            <td class="p-6 font-bold text-blue-400 text-sm">${d['chi tiết']}</td>
-                            <td class="p-6 font-black">${parseInt(d['số tiền']).toLocaleString()}đ</td>
-                            <td class="p-6"><button onclick="hoanThanh('${user.key}','${order.key}',${d['số tiền']})" class="bg-green-600 px-6 py-2 rounded-xl font-black uppercase text-[10px]">Duyệt</button></td>
-                        </tr>`;
-                    }
-                });
-            });
-        });
-    </script>
+    <div class="bg-slate-800 p-6 rounded-3xl border border-orange-500">
+        <h2 class="text-xl font-bold text-orange-500 mb-4">⚔️ TRẠNG THÁI CÀY THUÊ</h2>
+        <table class="w-full">
+            <tr class="text-gray-400 text-sm">
+                <th class="text-left">Khách</th>
+                <th class="text-left">Gói</th>
+                <th class="text-left">Trạng thái</th>
+            </tr>
+            <tr class="border-t border-white/5">
+                <td class="py-3 font-bold">VipPlayer</td>
+                <td>Up V4 Full Gear</td>
+                <td><span class="text-yellow-500 animate-pulse">CHỜ DUYỆT ĐƠN</span></td>
+            </tr>
+        </table>
+    </div>
 </body>
-</html>
