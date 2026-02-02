@@ -2,73 +2,127 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <title>Nghĩa Admin - Quản Lý Bank & Đơn</title>
+    <title>QUẢN LÝ ĐƠN & TIỀN - NGHĨA ELEMENTAL</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { background: #0f172a; color: white; font-family: sans-serif; }
+        .card { background: #1e293b; border-radius: 15px; padding: 20px; border: 1px solid #334155; }
+        .btn-done { background: #22c55e; color: white; padding: 5px 15px; border-radius: 8px; font-size: 12px; font-weight: bold; }
+        .btn-done:hover { background: #16a34a; }
+    </style>
 </head>
-<body class="bg-slate-900 text-white p-6 font-sans">
-    <h1 class="text-2xl font-black text-red-500 mb-6 uppercase italic">Trình quản lý của Nghĩa</h1>
+<body class="p-6">
+    <div class="max-w-6xl mx-auto space-y-8">
+        <h1 class="text-3xl font-black text-red-500 italic border-b-2 border-red-500 pb-2">HỆ THỐNG QUẢN TRỊ NGHĨA</h1>
 
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div class="bg-slate-800 p-5 rounded-2xl border border-blue-500">
-            <h2 class="text-blue-400 font-bold mb-4 uppercase italic">Duyệt Tiền Bank (Làm thủ công)</h2>
-            <div id="bank-list" class="space-y-3"></div>
-        </div>
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div class="card h-fit">
+                <h2 class="text-xl font-bold mb-4 text-blue-400">CỘNG TIỀN KHÁCH</h2>
+                <input type="text" id="target-user" placeholder="Tên khách..." class="w-full p-3 mb-3 bg-slate-900 border border-slate-700 rounded-xl outline-none">
+                <input type="number" id="amount" placeholder="Số tiền..." class="w-full p-3 mb-4 bg-slate-900 border border-slate-700 rounded-xl outline-none">
+                <button onclick="addMoney()" class="w-full bg-blue-600 py-3 rounded-xl font-bold uppercase hover:bg-blue-700 transition">Xác nhận cộng</button>
+                
+                <h3 class="mt-6 font-bold text-gray-400 text-sm mb-2 italic">Danh sách khách:</h3>
+                <div id="user-list" class="space-y-2 max-h-40 overflow-y-auto"></div>
+            </div>
 
-        <div class="bg-slate-800 p-5 rounded-2xl border border-green-500">
-            <h2 class="text-green-400 font-bold mb-4 uppercase italic">Đơn Cày Thuê (Theo dõi)</h2>
-            <div id="work-list" class="space-y-3 text-xs"></div>
+            <div class="lg:col-span-2 card">
+                <h2 class="text-xl font-bold mb-4 text-green-400">DANH SÁCH ĐƠN HÀNG CẦN LÀM</h2>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left">
+                        <thead class="text-gray-400 text-xs uppercase border-b border-slate-700">
+                            <tr>
+                                <th class="pb-3">Khách/Món</th>
+                                <th class="pb-3">Thông tin (Acc/Pass)</th>
+                                <th class="pb-3 text-right">Thao tác</th>
+                            </tr>
+                        </thead>
+                        <tbody id="order-list" class="text-sm">
+                            </tbody>
+                    </table>
+                </div>
+            </div>
         </div>
     </div>
 
     <script>
-        function renderAdmin() {
-            const banks = JSON.parse(localStorage.getItem('nghia_pending_bank')) || [];
-            const works = JSON.parse(localStorage.getItem('nghia_work')) || [];
-
-            // Hiển thị đơn Bank để Nghĩa duyệt
-            document.getElementById('bank-list').innerHTML = banks.map((b, i) => `
-                <div class="bg-black/40 p-3 rounded-lg flex justify-between items-center border border-white/5">
-                    <div>
-                        <p class="font-bold text-yellow-500">${b.u}</p>
-                        <p class="text-xs">Chuyển: ${b.v.toLocaleString()}đ</p>
-                    </div>
-                    <button onclick="approveBank(${i})" class="bg-blue-600 px-3 py-1 rounded text-[10px] font-bold">XÁC NHẬN ĐÃ NHẬN TIỀN</button>
-                </div>
-            `).join('') || 'Chưa có đơn bank nào.';
-
-            // Hiển thị đơn cày để Nghĩa biết mà làm
-            document.getElementById('work-list').innerHTML = works.map((w, i) => `
-                <div class="bg-black/40 p-3 rounded-lg border border-white/5 ${w.status === 'Xong' ? 'opacity-50' : ''}">
-                    <p class="font-bold text-green-400">${w.s}</p>
-                    <p>Khách: ${w.u} | TK: ${w.acc} | MK: ${w.pass}</p>
-                    ${w.status !== 'Xong' ? `<button onclick="doneWork(${i})" class="mt-2 bg-green-600 w-full py-1 rounded">BẤM KHI CÀY XONG</button>` : '<p class="text-center text-gray-500 mt-2 font-bold">ĐÃ XONG</p>'}
-                </div>
-            `).join('') || 'Chưa có đơn cày thuê.';
+        // LOAD DANH SÁCH KHÁCH
+        function loadUsers() {
+            let db = JSON.parse(localStorage.getItem('nghia_db')) || {};
+            let html = '';
+            for (let u in db) {
+                html += `<div class="bg-slate-800 p-2 rounded-lg flex justify-between items-center text-xs">
+                    <span><b>${u}</b>: ${db[u].b.toLocaleString()}đ</span>
+                    <button onclick="document.getElementById('target-user').value='${u}'" class="text-blue-400 underline">Chọn</button>
+                </div>`;
+            }
+            document.getElementById('user-list').innerHTML = html || 'Chưa có khách';
         }
 
-        function approveBank(i) {
-            let banks = JSON.parse(localStorage.getItem('nghia_pending_bank'));
-            let db = JSON.parse(localStorage.getItem('nghia_db'));
-            
-            if(db[banks[i].u]) {
-                db[banks[i].u].b += banks[i].v; // Cộng 100% tiền bank
+        // CỘNG TIỀN
+        function addMoney() {
+            let user = document.getElementById('target-user').value;
+            let money = parseInt(document.getElementById('amount').value);
+            let db = JSON.parse(localStorage.getItem('nghia_db')) || {};
+            if(db[user]) {
+                db[user].b += money;
                 localStorage.setItem('nghia_db', JSON.stringify(db));
-                alert("Đã cộng tiền cho " + banks[i].u);
-                banks.splice(i, 1);
-                localStorage.setItem('nghia_pending_bank', JSON.stringify(banks));
-                renderAdmin();
+                alert("Đã cộng tiền!"); loadUsers();
+            } else alert("Sai tên khách!");
+        }
+
+        // LOAD ĐƠN HÀNG
+        function loadOrders() {
+            let orders = JSON.parse(localStorage.getItem('nghia_orders')) || [];
+            let html = '';
+            orders.forEach(order => {
+                let statusColor = order.status === 'Đang xử lý' ? 'text-yellow-400' : 'text-green-400';
+                html += `
+                <tr class="border-b border-slate-800/50">
+                    <td class="py-4">
+                        <div class="font-bold">${order.user}</div>
+                        <div class="text-[10px] text-gray-400">${order.item}</div>
+                    </td>
+                    <td class="py-4">
+                        <code class="bg-black/50 p-1 rounded text-pink-400 text-[11px]">${order.info}</code>
+                        <div class="text-[9px] text-gray-500 mt-1">${order.time}</div>
+                    </td>
+                    <td class="py-4 text-right">
+                        ${order.status === 'Đang xử lý' 
+                            ? `<button onclick="approveOrder(${order.id})" class="btn-done">XONG (DUYỆT)</button>` 
+                            : `<span class="text-green-500 font-bold text-[10px] uppercase">✓ Đã Hoàn Thành</span>`}
+                        <button onclick="deleteOrder(${order.id})" class="ml-2 text-red-500 text-xs">Xóa</button>
+                    </td>
+                </tr>`;
+            });
+            document.getElementById('order-list').innerHTML = html || '<tr><td colspan="3" class="text-center py-10 text-gray-500 italic">Chưa có đơn hàng nào...</td></tr>';
+        }
+
+        // DUYỆT ĐƠN (CÀY XONG)
+        function approveOrder(id) {
+            let orders = JSON.parse(localStorage.getItem('nghia_orders'));
+            let order = orders.find(o => o.id === id);
+            if(order) {
+                order.status = 'Hoàn thành';
+                localStorage.setItem('nghia_orders', JSON.stringify(orders));
+                alert("Đã duyệt đơn! Khách sẽ thấy trạng thái Hoàn thành.");
+                loadOrders();
             }
         }
 
-        function doneWork(i) {
-            let works = JSON.parse(localStorage.getItem('nghia_work'));
-            works[i].status = 'Xong';
-            localStorage.setItem('nghia_work', JSON.stringify(works));
-            renderAdmin();
+        // XÓA ĐƠN
+        function deleteOrder(id) {
+            if(confirm("Xóa đơn này?")) {
+                let orders = JSON.parse(localStorage.getItem('nghia_orders'));
+                orders = orders.filter(o => o.id !== id);
+                localStorage.setItem('nghia_orders', JSON.stringify(orders));
+                loadOrders();
+            }
         }
 
-        renderAdmin();
-        setInterval(renderAdmin, 5000);
+        loadUsers(); loadOrders();
+        // Tự động làm mới mỗi 10 giây
+        setInterval(loadOrders, 10000);
     </script>
 </body>
 </html>
