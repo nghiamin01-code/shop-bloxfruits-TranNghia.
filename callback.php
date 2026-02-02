@@ -1,6 +1,6 @@
 <?php
 // callback.php - Xử lý kết quả từ hệ thống gạch thẻ
-$partner_key = '80df3668af04f2a85e1befc277896513'; // Dán key của Nghĩa vào đây
+$partner_key = 'KEY_CUA_NGHIA_TAI_DAY'; // Dán key của Nghĩa vào đây
 
 $status = $_POST['status']; 
 $amount = $_POST['amount']; // Mệnh giá thẻ nạp
