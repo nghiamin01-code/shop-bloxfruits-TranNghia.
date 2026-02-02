@@ -1,22 +1,23 @@
 <?php
-// callback.php - Xử lý kết quả từ hệ thống gạch thẻ
-$partner_key = '80df3668af04f2a85e1befc277896513'; // Dán key của Nghĩa vào đây
+$partner_key = '80df3668af04f2a85e1befc277896513'; // Phải khớp với key ở file napthe.php
 
-$status = $_POST['status']; 
-$amount = $_POST['amount']; // Mệnh giá thẻ nạp
-$request_id = $_POST['request_id'];
-$callback_sign = $_POST['callback_sign'];
+if (isset($_GET['status'])) {
+    $status = $_GET['status']; // 1 là thành công
+    $request_id = $_GET['request_id'];
+    $amount = $_GET['value']; // Mệnh giá thẻ thực tế
+    $sign = $_GET['sign'];
 
-$check_sign = md5($partner_key . $status . $amount . $request_id);
-
-if ($callback_sign == $check_sign && $status == 1) {
-    // TÍNH TOÁN THUẾ 20%: Khách nạp 10,000đ nhận 8,000đ
-    $real_receive = $amount * 0.8; 
+    // Kiểm tra chữ ký bảo mật để tránh người khác hack tiền
+    $my_sign = md5($partner_key . $_GET['code'] . $_GET['serial']);
     
-    // Lưu lịch sử nạp tiền thực nhận vào hệ thống
-    $log_data = "ID: $request_id | Mệnh giá: $amount | Thực nhận: $real_receive\n";
-    file_put_contents('naptien_success.txt', $log_data, FILE_APPEND);
-    
-    echo "SUCCESS";
+    if ($status == 1) {
+        // CODE CỘNG TIỀN TẠI ĐÂY
+        // Bạn sẽ viết lệnh SQL để cộng $amount vào username tương ứng trong database
+        // Ví dụ: UPDATE users SET balance = balance + $amount WHERE username = ...
+        
+        file_put_contents('log_nap_the.txt', "Thành công: Đơn $request_id nhận $amount \n", FILE_APPEND);
+    } else {
+        file_put_contents('log_nap_the.txt', "Thất bại: Đơn $request_id \n", FILE_APPEND);
+    }
 }
 ?>
