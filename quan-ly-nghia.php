@@ -1,21 +1,20 @@
 <?php
-// Đọc dữ liệu từ file json chung
 $dbFile = 'database.json';
-$data = json_decode(file_get_contents($dbFile), true);
+$db = json_decode(file_get_contents($dbFile), true);
 
-// Xử lý khi Nghĩa bấm Duyệt
-if(isset($_POST['action'])) {
-    $user = $_POST['user'];
-    $idx = $_POST['idx'];
+if (isset($_POST['do_action'])) {
+    $u = $_POST['target_user'];
+    $i = $_POST['target_idx'];
     
-    if($_POST['action'] == 'approve_bank') {
-        $amount = $_POST['amount'];
-        $data[$user]['b'] += $amount;
-        $data[$user]['h'][$idx]['s'] = "Thành công";
-    } elseif($_POST['action'] == 'done') {
-        $data[$user]['h'][$idx]['s'] = "Đã xong";
+    if ($_POST['do_action'] == 'bank') {
+        $db[$u]['b'] += $db[$u]['h'][$i]['p']; // Cộng 100% tiền
+        $db[$u]['h'][$i]['s'] = 'Thành công';
+    } elseif ($_POST['do_action'] == 'done') {
+        $db[$u]['h'][$i]['s'] = 'Đã xong';
+    } elseif ($_POST['do_action'] == 'del') {
+        array_splice($db[$u]['h'], $i, 1);
     }
-    file_put_contents($dbFile, json_encode($data));
+    file_put_contents($dbFile, json_encode($db));
     header("Location: quan-ly-nghia.php");
 }
 ?>
@@ -23,35 +22,31 @@ if(isset($_POST['action'])) {
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>ADMIN CHÍNH THỨC - NGHĨA</title>
+    <title>ADMIN NGHĨA - ĐÃ FIX LỖI</title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="bg-slate-900 text-white p-8">
-    <h1 class="text-2xl font-bold text-purple-400 mb-6 uppercase">Hệ Thống Duyệt Đơn Tập Trung</h1>
-    
-    <div class="space-y-4">
-        <?php foreach($data as $username => $info): ?>
-            <?php foreach($info['h'] as $index => $item): ?>
-                <?php if($item['s'] == "Chờ duyệt"): ?>
-                    <div class="bg-slate-800 p-4 rounded-xl border border-white/10 flex justify-between items-center">
-                        <div>
-                            <span class="text-green-400 font-bold">[<?php echo $username; ?>]</span>
-                            <span class="mx-2">-</span>
-                            <span><?php echo $item['n']; ?> (<?php echo number_format($item['p']); ?>đ)</span>
-                            <p class="text-xs text-gray-400">Info: <?php echo $item['info'] ?? 'Nạp Bank'; ?></p>
-                        </div>
-                        <form method="POST" class="flex gap-2">
-                            <input type="hidden" name="user" value="<?php echo $username; ?>">
-                            <input type="hidden" name="idx" value="<?php echo $index; ?>">
-                            
-                            <?php if(strpos($item['n'], 'Bank') !== false): ?>
-                                <input type="hidden" name="amount" value="<?php echo $item['p']; ?>">
-                                <button name="action" value="approve_bank" class="bg-green-600 px-4 py-2 rounded font-bold">DUYỆT TIỀN</button>
-                            <?php else: ?>
-                                <button name="action" value="done" class="bg-blue-600 px-4 py-2 rounded font-bold">XONG ĐƠN</button>
-                            <?php endif; ?>
-                        </form>
+<body class="bg-gray-900 text-white p-5">
+    <h1 class="text-xl font-bold mb-5 text-purple-400">DANH SÁCH ĐƠN CHỜ DUYỆT</h1>
+    <div class="space-y-3">
+        <?php foreach($db as $user => $data): ?>
+            <?php foreach($data['h'] as $idx => $item): ?>
+                <?php if($item['s'] == 'Chờ duyệt'): ?>
+                <div class="bg-gray-800 p-4 rounded-lg flex justify-between border border-gray-700">
+                    <div>
+                        <b class="text-blue-400"><?php echo $user; ?></b>: <?php echo $item['n']; ?> - <?php echo number_format($item['p']); ?>đ
+                        <p class="text-xs text-yellow-500">Thông tin: <?php echo $item['info']; ?></p>
                     </div>
+                    <form method="POST" class="flex gap-2">
+                        <input type="hidden" name="target_user" value="<?php echo $user; ?>">
+                        <input type="hidden" name="target_idx" value="<?php echo $idx; ?>">
+                        <?php if(strpos($item['n'], 'Bank') !== false): ?>
+                            <button name="do_action" value="bank" class="bg-green-600 px-3 py-1 rounded text-xs font-bold">DUYỆT TIỀN</button>
+                        <?php else: ?>
+                            <button name="do_action" value="done" class="bg-blue-600 px-3 py-1 rounded text-xs font-bold">XONG ĐƠN</button>
+                        <?php endif; ?>
+                        <button name="do_action" value="del" class="bg-red-600 px-3 py-1 rounded text-xs">XÓA</button>
+                    </form>
+                </div>
                 <?php endif; ?>
             <?php endforeach; ?>
         <?php endforeach; ?>
