@@ -1,120 +1,60 @@
+<?php
+// Đọc dữ liệu từ file json chung
+$dbFile = 'database.json';
+$data = json_decode(file_get_contents($dbFile), true);
+
+// Xử lý khi Nghĩa bấm Duyệt
+if(isset($_POST['action'])) {
+    $user = $_POST['user'];
+    $idx = $_POST['idx'];
+    
+    if($_POST['action'] == 'approve_bank') {
+        $amount = $_POST['amount'];
+        $data[$user]['b'] += $amount;
+        $data[$user]['h'][$idx]['s'] = "Thành công";
+    } elseif($_POST['action'] == 'done') {
+        $data[$user]['h'][$idx]['s'] = "Đã xong";
+    }
+    file_put_contents($dbFile, json_encode($data));
+    header("Location: quan-ly-nghia.php");
+}
+?>
 <!DOCTYPE html>
-<html lang="vi">
+<html>
 <head>
     <meta charset="UTF-8">
-    <title>ADMIN PANEL | NGHĨA ELEMENTAL</title>
+    <title>ADMIN CHÍNH THỨC - NGHĨA</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@700&display=swap" rel="stylesheet">
-    <style>
-        body { background: #0f172a; font-family: 'Quicksand', sans-serif; color: white; }
-        .admin-card { background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 15px; }
-        .btn-approve { background: #22c55e; transition: 0.3s; }
-        .btn-approve:hover { background: #16a34a; transform: scale(1.05); }
-    </style>
 </head>
-<body class="p-8">
-    <div class="max-w-6xl mx-auto">
-        <div class="flex justify-between items-center mb-8 border-b border-white/10 pb-5">
-            <h1 class="text-3xl text-purple-400 uppercase tracking-widest">Quản Lý Đơn Hàng - Nghĩa</h1>
-            <div class="text-right text-xs">
-                <p>Trạng thái hệ thống: <span class="text-green-400">Đang hoạt động</span></p>
-                <button onclick="location.href='index.html'" class="text-blue-400 hover:underline">Quay về Shop</button>
-            </div>
-        </div>
-
-        <div class="grid grid-cols-1 gap-6">
-            <div class="admin-card p-6">
-                <h2 class="text-xl text-yellow-400 mb-4 flex items-center">💰 ĐƠN NẠP BANK/MOMO (Cần duyệt)</h2>
-                <div id="list-bank" class="space-y-3">
+<body class="bg-slate-900 text-white p-8">
+    <h1 class="text-2xl font-bold text-purple-400 mb-6 uppercase">Hệ Thống Duyệt Đơn Tập Trung</h1>
+    
+    <div class="space-y-4">
+        <?php foreach($data as $username => $info): ?>
+            <?php foreach($info['h'] as $index => $item): ?>
+                <?php if($item['s'] == "Chờ duyệt"): ?>
+                    <div class="bg-slate-800 p-4 rounded-xl border border-white/10 flex justify-between items-center">
+                        <div>
+                            <span class="text-green-400 font-bold">[<?php echo $username; ?>]</span>
+                            <span class="mx-2">-</span>
+                            <span><?php echo $item['n']; ?> (<?php echo number_format($item['p']); ?>đ)</span>
+                            <p class="text-xs text-gray-400">Info: <?php echo $item['info'] ?? 'Nạp Bank'; ?></p>
+                        </div>
+                        <form method="POST" class="flex gap-2">
+                            <input type="hidden" name="user" value="<?php echo $username; ?>">
+                            <input type="hidden" name="idx" value="<?php echo $index; ?>">
+                            
+                            <?php if(strpos($item['n'], 'Bank') !== false): ?>
+                                <input type="hidden" name="amount" value="<?php echo $item['p']; ?>">
+                                <button name="action" value="approve_bank" class="bg-green-600 px-4 py-2 rounded font-bold">DUYỆT TIỀN</button>
+                            <?php else: ?>
+                                <button name="action" value="done" class="bg-blue-600 px-4 py-2 rounded font-bold">XONG ĐƠN</button>
+                            <?php endif; ?>
+                        </form>
                     </div>
-            </div>
-
-            <div class="admin-card p-6">
-                <h2 class="text-xl text-blue-400 mb-4 flex items-center">⚡ ĐƠN MUA DỊCH VỤ (Cần làm)</h2>
-                <div id="list-service" class="space-y-3">
-                    </div>
-            </div>
-        </div>
+                <?php endif; ?>
+            <?php endforeach; ?>
+        <?php endforeach; ?>
     </div>
-
-    <script>
-        let db = JSON.parse(localStorage.getItem('nghia_db')) || {};
-
-        function renderAdmin() {
-            let bankHtml = "";
-            let serviceHtml = "";
-
-            Object.keys(db).forEach(username => {
-                db[username].h.forEach((item, index) => {
-                    if (item.s === "Chờ duyệt") {
-                        // Phân loại đơn Bank
-                        if (item.n.includes("Bank")) {
-                            bankHtml += `
-                                <div class="flex justify-between items-center bg-white/5 p-4 rounded-xl border border-white/10">
-                                    <div>
-                                        <p class="font-bold text-green-400">${username.toUpperCase()}</p>
-                                        <p class="text-sm">Báo bank: <span class="text-white">${Number(item.p).toLocaleString()}đ</span></p>
-                                        <p class="text-[10px] text-gray-400">${item.t}</p>
-                                    </div>
-                                    <button onclick="approveBank('${username}', ${index}, ${item.p})" class="btn-approve px-6 py-2 rounded-lg font-bold text-sm">DUYỆT +100% TIỀN</button>
-                                </div>`;
-                        } 
-                        // Phân loại đơn Cày thuê / Vật phẩm
-                        else {
-                            serviceHtml += `
-                                <div class="bg-white/5 p-4 rounded-xl border border-white/10">
-                                    <div class="flex justify-between items-start">
-                                        <div>
-                                            <p class="font-bold text-blue-400">${item.n}</p>
-                                            <p class="text-xs text-gray-300">Khách: ${username} | Giá: ${Number(item.p).toLocaleString()}đ</p>
-                                            <div class="mt-2 p-2 bg-black/40 rounded border border-dashed border-white/20">
-                                                <p class="text-xs text-yellow-200">Thông tin khách gửi: <b class="text-white">${item.info || 'Không có'}</b></p>
-                                            </div>
-                                        </div>
-                                        <div class="flex gap-2">
-                                            <button onclick="approveService('${username}', ${index})" class="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-lg font-bold text-xs">XONG ĐƠN</button>
-                                            <button onclick="deleteOrder('${username}', ${index})" class="bg-red-500/20 text-red-500 px-4 py-2 rounded-lg font-bold text-xs">XÓA</button>
-                                        </div>
-                                    </div>
-                                </div>`;
-                        }
-                    }
-                });
-            });
-
-            document.getElementById('list-bank').innerHTML = bankHtml || "<p class='text-gray-500 italic text-sm'>Không có yêu cầu nạp tiền nào.</p>";
-            document.getElementById('list-service').innerHTML = serviceHtml || "<p class='text-gray-500 italic text-sm'>Không có đơn hàng nào cần làm.</p>";
-        }
-
-        function approveBank(user, idx, amount) {
-            if(!confirm(`Cộng ${Number(amount).toLocaleString()}đ cho ${user}?`)) return;
-            db[user].b += Number(amount); // Cộng đủ 100% tiền
-            db[user].h[idx].s = "Thành công";
-            save();
-            alert("Đã cộng tiền thành công cho " + user);
-            renderAdmin();
-        }
-
-        function approveService(user, idx) {
-            db[user].h[idx].s = "Đã xong";
-            save();
-            alert("Đã duyệt hoàn thành đơn hàng!");
-            renderAdmin();
-        }
-
-        function deleteOrder(user, idx) {
-            if(confirm("Bạn có chắc muốn xóa đơn này?")) {
-                db[user].h.splice(idx, 1);
-                save();
-                renderAdmin();
-            }
-        }
-
-        function save() {
-            localStorage.setItem('nghia_db', JSON.stringify(db));
-        }
-
-        renderAdmin();
-    </script>
 </body>
 </html>
