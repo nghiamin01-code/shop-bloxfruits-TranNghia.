@@ -1,35 +1,50 @@
 <?php
-// Thay thông tin đối tác của bạn vào đây
-$partner_id = '9565963734'; 
-$partner_key = '80df3668af04f2a85e1befc277896513';
+// Cấu hình Firebase & API thegiatot.vn
+$firebase_url = "https://shop-blox-fruit-trannghia-default-rtdb.firebaseio.com/";
+$partner_id = '9565963734'; // Lấy Partner ID trên thegiatot.vn
+$partner_key = '80df3668af04f2a85e1befc277896513'; // Lấy Partner Key trên thegiatot.vn
 
-if ($_POST) {
-    $telco = $_POST['telco']; // Viettel, Mobifone...
-    $amount = $_POST['amount'];
-    $pin = $_POST['pin'];
-    $seri = $_POST['seri'];
-    $request_id = rand(100000, 999999); // Mã đơn hàng ngẫu nhiên
+$pin   = $_POST['pin'] ?? '';
+$seri  = $_POST['seri'] ?? '';
+$telco = $_POST['telco'] ?? '';
+$val   = $_POST['val'] ?? '';
+$user  = $_POST['user'] ?? '';
 
-    $data = array();
-    $data['partner_id'] = $partner_id;
-    $data['telco'] = $telco;
-    $data['amount'] = $amount;
-    $data['code'] = $pin;
-    $data['serial'] = $seri;
-    $data['request_id'] = $request_id;
-    $data['sign'] = md5($partner_key . $pin . $seri);
-    $data['command'] = 'charging';
-
-    // Gửi yêu cầu bằng CURL
-    $url = "https://thesieure.com/chargingws/v2"; // Ví dụ dùng web thesieure
-    $ch = curl_init();
-    curl_setopt($ch, CURLOPT_URL, $url);
-    curl_setopt($ch, CURLOPT_POST, 1);
-    curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($data));
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-    $result = curl_exec($ch);
-    curl_close($ch);
-
-    echo $result; // Trả về thông báo cho khách (Thẻ đang chờ xử lý)
+if (empty($pin) || empty($seri) || empty($user)) {
+    die(json_encode(['status' => 'error', 'msg' => 'Nhập thiếu thông tin!']));
 }
+
+$request_id = rand(100000, 999999);
+$sign = md5($partner_key . $pin . $seri);
+
+$data_post = [
+    'telco' => $telco,
+    'code' => $pin,
+    'serial' => $seri,
+    'amount' => $val,
+    'request_id' => $request_id,
+    'partner_id' => $partner_id,
+    'sign' => $sign,
+    'command' => 'charging'
+];
+
+// Gửi lên thegiatot.vn
+$ch = curl_init('https://thegiatot.vn/chargingws/v2');
+curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+curl_setopt($ch, CURLOPT_POST, true);
+curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($data_post));
+$response = curl_exec($ch);
+curl_close($ch);
+
+// Lưu vào Firebase để bạn quản lý đơn
+$order_data = json_encode([
+    'id' => $request_id,
+    'user' => $user,
+    'info' => "Thẻ $telco - Mệnh giá $val",
+    'status' => 'Đang chờ gạch',
+    'time' => date("H:i d/m/Y")
+]);
+file_get_contents($firebase_url . "requests/" . $request_id . ".json", false, stream_context_create(['http' => ['method' => 'PUT', 'content' => $order_data]]));
+
+echo $response; // Trả về thông báo của hệ thống gạch thẻ
 ?>
