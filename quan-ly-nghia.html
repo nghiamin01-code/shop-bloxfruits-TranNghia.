@@ -2,37 +2,72 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <title>ADMIN - QUẢN LÝ SHOP BẮP</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QUẢN TRỊ VIÊN - SHOP BẮP</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@700&display=swap" rel="stylesheet">
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
     <style>
-        body { background: #0b1120; color: white; font-family: sans-serif; padding: 20px; }
-        .card { background: rgba(255,255,255,0.05); padding: 20px; border-radius: 15px; margin-bottom: 20px; border: 1px solid rgba(255,255,255,0.1); }
-        th { text-align: left; color: #facc15; font-size: 12px; text-transform: uppercase; padding: 10px; }
-        td { padding: 10px; border-bottom: 1px solid rgba(255,255,255,0.05); font-size: 14px; }
-        .btn-check { background: #22c55e; color: black; padding: 5px 10px; border-radius: 5px; font-weight: bold; font-size: 12px; }
-        .btn-del { background: #ef4444; color: white; padding: 5px 10px; border-radius: 5px; font-size: 12px; }
+        body { background: #0f172a; font-family: 'Quicksand', sans-serif; color: #fff; }
+        .admin-card { background: rgba(30, 41, 59, 0.7); border: 1px solid rgba(255,255,255,0.1); border-radius: 15px; padding: 20px; }
+        .status-badge { padding: 4px 10px; border-radius: 20px; font-size: 10px; font-weight: bold; text-transform: uppercase; }
+        .pending { background: #f59e0b; color: #000; }
+        .success { background: #10b981; color: #fff; }
+        input { background: #1e293b; border: 1px solid #334155; color: #fff; padding: 5px 10px; border-radius: 8px; outline: none; }
     </style>
 </head>
-<body>
-    <h1 class="text-2xl font-bold mb-6 text-yellow-400">TRANG QUẢN TRỊ ADMIN - NGHĨA</h1>
+<body class="p-4 md:p-8">
 
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div class="card">
-            <h2 class="text-blue-400 font-bold mb-4 italic">💰 YÊU CẦU NẠP TIỀN</h2>
-            <table class="w-full">
-                <thead><tr><th>Khách</th><th>Loại</th><th>Số tiền nạp</th><th>Thẻ(PIN/Seri)</th><th>Duyệt</th></tr></thead>
-                <tbody id="list-recharge"></tbody>
-            </table>
+    <div class="max-w-6xl mx-auto">
+        <div class="flex justify-between items-center mb-8">
+            <h1 class="text-2xl font-bold text-yellow-400 uppercase tracking-tighter">BẢNG ĐIỀU KHIỂN ADMIN 👑</h1>
+            <button onclick="location.reload()" class="bg-blue-600 px-4 py-2 rounded-lg text-sm">Làm mới dữ liệu</button>
         </div>
 
-        <div class="card">
-            <h2 class="text-green-400 font-bold mb-4 italic">📦 ĐƠN HÀNG CHỜ XỬ LÝ</h2>
-            <table class="w-full">
-                <thead><tr><th>Khách</th><th>Món đồ</th><th>Acc/Pass/Info</th><th>Duyệt</th></tr></thead>
-                <tbody id="list-orders"></tbody>
-            </table>
+        <div class="grid grid-cols-1 gap-8">
+            
+            <section class="admin-card">
+                <h2 class="text-lg mb-4 text-green-400">💰 YÊU CẦU NẠP TIỀN (BANK/THẺ)</h2>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-sm">
+                        <thead class="border-b border-white/10 text-gray-400">
+                            <tr>
+                                <th class="p-3">Thời gian</th>
+                                <th>Khách hàng</th>
+                                <th>Loại</th>
+                                <th>Chi tiết</th>
+                                <th>Trạng thái</th>
+                                <th>Hành động</th>
+                            </tr>
+                        </thead>
+                        <tbody id="list-requests"></tbody>
+                    </table>
+                </div>
+            </section>
+
+            <section class="admin-card border-t-4 border-yellow-500">
+                <h2 class="text-lg mb-4 text-yellow-400">🛒 ĐƠN HÀNG CẦN XỬ LÝ</h2>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-sm">
+                        <thead class="border-b border-white/10 text-gray-400">
+                            <tr>
+                                <th class="p-3">Khách hàng</th>
+                                <th>Món đồ / Dịch vụ</th>
+                                <th>Thời gian</th>
+                                <th>Trạng thái</th>
+                                <th>Hành động</th>
+                            </tr>
+                        </thead>
+                        <tbody id="list-orders"></tbody>
+                    </table>
+                </div>
+            </section>
+
+            <section class="admin-card">
+                <h2 class="text-lg mb-4 text-purple-400">👥 QUẢN LÝ THÀNH VIÊN</h2>
+                <div id="list-users" class="grid grid-cols-1 md:grid-cols-3 gap-4"></div>
+            </section>
         </div>
     </div>
 
@@ -41,56 +76,101 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
-        // 1. HIỂN THỊ DANH SÁCH NẠP
-        db.ref('recharges').on('value', s => {
+        // 1. TẢI DANH SÁCH YÊU CẦU NẠP (REQUESTS)
+        db.ref('requests').on('value', snapshot => {
+            const data = snapshot.val();
             let html = '';
-            s.forEach(item => {
-                const r = item.val();
-                html += `<tr>
-                    <td><b>${r.user}</b></td>
-                    <td>${r.type}</td>
-                    <td><input type="number" id="amt-${item.key}" value="${r.amount}" class="bg-black text-white w-20 p-1 border border-white/20"></td>
-                    <td>${r.pin ? r.pin+'<br>'+r.seri : 'Bank'}</td>
-                    <td><button onclick="approveRecharge('${item.key}', '${r.user}')" class="btn-check">DUYỆT ✅</button></td>
+            for (let id in data) {
+                const req = data[id];
+                const isPending = req.status === 'Chờ duyệt';
+                html += `
+                <tr class="border-b border-white/5 hover:bg-white/5">
+                    <td class="p-3 opacity-50 text-[10px]">${req.time}</td>
+                    <td class="font-bold">${req.user}</td>
+                    <td><span class="status-badge bg-white/10">${req.type}</span></td>
+                    <td class="text-[11px] text-gray-300">${req.info}</td>
+                    <td><span class="status-badge ${isPending ? 'pending' : 'success'}">${req.status}</span></td>
+                    <td class="p-2">
+                        ${isPending ? `<button onclick="approveDeposit('${id}', '${req.user}', ${req.realVal || 0})" class="bg-green-600 px-3 py-1 rounded text-[10px] font-bold">CỘNG TIỀN</button>` : '✅'}
+                    </td>
                 </tr>`;
-            });
-            document.getElementById('list-recharge').innerHTML = html;
-        });
-
-        // 2. HIỂN THỊ DANH SÁCH ĐƠN HÀNG
-        db.ref('orders').on('value', s => {
-            let html = '';
-            s.forEach(item => {
-                const o = item.val();
-                html += `<tr>
-                    <td><b>${o.user}</b></td>
-                    <td>${o.item}</td>
-                    <td><span class="text-xs">${o.info}</span></td>
-                    <td><button onclick="db.ref('orders/${item.key}').remove()" class="btn-check" style="background:#3b82f6;color:white">XONG ✅</button></td>
-                </tr>`;
-            });
-            document.getElementById('list-orders').innerHTML = html;
-        });
-
-        // HÀM DUYỆT NẠP TIỀN - TỰ ĐỘNG CỘNG
-        async function approveRecharge(key, username) {
-            const amountToAdd = parseInt(document.getElementById('amt-'+key).value);
-            const userRef = db.ref('accounts/' + username);
-            
-            const snap = await userRef.once('value');
-            if(snap.exists()) {
-                const currentBalance = snap.val().balance || 0;
-                const newBalance = currentBalance + amountToAdd;
-                
-                // Cập nhật tiền mới cho khách
-                await userRef.update({ balance: newBalance });
-                // Xóa yêu cầu nạp sau khi duyệt xong
-                await db.ref('recharges/' + key).remove();
-                
-                alert(`Đã cộng ${amountToAdd}đ cho ${username}. Số dư mới: ${newBalance}đ`);
-            } else {
-                alert("Không tìm thấy tài khoản khách này!");
             }
+            document.getElementById('list-requests').innerHTML = html || '<tr><td colspan="6" class="text-center p-4 opacity-30">Không có yêu cầu nào.</td></tr>';
+        });
+
+        // 2. TẢI DANH SÁCH ĐƠN HÀNG (ORDERS)
+        db.ref('orders').on('value', snapshot => {
+            const data = snapshot.val();
+            let html = '';
+            for (let id in data) {
+                const ord = data[id];
+                const isProcessing = ord.status === 'Đang xử lý';
+                html += `
+                <tr class="border-b border-white/5 hover:bg-white/5">
+                    <td class="p-3 font-bold text-yellow-400">${ord.user}</td>
+                    <td>${ord.item}</td>
+                    <td class="text-[10px] opacity-50">${ord.time}</td>
+                    <td><span class="status-badge ${isProcessing ? 'pending' : 'success'}">${ord.status}</span></td>
+                    <td class="p-2">
+                        ${isProcessing ? `<button onclick="completeOrder('${id}')" class="bg-blue-600 px-3 py-1 rounded text-[10px] font-bold uppercase">Xong ✅</button>` : '👍'}
+                    </td>
+                </tr>`;
+            }
+            document.getElementById('list-orders').innerHTML = html || '<tr><td colspan="5" class="text-center p-4 opacity-30">Không có đơn hàng.</td></tr>';
+        });
+
+        // 3. TẢI DANH SÁCH NGƯỜI DÙNG
+        db.ref('users').on('value', snapshot => {
+            const data = snapshot.val();
+            let html = '';
+            for (let u in data) {
+                const user = data[u];
+                html += `
+                <div class="bg-black/30 p-4 rounded-xl border border-white/5">
+                    <p class="text-xs text-gray-400">@${u}</p>
+                    <p class="text-lg font-bold text-green-400">${(user.balance || 0).toLocaleString()}đ</p>
+                    <div class="mt-2 flex gap-2">
+                        <input type="number" id="plus-${u}" placeholder="Số tiền..." class="w-full text-xs">
+                        <button onclick="adjustBalance('${u}')" class="bg-white/10 px-2 rounded">Sửa</button>
+                    </div>
+                </div>`;
+            }
+            document.getElementById('list-users').innerHTML = html;
+        });
+
+        // --- HÀM XỬ LÝ LOGIC ---
+
+        // Duyệt nạp tiền (Cộng tiền cho khách)
+        async function approveDeposit(id, username, amount) {
+            let money = amount;
+            if(money <= 0) {
+                money = prompt("Thẻ/Bank này cộng bao nhiêu tiền?", "0");
+                if(!money) return;
+            }
+            
+            const userRef = db.ref('users/' + username);
+            const snap = await userRef.get();
+            const currentBal = snap.val().balance || 0;
+
+            await userRef.update({ balance: currentBal + parseInt(money) });
+            await db.ref('requests/' + id).update({ status: 'Hoàn thành' });
+            alert(`Đã cộng ${parseInt(money).toLocaleString()}đ cho ${username}`);
+        }
+
+        // Hoàn thành đơn hàng (Làm xong đồ/cày thuê)
+        async function completeOrder(id) {
+            if(confirm("Xác nhận đã làm xong đơn này?")) {
+                await db.ref('orders/' + id).update({ status: 'Hoàn thành' });
+                alert("Đã báo cho khách là xong!");
+            }
+        }
+
+        // Chỉnh sửa số dư thủ công
+        async function adjustBalance(username) {
+            const amount = document.getElementById('plus-' + username).value;
+            if(!amount) return;
+            await db.ref('users/' + username).update({ balance: parseInt(amount) });
+            alert("Đã cập nhật số dư!");
         }
     </script>
 </body>
