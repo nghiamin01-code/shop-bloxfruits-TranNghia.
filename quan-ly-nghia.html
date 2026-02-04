@@ -1,73 +1,23 @@
 <!DOCTYPE html>
-<html lang="vi">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>QUẢN TRỊ VIÊN - SHOP BẮP</title>
+    <title>ADMIN SHOP BẮP</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@700&display=swap" rel="stylesheet">
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
-    <style>
-        body { background: #0f172a; font-family: 'Quicksand', sans-serif; color: #fff; }
-        .admin-card { background: rgba(30, 41, 59, 0.7); border: 1px solid rgba(255,255,255,0.1); border-radius: 15px; padding: 20px; }
-        .status-badge { padding: 4px 10px; border-radius: 20px; font-size: 10px; font-weight: bold; text-transform: uppercase; }
-        .pending { background: #f59e0b; color: #000; }
-        .success { background: #10b981; color: #fff; }
-        input { background: #1e293b; border: 1px solid #334155; color: #fff; padding: 5px 10px; border-radius: 8px; outline: none; }
-    </style>
 </head>
-<body class="p-4 md:p-8">
+<body class="bg-gray-900 text-white p-5">
+    <h1 class="text-2xl font-bold mb-5 text-yellow-400">QUẢN LÝ ĐƠN HÀNG - SHOP BẮP</h1>
 
-    <div class="max-w-6xl mx-auto">
-        <div class="flex justify-between items-center mb-8">
-            <h1 class="text-2xl font-bold text-yellow-400 uppercase tracking-tighter">BẢNG ĐIỀU KHIỂN ADMIN 👑</h1>
-            <button onclick="location.reload()" class="bg-blue-600 px-4 py-2 rounded-lg text-sm">Làm mới dữ liệu</button>
+    <div class="grid grid-cols-1 gap-5">
+        <div class="bg-gray-800 p-5 rounded-xl border border-yellow-500">
+            <h2 class="font-bold mb-3 text-green-400 uppercase">🔔 Yêu cầu nạp Bank (Duyệt tay)</h2>
+            <div id="bank-list" class="space-y-2"></div>
         </div>
 
-        <div class="grid grid-cols-1 gap-8">
-            
-            <section class="admin-card">
-                <h2 class="text-lg mb-4 text-green-400">💰 YÊU CẦU NẠP TIỀN (BANK/THẺ)</h2>
-                <div class="overflow-x-auto">
-                    <table class="w-full text-left text-sm">
-                        <thead class="border-b border-white/10 text-gray-400">
-                            <tr>
-                                <th class="p-3">Thời gian</th>
-                                <th>Khách hàng</th>
-                                <th>Loại</th>
-                                <th>Chi tiết</th>
-                                <th>Trạng thái</th>
-                                <th>Hành động</th>
-                            </tr>
-                        </thead>
-                        <tbody id="list-requests"></tbody>
-                    </table>
-                </div>
-            </section>
-
-            <section class="admin-card border-t-4 border-yellow-500">
-                <h2 class="text-lg mb-4 text-yellow-400">🛒 ĐƠN HÀNG CẦN XỬ LÝ</h2>
-                <div class="overflow-x-auto">
-                    <table class="w-full text-left text-sm">
-                        <thead class="border-b border-white/10 text-gray-400">
-                            <tr>
-                                <th class="p-3">Khách hàng</th>
-                                <th>Món đồ / Dịch vụ</th>
-                                <th>Thời gian</th>
-                                <th>Trạng thái</th>
-                                <th>Hành động</th>
-                            </tr>
-                        </thead>
-                        <tbody id="list-orders"></tbody>
-                    </table>
-                </div>
-            </section>
-
-            <section class="admin-card">
-                <h2 class="text-lg mb-4 text-purple-400">👥 QUẢN LÝ THÀNH VIÊN</h2>
-                <div id="list-users" class="grid grid-cols-1 md:grid-cols-3 gap-4"></div>
-            </section>
+        <div class="bg-gray-800 p-5 rounded-xl border border-blue-500">
+            <h2 class="font-bold mb-3 text-blue-400 uppercase">⚔️ Đơn hàng cần xử lý</h2>
+            <div id="order-list" class="space-y-2"></div>
         </div>
     </div>
 
@@ -76,102 +26,44 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
-        // 1. TẢI DANH SÁCH YÊU CẦU NẠP (REQUESTS)
-        db.ref('requests').on('value', snapshot => {
-            const data = snapshot.val();
-            let html = '';
-            for (let id in data) {
-                const req = data[id];
-                const isPending = req.status === 'Chờ duyệt';
-                html += `
-                <tr class="border-b border-white/5 hover:bg-white/5">
-                    <td class="p-3 opacity-50 text-[10px]">${req.time}</td>
-                    <td class="font-bold">${req.user}</td>
-                    <td><span class="status-badge bg-white/10">${req.type}</span></td>
-                    <td class="text-[11px] text-gray-300">${req.info}</td>
-                    <td><span class="status-badge ${isPending ? 'pending' : 'success'}">${req.status}</span></td>
-                    <td class="p-2">
-                        ${isPending ? `<button onclick="approveDeposit('${id}', '${req.user}', ${req.realVal || 0})" class="bg-green-600 px-3 py-1 rounded text-[10px] font-bold">CỘNG TIỀN</button>` : '✅'}
-                    </td>
-                </tr>`;
-            }
-            document.getElementById('list-requests').innerHTML = html || '<tr><td colspan="6" class="text-center p-4 opacity-30">Không có yêu cầu nào.</td></tr>';
-        });
-
-        // 2. TẢI DANH SÁCH ĐƠN HÀNG (ORDERS)
-        db.ref('orders').on('value', snapshot => {
-            const data = snapshot.val();
-            let html = '';
-            for (let id in data) {
-                const ord = data[id];
-                const isProcessing = ord.status === 'Đang xử lý';
-                html += `
-                <tr class="border-b border-white/5 hover:bg-white/5">
-                    <td class="p-3 font-bold text-yellow-400">${ord.user}</td>
-                    <td>${ord.item}</td>
-                    <td class="text-[10px] opacity-50">${ord.time}</td>
-                    <td><span class="status-badge ${isProcessing ? 'pending' : 'success'}">${ord.status}</span></td>
-                    <td class="p-2">
-                        ${isProcessing ? `<button onclick="completeOrder('${id}')" class="bg-blue-600 px-3 py-1 rounded text-[10px] font-bold uppercase">Xong ✅</button>` : '👍'}
-                    </td>
-                </tr>`;
-            }
-            document.getElementById('list-orders').innerHTML = html || '<tr><td colspan="5" class="text-center p-4 opacity-30">Không có đơn hàng.</td></tr>';
-        });
-
-        // 3. TẢI DANH SÁCH NGƯỜI DÙNG
-        db.ref('users').on('value', snapshot => {
-            const data = snapshot.val();
-            let html = '';
-            for (let u in data) {
-                const user = data[u];
-                html += `
-                <div class="bg-black/30 p-4 rounded-xl border border-white/5">
-                    <p class="text-xs text-gray-400">@${u}</p>
-                    <p class="text-lg font-bold text-green-400">${(user.balance || 0).toLocaleString()}đ</p>
-                    <div class="mt-2 flex gap-2">
-                        <input type="number" id="plus-${u}" placeholder="Số tiền..." class="w-full text-xs">
-                        <button onclick="adjustBalance('${u}')" class="bg-white/10 px-2 rounded">Sửa</button>
-                    </div>
+        // Lấy danh sách bank
+        db.ref('requests').on('value', s => {
+            const list = document.getElementById('bank-list');
+            list.innerHTML = "";
+            s.forEach(item => {
+                const d = item.val();
+                list.innerHTML += `<div class="bg-black/50 p-3 rounded flex justify-between">
+                    <span>${d.user} - ${d.info}</span>
+                    <button onclick="approveBank('${d.user}', '${item.key}')" class="bg-green-600 px-3 py-1 rounded text-xs">CỘNG TIỀN + DUYỆT</button>
                 </div>`;
-            }
-            document.getElementById('list-users').innerHTML = html;
+            });
         });
 
-        // --- HÀM XỬ LÝ LOGIC ---
-
-        // Duyệt nạp tiền (Cộng tiền cho khách)
-        async function approveDeposit(id, username, amount) {
-            let money = amount;
-            if(money <= 0) {
-                money = prompt("Thẻ/Bank này cộng bao nhiêu tiền?", "0");
-                if(!money) return;
-            }
-            
-            const userRef = db.ref('users/' + username);
-            const snap = await userRef.get();
-            const currentBal = snap.val().balance || 0;
-
-            await userRef.update({ balance: currentBal + parseInt(money) });
-            await db.ref('requests/' + id).update({ status: 'Hoàn thành' });
-            alert(`Đã cộng ${parseInt(money).toLocaleString()}đ cho ${username}`);
-        }
-
-        // Hoàn thành đơn hàng (Làm xong đồ/cày thuê)
-        async function completeOrder(id) {
-            if(confirm("Xác nhận đã làm xong đơn này?")) {
-                await db.ref('orders/' + id).update({ status: 'Hoàn thành' });
-                alert("Đã báo cho khách là xong!");
+        async function approveBank(user, key) {
+            const money = prompt("Nhập số tiền cần cộng cho " + user + ":");
+            if(money) {
+                const s = await db.ref('users/' + user).get();
+                const bal = s.val().balance || 0;
+                await db.ref('users/' + user).update({ balance: parseInt(bal) + parseInt(money) });
+                await db.ref('requests/' + key).remove();
+                alert("Đã duyệt và cộng tiền!");
             }
         }
 
-        // Chỉnh sửa số dư thủ công
-        async function adjustBalance(username) {
-            const amount = document.getElementById('plus-' + username).value;
-            if(!amount) return;
-            await db.ref('users/' + username).update({ balance: parseInt(amount) });
-            alert("Đã cập nhật số dư!");
-        }
+        // Lấy danh sách đơn hàng
+        db.ref('orders').on('value', s => {
+            const list = document.getElementById('order-list');
+            list.innerHTML = "";
+            s.forEach(item => {
+                const d = item.val();
+                if(d.status === 'Đang xử lý') {
+                    list.innerHTML += `<div class="bg-black/50 p-3 rounded flex justify-between">
+                        <span>${d.user} mua ${d.item}</span>
+                        <button onclick="db.ref('orders/${item.key}').update({status:'Hoàn thành'})" class="bg-blue-600 px-3 py-1 rounded text-xs">XONG ✅</button>
+                    </div>`;
+                }
+            });
+        });
     </script>
 </body>
 </html>
