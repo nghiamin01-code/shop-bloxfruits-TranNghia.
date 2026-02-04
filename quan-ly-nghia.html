@@ -2,68 +2,95 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <title>QUẢN TRỊ SHOP BẮP</title>
+    <title>ADMIN - QUẢN LÝ SHOP BẮP</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
+    <style>
+        body { background: #0b1120; color: white; font-family: sans-serif; padding: 20px; }
+        .card { background: rgba(255,255,255,0.05); padding: 20px; border-radius: 15px; margin-bottom: 20px; border: 1px solid rgba(255,255,255,0.1); }
+        th { text-align: left; color: #facc15; font-size: 12px; text-transform: uppercase; padding: 10px; }
+        td { padding: 10px; border-bottom: 1px solid rgba(255,255,255,0.05); font-size: 14px; }
+        .btn-check { background: #22c55e; color: black; padding: 5px 10px; border-radius: 5px; font-weight: bold; font-size: 12px; }
+        .btn-del { background: #ef4444; color: white; padding: 5px 10px; border-radius: 5px; font-size: 12px; }
+    </style>
 </head>
-<body class="bg-gray-900 text-white p-6 font-sans">
-    <h1 class="text-2xl font-bold text-yellow-500 mb-6">QUẢN LÝ SHOP BẮP</h1>
+<body>
+    <h1 class="text-2xl font-bold mb-6 text-yellow-400">TRANG QUẢN TRỊ ADMIN - NGHĨA</h1>
 
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        <div class="bg-gray-800 p-4 rounded-xl">
-            <h2 class="text-xl mb-4 font-bold text-green-400 border-b border-gray-700 pb-2">THẺ CHỜ DUYỆT</h2>
-            <div id="list-card" class="space-y-3"></div>
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div class="card">
+            <h2 class="text-blue-400 font-bold mb-4 italic">💰 YÊU CẦU NẠP TIỀN</h2>
+            <table class="w-full">
+                <thead><tr><th>Khách</th><th>Loại</th><th>Số tiền nạp</th><th>Thẻ(PIN/Seri)</th><th>Duyệt</th></tr></thead>
+                <tbody id="list-recharge"></tbody>
+            </table>
         </div>
 
-        <div class="bg-gray-800 p-4 rounded-xl">
-            <h2 class="text-xl mb-4 font-bold text-blue-400 border-b border-gray-700 pb-2">ĐƠN HÀNG MỚI</h2>
-            <div id="list-order" class="space-y-3"></div>
+        <div class="card">
+            <h2 class="text-green-400 font-bold mb-4 italic">📦 ĐƠN HÀNG CHỜ XỬ LÝ</h2>
+            <table class="w-full">
+                <thead><tr><th>Khách</th><th>Món đồ</th><th>Acc/Pass/Info</th><th>Duyệt</th></tr></thead>
+                <tbody id="list-orders"></tbody>
+            </table>
         </div>
     </div>
 
     <script>
-        const firebaseConfig = { databaseURL: "https://shop-bloxfruit-trannghia-default-rtdb.firebaseio.com" };
+        const firebaseConfig = { databaseURL: "https://shop-blox-fruit-trannghia-default-rtdb.firebaseio.com/" };
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
-        // Tự động load thẻ nạp
-        db.ref('napthe').on('value', s => {
-            let h = "";
-            s.forEach(c => {
-                let d = c.val();
-                if(d.status === "Chờ duyệt") {
-                    h += `<div class="bg-gray-700 p-3 rounded-lg border-l-4 border-yellow-500">
-                        <p><b>User:</b> ${d.user} | <b>Mệnh giá:</b> ${d.real}đ</p>
-                        <p class="text-xs text-gray-400">PIN: ${d.pin} | Seri: ${d.seri} | Loại: ${d.telco}</p>
-                        <button onclick="duyet('${c.key}', '${d.userKey}', ${d.real})" class="mt-2 bg-green-600 px-4 py-1 rounded text-xs font-bold">CỘNG TIỀN ✅</button>
-                    </div>`;
-                }
+        // 1. HIỂN THỊ DANH SÁCH NẠP
+        db.ref('recharges').on('value', s => {
+            let html = '';
+            s.forEach(item => {
+                const r = item.val();
+                html += `<tr>
+                    <td><b>${r.user}</b></td>
+                    <td>${r.type}</td>
+                    <td><input type="number" id="amt-${item.key}" value="${r.amount}" class="bg-black text-white w-20 p-1 border border-white/20"></td>
+                    <td>${r.pin ? r.pin+'<br>'+r.seri : 'Bank'}</td>
+                    <td><button onclick="approveRecharge('${item.key}', '${r.user}')" class="btn-check">DUYỆT ✅</button></td>
+                </tr>`;
             });
-            document.getElementById('list-card').innerHTML = h || "Không có thẻ nào.";
+            document.getElementById('list-recharge').innerHTML = html;
         });
 
-        // Load đơn hàng
+        // 2. HIỂN THỊ DANH SÁCH ĐƠN HÀNG
         db.ref('orders').on('value', s => {
-            let h = "";
-            s.forEach(o => {
-                let d = o.val();
-                h += `<div class="bg-gray-700 p-3 rounded-lg border-l-4 border-blue-500 text-xs">
-                    <p><b>Khách:</b> ${d.user} | <b>Mua:</b> ${d.item}</p>
-                    <p class="text-yellow-400"><b>Thông tin:</b> ${d.info}</p>
-                    <p class="text-gray-500">${d.time}</p>
-                </div>`;
+            let html = '';
+            s.forEach(item => {
+                const o = item.val();
+                html += `<tr>
+                    <td><b>${o.user}</b></td>
+                    <td>${o.item}</td>
+                    <td><span class="text-xs">${o.info}</span></td>
+                    <td><button onclick="db.ref('orders/${item.key}').remove()" class="btn-check" style="background:#3b82f6;color:white">XONG ✅</button></td>
+                </tr>`;
             });
-            document.getElementById('list-order').innerHTML = h || "Chưa có đơn hàng.";
+            document.getElementById('list-orders').innerHTML = html;
         });
 
-        function duyet(key, userK, money) {
-            db.ref('users/' + userK).once('value', s => {
-                let current = s.val().balance || 0;
-                db.ref('users/' + userK).update({ balance: current + Number(money) });
-                db.ref('napthe/' + key).update({ status: "Xong" });
-                alert("Đã cộng tiền!");
-            });
+        // HÀM DUYỆT NẠP TIỀN - TỰ ĐỘNG CỘNG
+        async function approveRecharge(key, username) {
+            const amountToAdd = parseInt(document.getElementById('amt-'+key).value);
+            const userRef = db.ref('accounts/' + username);
+            
+            const snap = await userRef.once('value');
+            if(snap.exists()) {
+                const currentBalance = snap.val().balance || 0;
+                const newBalance = currentBalance + amountToAdd;
+                
+                // Cập nhật tiền mới cho khách
+                await userRef.update({ balance: newBalance });
+                // Xóa yêu cầu nạp sau khi duyệt xong
+                await db.ref('recharges/' + key).remove();
+                
+                alert(`Đã cộng ${amountToAdd}đ cho ${username}. Số dư mới: ${newBalance}đ`);
+            } else {
+                alert("Không tìm thấy tài khoản khách này!");
+            }
         }
     </script>
 </body>
