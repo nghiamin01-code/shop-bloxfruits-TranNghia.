@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SHOP BẮP - BLOX FRUIT Uy Tín</title>
+    <title>SHOP BẮP - BLOX FRUIT SIÊU CẤP 2026</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@700&family=Pacifico&display=swap" rel="stylesheet">
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
@@ -19,16 +19,14 @@
         .marquee { background: rgba(250, 204, 21, 0.1); color: #facc15; padding: 6px; font-size: 11px; text-align: center; border-bottom: 1px solid rgba(250, 204, 21, 0.2); }
     </style>
 </head>
-<body class="notranslate">
+<body>
 
-    <div class="marquee">
-        <marquee>🔥 Chào mừng đến với Shop Bắp - Hệ thống bán Trái Ác Quỷ, Gamepass và Cày Thuê tự động Uy Tín số 1 🔥</marquee>
-    </div>
+    <div class="marquee"><marquee>🔥 Shop Bắp: Hệ thống cày thuê & bán Gamepass tự động - Uy tín tạo nên thương hiệu 🔥</marquee></div>
 
     <nav class="p-4 border-b border-white/5 bg-[#0b1120]/95 sticky top-0 z-50">
         <div class="max-w-7xl mx-auto flex justify-between items-center">
             <div onclick="location.reload()" class="flex items-center gap-3 cursor-pointer">
-                <img src="https://i.postimg.cc/8fg7BFnL/image.jpg" class="w-10 h-10 rounded-full border-2 border-yellow-400">
+                <img src="https://i.postimg.cc/8fg7BFnL/image.jpg" class="w-10 h-10 rounded-full border-2 border-yellow-400 shadow-lg">
                 <span class="text-xl font-['Pacifico'] text-yellow-400">Shop Bắp</span>
             </div>
             <div id="user-area"><button onclick="openAuth()" class="btn-main px-4 py-2 text-[10px] uppercase">Đăng Nhập</button></div>
@@ -36,6 +34,7 @@
     </nav>
 
     <div class="max-w-7xl mx-auto p-4 mt-6 grid grid-cols-1 lg:grid-cols-12 gap-8">
+        
         <div class="lg:col-span-4 space-y-6">
             <div class="nap-box">
                 <h2 class="text-center font-bold text-xs mb-5 uppercase text-yellow-400">💳 NẠP THẺ (THUẾ 20%)</h2>
@@ -49,23 +48,31 @@
                     <option value="500000">Mệnh giá 500,000đ</option>
                 </select>
                 <div class="bg-black/30 p-2 rounded-xl border border-white/10 mb-4 text-center">
-                    <p class="text-[10px] text-gray-400 uppercase">Bạn sẽ nhận được:</p>
+                    <p class="text-[10px] text-gray-400 uppercase">Tiền nhận được:</p>
                     <p class="text-lg font-black text-green-400" id="real-val">8,000đ</p>
                 </div>
                 <input type="text" id="card-pin" placeholder="Mã PIN thẻ...">
                 <input type="text" id="card-seri" placeholder="Số Seri thẻ...">
-                <button onclick="sendRequest('CARD')" class="btn-main w-full py-4 uppercase text-xs">GỬI THẺ</button>
+                <button onclick="sendRequest('CARD')" class="btn-main w-full py-4 uppercase text-xs">GỬI THẺ NGAY</button>
             </div>
 
-            <div class="glass p-6 border-t-4 border-green-500">
-                <h2 class="text-center font-bold text-xs mb-4 uppercase text-green-400">🏧 NẠP QUA BANK</h2>
+            <div class="glass p-6 border-t-4 border-green-500 shadow-xl">
+                <h2 class="text-center font-bold text-xs mb-4 uppercase text-green-400">🏧 NẠP QUA BANK (NHẬN 100%)</h2>
                 <div class="text-[11px] bg-black/40 p-4 rounded-xl mb-4">
                     <p class="flex justify-between"><span>Bank:</span> <b>AGRIBANK</b></p>
                     <p class="flex justify-between"><span>STK:</span> <b class="text-yellow-400">2208205353447</b></p>
-                    <p class="flex justify-between"><span>Nội dung:</span> <b id="bank-memo" class="text-yellow-400">LOGIN ĐỂ LẤY</b></p>
+                    <p class="flex justify-between"><span>Nội dung:</span> <b id="bank-memo" class="text-yellow-400 uppercase italic">LOGIN ĐỂ LẤY</b></p>
                 </div>
+                <label class="text-[10px] text-gray-400 ml-1">Bạn đã chuyển bao nhiêu?</label>
+                <select id="bank-val-select">
+                    <option value="10000">Đã Bank 10,000đ</option>
+                    <option value="20000">Đã Bank 20,000đ</option>
+                    <option value="50000">Đã Bank 50,000đ</option>
+                    <option value="100000">Đã Bank 100,000đ</option>
+                    <option value="200000">Đã Bank 200,000đ</option>
+                    <option value="500000">Đã Bank 500,000đ</option>
+                </select>
                 <button onclick="sendRequest('BANK')" class="w-full border-2 border-yellow-400 text-yellow-400 py-3 rounded-xl font-bold text-[10px] uppercase">XÁC NHẬN ĐÃ BANK ✅</button>
-                <p class="text-[9px] text-red-500 mt-4 text-center font-bold italic">⚠️ Sau 23:00 Bank sẽ ngừng duyệt đến sáng mai.</p>
             </div>
         </div>
 
@@ -82,7 +89,7 @@
 
     <div id="auth-modal" class="fixed inset-0 bg-black/95 hidden z-[100] flex items-center justify-center p-4">
         <div class="glass p-8 w-full max-w-sm text-center">
-            <h2 class="text-xl font-bold text-yellow-400 mb-6 uppercase">TÀI KHOẢN</h2>
+            <h2 class="text-xl font-bold text-yellow-400 mb-6 uppercase tracking-widest">TÀI KHOẢN</h2>
             <input type="text" id="auth-user" placeholder="Tên tài khoản...">
             <input type="password" id="auth-pass" placeholder="Mật khẩu...">
             <button onclick="authAction()" class="btn-main w-full py-4 rounded-xl uppercase text-xs mt-4">XÁC NHẬN</button>
@@ -139,7 +146,7 @@
     {n:"Flame VV", p:100000, img:"https://i.postimg.cc/8zyXdYst/Anh-chup-man-hinh-2026-01-28-113555.png"},
     {n:"Blade VV", p:20000, img:"https://i.postimg.cc/BvXYmC1p/Anh-chup-man-hinh-2026-01-28-113602.png"}
 ],
-                gp: [
+           gp: [
                 {n:"Fruit Notifier", p:370000, img:"https://i.postimg.cc/VNdGKFbx/Anh-chup-man-hinh-2026-01-28-113608.png"},
                 {n:"Dark Blade", p:200000, img:"https://i.postimg.cc/d0LH59yQ/Anh-chup-man-hinh-2026-01-28-113612.png"},
                 {n:"X2 Mastery VV", p:54000, img:"https://i.postimg.cc/44z82ym7/Anh-chup-man-hinh-2026-01-28-113623.png"},
@@ -148,7 +155,8 @@
                 {n:"X2 Drop VV", p:40000, img:"https://i.postimg.cc/PrTSgHwD/Anh-chup-man-hinh-2026-01-28-113631.png"},
                 {n:"Fast Boat VV", p:40000, img:"https://i.postimg.cc/HkLBLt3Y/Anh-chup-man-hinh-2026-01-28-113635.png"}
             ],
-           ct: [
+
+            ct: [
                 {n:"Cày Thuê Level 1-2800", p:20000},
                 {n:"Lấy Võ V2 (Tặng Full Chiêu)", p:30000},
                 {n:"Thức Tỉnh Trái V2 (Lửa-Chấn Động)", p:20000},
@@ -174,28 +182,27 @@
             if(!currentUser) return openAuth();
             const s = await db.ref('users/' + currentUser.user).get();
             const bal = s.val().balance || 0;
-            if(bal < price) return alert("Không đủ tiền!");
+            if(bal < price) return alert("Hết tiền rồi! Nạp thêm đi bạn.");
 
             let infoGame = "";
             let discordMsg = "";
 
             if(type === 'ct') {
-                const tk = prompt("Nhập TÀI KHOẢN (Roblox):"); if(!tk) return;
-                const mk = prompt("Nhập MẬT KHẨU:"); if(!mk) return;
+                const tk = prompt("NHẬP TÀI KHOẢN GAME (ROBLOX):"); if(!tk) return;
+                const mk = prompt("NHẬP MẬT KHẨU GAME:"); if(!mk) return;
                 infoGame = `TK: ${tk} | MK: ${mk}`;
-                discordMsg = `⚔️ **CÀY THUÊ:** ${name}\n- TK: \`${tk}\`\n- MK: \`${mk}\`\n- Shop: \`${currentUser.user}\``;
+                discordMsg = `⚔️ **CÀY THUÊ:** ${name}\n- TK: \`${tk}\`\n- MK: \`${mk}\`\n- Khách: \`${currentUser.user}\``;
             } else {
-                const ingame = prompt("Nhập Tên Nhân Vật (Username) để Nghĩa tặng đồ:");
-                if(!ingame) return;
+                const ingame = prompt("NHẬP TÊN NHÂN VẬT ĐỂ NGHĨA KẾT BẠN:"); if(!ingame) return;
                 infoGame = `Tên NV: ${ingame}`;
-                discordMsg = `🍎 **GAMEPASS/VV:** ${name}\n- Tên NV: \`${ingame}\`\n- Shop: \`${currentUser.user}\``;
+                discordMsg = `🍎 **GIFT ĐỒ:** ${name}\n- Tên NV: \`${ingame}\`\n- Khách: \`${currentUser.user}\``;
             }
 
-            if(confirm(`Xác nhận mua ${name}?`)) {
+            if(confirm(`Mua ${name}?`)) {
                 await db.ref('users/' + currentUser.user).update({ balance: bal - price });
                 await db.ref('orders/' + Date.now()).set({ user: currentUser.user, item: name, info: infoGame, status: 'Đang xử lý', time: new Date().toLocaleString() });
                 fetch(DISCORD_WEBHOOK, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ content: discordMsg }) });
-                alert("Mua thành công! Nghĩa đã nhận thông báo.");
+                alert("Mua thành công! Chờ Nghĩa xử lý nhé.");
                 showStatus();
             }
         }
@@ -204,13 +211,18 @@
             if(!currentUser) return openAuth();
             const id = Date.now();
             if(type === 'BANK') {
-                await db.ref('requests/' + id).set({ id, user: currentUser.user, type: 'BANKING', info: 'Báo đã bank Agribank', status: 'Chờ duyệt', time: new Date().toLocaleString() });
-                alert("Đã gửi thông báo cho Nghĩa!");
+                const amount = document.getElementById('bank-val-select').value;
+                await db.ref('requests/' + id).set({ 
+                    id, user: currentUser.user, type: 'BANKING', 
+                    amount: parseInt(amount), status: 'Chờ duyệt', time: new Date().toLocaleString() 
+                });
+                alert("Đã gửi báo Bank! Nghĩa sẽ check và cộng tiền ngay.");
             } else {
                 const pin = document.getElementById('card-pin').value, seri = document.getElementById('card-seri').value;
-                if(!pin || !seri) return alert("Nhập đủ PIN và Seri!");
+                if(!pin || !seri) return alert("Nhập đủ PIN và Seri thẻ!");
                 const f = new FormData();
-                f.append('telco', document.getElementById('card-telco').value); f.append('val', document.getElementById('card-val').value);
+                f.append('telco', document.getElementById('card-telco').value); 
+                f.append('val', document.getElementById('card-val').value);
                 f.append('pin', pin); f.append('seri', seri); f.append('user', currentUser.user);
                 fetch('napthe.php', { method: 'POST', body: f }).then(() => alert("Đã gửi thẻ!"));
             }
@@ -235,7 +247,7 @@
             const u = document.getElementById('auth-user').value.trim(), p = document.getElementById('auth-pass').value.trim();
             if(!u || !p) return alert("Nhập đủ!");
             const ref = db.ref('users/' + u), s = await ref.get();
-            if(s.exists() && s.val().pass !== p) return alert("Sai pass!");
+            if(s.exists() && s.val().pass !== p) return alert("Sai mật khẩu!");
             if(!s.exists()) await ref.set({ user: u, pass: p, balance: 0 });
             localStorage.setItem('bap_user', JSON.stringify({user:u})); location.reload();
         }
