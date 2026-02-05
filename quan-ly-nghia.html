@@ -1,69 +1,123 @@
 <!DOCTYPE html>
-<html>
+<html lang="vi">
 <head>
-    <title>ADMIN SHOP BẮP</title>
+    <meta charset="UTF-8">
+    <title>QUẢN TRỊ VIÊN - SHOP BẮP</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
+    <style>
+        body { background: #0f172a; font-family: 'Segoe UI', sans-serif; color: #fff; }
+        .card { background: rgba(30, 41, 59, 0.7); border: 1px solid rgba(255,255,255,0.1); border-radius: 15px; padding: 20px; }
+    </style>
 </head>
-<body class="bg-gray-900 text-white p-5">
-    <h1 class="text-2xl font-bold mb-5 text-yellow-400">QUẢN LÝ ĐƠN HÀNG - SHOP BẮP</h1>
+<body class="p-4 md:p-8">
 
-    <div class="grid grid-cols-1 gap-5">
-        <div class="bg-gray-800 p-5 rounded-xl border border-yellow-500">
-            <h2 class="font-bold mb-3 text-green-400 uppercase">🔔 Yêu cầu nạp Bank (Duyệt tay)</h2>
-            <div id="bank-list" class="space-y-2"></div>
-        </div>
+    <div class="max-w-6xl mx-auto">
+        <h1 class="text-3xl font-black text-yellow-400 mb-8 flex items-center gap-3">
+            👑 HỆ THỐNG QUẢN LÝ SHOP BẮP
+        </h1>
 
-        <div class="bg-gray-800 p-5 rounded-xl border border-blue-500">
-            <h2 class="font-bold mb-3 text-blue-400 uppercase">⚔️ Đơn hàng cần xử lý</h2>
-            <div id="order-list" class="space-y-2"></div>
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            
+            <div class="card">
+                <h2 class="text-xl font-bold text-green-400 mb-4 border-b border-green-400/20 pb-2">🏧 DUYỆT NẠP BANK</h2>
+                <div id="bank-list" class="space-y-4">
+                    <p class="text-gray-500 italic">Đang tải yêu cầu...</p>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2 class="text-xl font-bold text-blue-400 mb-4 border-b border-blue-400/20 pb-2">⚔️ ĐƠN HÀNG MỚI</h2>
+                <div id="order-list" class="space-y-4">
+                    <p class="text-gray-500 italic">Đang tải đơn hàng...</p>
+                </div>
+            </div>
+
         </div>
     </div>
 
     <script>
+        // Cấu hình Firebase (Dùng chung với file index.html của Nghĩa)
         const firebaseConfig = { databaseURL: "https://shop-blox-fruit-trannghia-default-rtdb.firebaseio.com/" };
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
-        // Lấy danh sách bank
+        // 1. XỬ LÝ DUYỆT BANK
         db.ref('requests').on('value', s => {
             const list = document.getElementById('bank-list');
             list.innerHTML = "";
-            s.forEach(item => {
-                const d = item.val();
-                list.innerHTML += `<div class="bg-black/50 p-3 rounded flex justify-between">
-                    <span>${d.user} - ${d.info}</span>
-                    <button onclick="approveBank('${d.user}', '${item.key}')" class="bg-green-600 px-3 py-1 rounded text-xs">CỘNG TIỀN + DUYỆT</button>
-                </div>`;
+            const data = s.val();
+            if(!data) { list.innerHTML = "✅ Không có yêu cầu nạp tiền nào."; return; }
+
+            Object.keys(data).forEach(key => {
+                const item = data[key];
+                list.innerHTML += `
+                    <div class="bg-black/40 p-4 rounded-xl border-l-4 border-green-500 flex justify-between items-center">
+                        <div>
+                            <p class="font-bold text-yellow-400">${item.user}</p>
+                            <p class="text-lg">Bank: <span class="text-green-400 font-black">${item.amount.toLocaleString()}đ</span></p>
+                            <p class="text-[10px] text-gray-500">${item.time}</p>
+                        </div>
+                        <div class="flex flex-col gap-2">
+                            <button onclick="approveBank('${item.user}', ${item.amount}, '${key}')" class="bg-green-600 hover:bg-green-500 px-4 py-2 rounded-lg text-xs font-bold transition">DUYỆT LUÔN</button>
+                            <button onclick="deleteReq('${key}')" class="text-red-400 text-[10px] underline">Xóa yêu cầu</button>
+                        </div>
+                    </div>`;
             });
         });
 
-        async function approveBank(user, key) {
-            const money = prompt("Nhập số tiền cần cộng cho " + user + ":");
-            if(money) {
-                const s = await db.ref('users/' + user).get();
-                const bal = s.val().balance || 0;
-                await db.ref('users/' + user).update({ balance: parseInt(bal) + parseInt(money) });
+        async function approveBank(user, amount, key) {
+            if(confirm(`Xác nhận cộng ${amount.toLocaleString()}đ cho tài khoản ${user}?`)) {
+                const userRef = db.ref('users/' + user);
+                const snapshot = await userRef.get();
+                const currentBalance = snapshot.val().balance || 0;
+                
+                await userRef.update({ balance: currentBalance + amount });
                 await db.ref('requests/' + key).remove();
-                alert("Đã duyệt và cộng tiền!");
+                alert("Đã cộng tiền thành công!");
             }
         }
 
-        // Lấy danh sách đơn hàng
+        function deleteReq(key) { if(confirm("Xóa yêu cầu này?")) db.ref('requests/' + key).remove(); }
+
+        // 2. XỬ LÝ ĐƠN HÀNG
         db.ref('orders').on('value', s => {
             const list = document.getElementById('order-list');
             list.innerHTML = "";
-            s.forEach(item => {
-                const d = item.val();
-                if(d.status === 'Đang xử lý') {
-                    list.innerHTML += `<div class="bg-black/50 p-3 rounded flex justify-between">
-                        <span>${d.user} mua ${d.item}</span>
-                        <button onclick="db.ref('orders/${item.key}').update({status:'Hoàn thành'})" class="bg-blue-600 px-3 py-1 rounded text-xs">XONG ✅</button>
-                    </div>`;
+            const data = s.val();
+            if(!data) { list.innerHTML = "☕ Chưa có đơn hàng nào."; return; }
+
+            Object.keys(data).reverse().forEach(key => {
+                const item = data[key];
+                if(item.status === 'Đang xử lý') {
+                    list.innerHTML += `
+                        <div class="bg-black/40 p-4 rounded-xl border-l-4 border-blue-500">
+                            <div class="flex justify-between mb-2">
+                                <span class="bg-blue-500/20 text-blue-400 px-2 py-1 rounded text-[10px] font-bold">${item.item}</span>
+                                <span class="text-[10px] text-gray-500">${item.time}</span>
+                            </div>
+                            <p class="text-sm mb-2">👤 Khách: <b class="text-yellow-400">${item.user}</b></p>
+                            <div class="bg-white/5 p-3 rounded-lg border border-dashed border-white/10 mb-3">
+                                <p class="text-xs text-gray-300">Thông tin nhận hàng:</p>
+                                <p class="text-sm font-mono text-green-400 break-all">${item.info}</p>
+                            </div>
+                            <div class="flex gap-2">
+                                <button onclick="completeOrder('${key}')" class="flex-1 bg-blue-600 hover:bg-blue-500 py-2 rounded font-bold text-xs uppercase">XONG ✅</button>
+                                <button onclick="deleteOrder('${key}')" class="bg-red-900/50 hover:bg-red-600 px-3 rounded transition">✕</button>
+                            </div>
+                        </div>`;
                 }
             });
         });
+
+        async function completeOrder(key) {
+            if(confirm("Xác nhận đã hoàn thành đơn này?")) {
+                await db.ref('orders/' + key).update({ status: 'Hoàn thành' });
+            }
+        }
+
+        function deleteOrder(key) { if(confirm("Xóa bỏ đơn hàng này?")) db.ref('orders/' + key).remove(); }
     </script>
 </body>
 </html>
