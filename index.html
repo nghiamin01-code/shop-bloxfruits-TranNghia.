@@ -249,7 +249,7 @@
             } else {
                 const pin = document.getElementById('card-pin').value, seri = document.getElementById('card-seri').value;
                 if(!pin || !seri) return alert("Nhập đủ thẻ!");
-                fetch('napthe.php', { method: 'POST' }).then(() => alert("Đã gửi thẻ!"));
+                fetch('api/napthe.php', { method: 'POST' }).then(() => alert("Đã gửi thẻ!"));
             }
         }
 
