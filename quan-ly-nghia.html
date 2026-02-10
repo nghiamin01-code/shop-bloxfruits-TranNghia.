@@ -2,122 +2,248 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>QUẢN TRỊ VIÊN - SHOP BẮP</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        body { background: #0f172a; font-family: 'Segoe UI', sans-serif; color: #fff; }
-        .card { background: rgba(30, 41, 59, 0.7); border: 1px solid rgba(255,255,255,0.1); border-radius: 15px; padding: 20px; }
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap');
+        body { font-family: 'Inter', sans-serif; background-color: #0f172a; color: #f8fafc; }
+        .glass-card { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.1); border-radius: 24px; }
+        .status-pill { padding: 4px 12px; border-radius: 9999px; font-size: 11px; font-weight: 800; text-transform: uppercase; }
+        .tab-btn.active { background: #3b82f6; color: white; box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4); }
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-thumb { background: #334155; border-radius: 10px; }
     </style>
 </head>
-<body class="p-4 md:p-8">
+<body class="min-h-screen p-4 md:p-8">
 
-    <div class="max-w-6xl mx-auto">
-        <h1 class="text-3xl font-black text-yellow-400 mb-8 flex items-center gap-3">
-            👑 HỆ THỐNG QUẢN LÝ SHOP BẮP
-        </h1>
-
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            
-            <div class="card">
-                <h2 class="text-xl font-bold text-green-400 mb-4 border-b border-green-400/20 pb-2">🏧 DUYỆT NẠP BANK</h2>
-                <div id="bank-list" class="space-y-4">
-                    <p class="text-gray-500 italic">Đang tải yêu cầu...</p>
+    <div class="max-w-7xl mx-auto">
+        <!-- Header -->
+        <header class="flex flex-col md:flex-row justify-between items-center mb-10 gap-6">
+            <div class="flex items-center gap-4">
+                <div class="w-14 h-14 bg-yellow-400 rounded-2xl flex items-center justify-center text-slate-900 shadow-[0_0_20px_rgba(250,204,21,0.3)]">
+                    <i class="fas fa-crown text-2xl"></i>
+                </div>
+                <div>
+                    <h1 class="text-3xl font-black tracking-tighter text-white">SHOP BẮP <span class="text-yellow-400">ADMIN</span></h1>
+                    <p class="text-slate-400 text-xs font-bold uppercase tracking-widest">Hệ thống quản lý thời gian thực</p>
                 </div>
             </div>
 
-            <div class="card">
-                <h2 class="text-xl font-bold text-blue-400 mb-4 border-b border-blue-400/20 pb-2">⚔️ ĐƠN HÀNG MỚI</h2>
-                <div id="order-list" class="space-y-4">
-                    <p class="text-gray-500 italic">Đang tải đơn hàng...</p>
-                </div>
+            <div class="flex bg-slate-800/50 p-1.5 rounded-2xl border border-slate-700">
+                <button onclick="switchTab('bank')" id="btn-bank" class="tab-btn active px-6 py-2.5 rounded-xl text-sm font-bold transition-all">
+                    <i class="fas fa-university mr-2"></i>Duyệt Bank
+                </button>
+                <button onclick="switchTab('orders')" id="btn-orders" class="tab-btn px-6 py-2.5 rounded-xl text-sm font-bold transition-all">
+                    <i class="fas fa-shopping-cart mr-2"></i>Đơn Hàng
+                </button>
             </div>
+        </header>
 
+        <!-- Stats -->
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+            <div class="glass-card p-5 border-l-4 border-yellow-400">
+                <p class="text-[10px] font-bold text-slate-400 uppercase mb-1">Yêu cầu nạp</p>
+                <p id="count-bank" class="text-2xl font-black text-white">0</p>
+            </div>
+            <div class="glass-card p-5 border-l-4 border-blue-400">
+                <p class="text-[10px] font-bold text-slate-400 uppercase mb-1">Đơn chờ duyệt</p>
+                <p id="count-orders" class="text-2xl font-black text-white">0</p>
+            </div>
+            <div class="glass-card p-5 border-l-4 border-green-400">
+                <p class="text-[10px] font-bold text-slate-400 uppercase mb-1">Đã hoàn tất</p>
+                <p id="count-done" class="text-2xl font-black text-white">0</p>
+            </div>
+            <div class="glass-card p-5 border-l-4 border-indigo-400">
+                <p class="text-[10px] font-bold text-slate-400 uppercase mb-1">Trạng thái DB</p>
+                <p class="text-sm font-black text-green-400 uppercase">Online</p>
+            </div>
+        </div>
+
+        <!-- Main Content Area -->
+        <div class="grid grid-cols-1 gap-8">
+            <!-- Bank List Section -->
+            <section id="section-bank" class="space-y-4">
+                <div class="flex items-center justify-between px-2">
+                    <h2 class="font-black text-xl flex items-center gap-2"><i class="fas fa-money-check-alt text-green-400"></i> DUYỆT NẠP TIỀN</h2>
+                    <span class="text-xs text-slate-500 font-bold uppercase tracking-tighter">Tự động cập nhật mỗi 1s</span>
+                </div>
+                <div id="bank-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 text-slate-300 italic">
+                    Đang kết nối cơ sở dữ liệu...
+                </div>
+            </section>
+
+            <!-- Order List Section -->
+            <section id="section-orders" class="space-y-4 hidden">
+                <div class="flex items-center justify-between px-2">
+                    <h2 class="font-black text-xl flex items-center gap-2"><i class="fas fa-box-open text-blue-400"></i> ĐƠN HÀNG DỊCH VỤ</h2>
+                    <span class="text-xs text-slate-500 font-bold uppercase tracking-tighter">Xử lý ngay kẻo khách đợi</span>
+                </div>
+                <div id="order-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 text-slate-300 italic">
+                    Đang tải danh sách đơn hàng...
+                </div>
+            </section>
+        </div>
+    </div>
+
+    <!-- Notification Toast -->
+    <div id="toast" class="fixed bottom-10 right-10 translate-y-20 opacity-0 transition-all duration-500 z-50">
+        <div class="bg-blue-600 text-white px-6 py-4 rounded-2xl shadow-2xl flex items-center gap-4 border border-blue-400">
+            <i class="fas fa-bell animate-bounce"></i>
+            <span id="toast-msg" class="font-bold text-sm">Thông báo hệ thống</span>
         </div>
     </div>
 
     <script>
-        // Cấu hình Firebase (Dùng chung với file index.html của Nghĩa)
+        // --- CẤU HÌNH FIREBASE ---
         const firebaseConfig = { databaseURL: "https://shop-blox-fruit-trannghia-default-rtdb.firebaseio.com/" };
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
-        // 1. XỬ LÝ DUYỆT BANK
+        let currentTab = 'bank';
+
+        function switchTab(tab) {
+            currentTab = tab;
+            document.getElementById('section-bank').classList.toggle('hidden', tab !== 'bank');
+            document.getElementById('section-orders').classList.toggle('hidden', tab !== 'orders');
+            document.getElementById('btn-bank').classList.toggle('active', tab === 'bank');
+            document.getElementById('btn-orders').classList.toggle('active', tab === 'orders');
+        }
+
+        // --- 1. THEO DÕI NẠP BANK ---
         db.ref('requests').on('value', s => {
             const list = document.getElementById('bank-list');
-            list.innerHTML = "";
             const data = s.val();
-            if(!data) { list.innerHTML = "✅ Không có yêu cầu nạp tiền nào."; return; }
+            let count = 0;
+            list.innerHTML = "";
+
+            if(!data) {
+                list.innerHTML = `<div class="col-span-full glass-card p-10 text-center text-slate-500 font-bold">✅ Hiện tại không có yêu cầu nạp tiền nào.</div>`;
+                document.getElementById('count-bank').innerText = 0;
+                return;
+            }
 
             Object.keys(data).forEach(key => {
+                count++;
                 const item = data[key];
                 list.innerHTML += `
-                    <div class="bg-black/40 p-4 rounded-xl border-l-4 border-green-500 flex justify-between items-center">
-                        <div>
-                            <p class="font-bold text-yellow-400">${item.user}</p>
-                            <p class="text-lg">Bank: <span class="text-green-400 font-black">${item.amount.toLocaleString()}đ</span></p>
-                            <p class="text-[10px] text-gray-500">${item.time}</p>
+                    <div class="glass-card p-6 border-t-4 border-green-500 hover:scale-[1.02] transition-transform">
+                        <div class="flex justify-between items-start mb-4">
+                            <div>
+                                <p class="text-yellow-400 font-black text-lg">@${item.user}</p>
+                                <p class="text-[10px] text-slate-500 font-bold uppercase">${item.time}</p>
+                            </div>
+                            <span class="bg-green-500/10 text-green-400 px-3 py-1 rounded-lg font-black text-sm">+${item.amount.toLocaleString()}đ</span>
                         </div>
-                        <div class="flex flex-col gap-2">
-                            <button onclick="approveBank('${item.user}', ${item.amount}, '${key}')" class="bg-green-600 hover:bg-green-500 px-4 py-2 rounded-lg text-xs font-bold transition">DUYỆT LUÔN</button>
-                            <button onclick="deleteReq('${key}')" class="text-red-400 text-[10px] underline">Xóa yêu cầu</button>
+                        <div class="flex flex-col gap-2 mt-6">
+                            <button onclick="approveBank('${item.user}', ${item.amount}, '${key}')" class="w-full bg-green-600 hover:bg-green-500 text-white font-black py-3 rounded-xl shadow-lg shadow-green-900/20 transition-all active:scale-95">DUYỆT NGAY</button>
+                            <button onclick="deleteReq('${key}')" class="text-xs text-slate-500 font-bold hover:text-red-400 transition-colors uppercase tracking-widest mt-2">Từ chối & Xóa</button>
                         </div>
                     </div>`;
             });
+            document.getElementById('count-bank').innerText = count;
         });
 
         async function approveBank(user, amount, key) {
             if(confirm(`Xác nhận cộng ${amount.toLocaleString()}đ cho tài khoản ${user}?`)) {
-                const userRef = db.ref('users/' + user);
-                const snapshot = await userRef.get();
-                const currentBalance = snapshot.val().balance || 0;
-                
-                await userRef.update({ balance: currentBalance + amount });
-                await db.ref('requests/' + key).remove();
-                alert("Đã cộng tiền thành công!");
+                try {
+                    const userRef = db.ref('users/' + user);
+                    const snapshot = await userRef.get();
+                    const userData = snapshot.val() || { balance: 0 };
+                    const currentBalance = userData.balance || 0;
+                    
+                    await userRef.update({ balance: currentBalance + amount });
+                    await db.ref('requests/' + key).remove();
+                    showToast(`Đã cộng ${amount.toLocaleString()}đ cho ${user}!`);
+                } catch (e) {
+                    alert("Lỗi khi cộng tiền: " + e.message);
+                }
             }
         }
 
         function deleteReq(key) { if(confirm("Xóa yêu cầu này?")) db.ref('requests/' + key).remove(); }
 
-        // 2. XỬ LÝ ĐƠN HÀNG
+        // --- 2. THEO DÕI ĐƠN HÀNG ---
         db.ref('orders').on('value', s => {
             const list = document.getElementById('order-list');
-            list.innerHTML = "";
             const data = s.val();
-            if(!data) { list.innerHTML = "☕ Chưa có đơn hàng nào."; return; }
+            let countPending = 0;
+            let countDone = 0;
+            list.innerHTML = "";
+
+            if(!data) {
+                list.innerHTML = `<div class="col-span-full glass-card p-10 text-center text-slate-500 font-bold">☕ Chưa có đơn hàng nào trong hệ thống.</div>`;
+                document.getElementById('count-orders').innerText = 0;
+                return;
+            }
 
             Object.keys(data).reverse().forEach(key => {
                 const item = data[key];
                 if(item.status === 'Đang xử lý') {
+                    countPending++;
                     list.innerHTML += `
-                        <div class="bg-black/40 p-4 rounded-xl border-l-4 border-blue-500">
-                            <div class="flex justify-between mb-2">
-                                <span class="bg-blue-500/20 text-blue-400 px-2 py-1 rounded text-[10px] font-bold">${item.item}</span>
-                                <span class="text-[10px] text-gray-500">${item.time}</span>
+                        <div class="glass-card p-6 border-t-4 border-blue-500">
+                            <div class="flex justify-between items-center mb-4">
+                                <span class="bg-blue-500 text-white text-[10px] font-black px-2 py-1 rounded uppercase">${item.item}</span>
+                                <span class="text-[10px] text-slate-500 font-bold">${item.time}</span>
                             </div>
-                            <p class="text-sm mb-2">👤 Khách: <b class="text-yellow-400">${item.user}</b></p>
-                            <div class="bg-white/5 p-3 rounded-lg border border-dashed border-white/10 mb-3">
-                                <p class="text-xs text-gray-300">Thông tin nhận hàng:</p>
-                                <p class="text-sm font-mono text-green-400 break-all">${item.info}</p>
+                            <p class="text-sm mb-4">👤 Khách: <b class="text-yellow-400 font-black">${item.user}</b></p>
+                            
+                            <div class="bg-slate-900/80 p-4 rounded-xl border border-slate-700 mb-6 relative group">
+                                <p class="text-[10px] text-slate-500 uppercase font-bold mb-1">Thông tin đăng nhập:</p>
+                                <p id="info-${key}" class="text-xs font-mono text-blue-300 break-all leading-relaxed">${item.info}</p>
+                                <button onclick="copyInfo('${key}')" class="absolute top-2 right-2 text-slate-600 hover:text-white transition-colors">
+                                    <i class="fas fa-copy"></i>
+                                </button>
                             </div>
+
                             <div class="flex gap-2">
-                                <button onclick="completeOrder('${key}')" class="flex-1 bg-blue-600 hover:bg-blue-500 py-2 rounded font-bold text-xs uppercase">XONG ✅</button>
-                                <button onclick="deleteOrder('${key}')" class="bg-red-900/50 hover:bg-red-600 px-3 rounded transition">✕</button>
+                                <button onclick="completeOrder('${key}')" class="flex-1 bg-blue-600 hover:bg-blue-500 text-white font-black py-3 rounded-xl transition-all shadow-lg shadow-blue-900/20 active:scale-95">XONG ✅</button>
+                                <button onclick="deleteOrder('${key}')" class="bg-slate-800 hover:bg-red-900/50 text-slate-400 px-4 rounded-xl transition-colors border border-slate-700">
+                                    <i class="fas fa-trash"></i>
+                                </button>
                             </div>
                         </div>`;
+                } else {
+                    countDone++;
                 }
             });
+            document.getElementById('count-orders').innerText = countPending;
+            document.getElementById('count-done').innerText = countDone;
         });
 
         async function completeOrder(key) {
-            if(confirm("Xác nhận đã hoàn thành đơn này?")) {
+            if(confirm("Đã trả xong đơn này cho khách?")) {
                 await db.ref('orders/' + key).update({ status: 'Hoàn thành' });
+                showToast("Đã cập nhật trạng thái đơn thành HOÀN THÀNH!");
             }
         }
 
-        function deleteOrder(key) { if(confirm("Xóa bỏ đơn hàng này?")) db.ref('orders/' + key).remove(); }
+        function deleteOrder(key) { if(confirm("Xóa bỏ vĩnh viễn đơn hàng này?")) db.ref('orders/' + key).remove(); }
+
+        // --- UTILS ---
+        function showToast(msg) {
+            const toast = document.getElementById('toast');
+            document.getElementById('toast-msg').innerText = msg;
+            toast.classList.remove('translate-y-20', 'opacity-0');
+            setTimeout(() => {
+                toast.classList.add('translate-y-20', 'opacity-0');
+            }, 3000);
+        }
+
+        function copyInfo(key) {
+            const text = document.getElementById('info-' + key).innerText;
+            const el = document.createElement('textarea');
+            el.value = text;
+            document.body.appendChild(el);
+            el.select();
+            document.execCommand('copy');
+            document.body.removeChild(el);
+            showToast("Đã copy thông tin tài khoản!");
+        }
     </script>
 </body>
 </html>
