@@ -18,6 +18,8 @@
         .tab-active { background: #facc15 !important; color: #000 !important; box-shadow: 0 0 15px rgba(250, 204, 21, 0.3); }
         input, select { background: rgba(255,255,255,0.05) !important; border: 1px solid rgba(255,255,255,0.1) !important; color: white !important; outline: none; transition: 0.2s; }
         input:focus { border-color: var(--primary) !important; }
+        
+        /* VÒNG QUAY CSS */
         .wheel-container { position: relative; width: 300px; height: 300px; margin: 20px auto; }
         #wheel { 
             width: 100%; height: 100%; border-radius: 50%; border: 8px solid #1e293b; 
@@ -25,15 +27,19 @@
             background: conic-gradient(#1e293b 0deg 60deg, #0f172a 60deg 120deg, #1e293b 120deg 180deg, #0f172a 180deg 240deg, #1e293b 240deg 300deg, #0f172a 300deg 360deg);
         }
         .p-img { position: absolute; width: 50px; height: 50px; left: 50%; top: 50%; margin: -25px; object-fit: contain; z-index: 10; }
-        .p1 { transform: rotate(0deg) translateY(-100px); }
+        .p1 { transform: rotate(0deg) translateY(-100px); } /* ROCKET */
         .p2 { transform: rotate(60deg) translateY(-100px); }
         .p3 { transform: rotate(120deg) translateY(-100px); }
         .p4 { transform: rotate(180deg) translateY(-100px); }
         .p5 { transform: rotate(240deg) translateY(-100px); }
         .p6 { transform: rotate(300deg) translateY(-100px); }
-        .pointer { position: absolute; top: -10px; left: 50%; transform: translateX(-50%); z-index: 50; width: 35px; }
+        
+        /* Mũi tên chỉ xuống */
+        .pointer { position: absolute; top: -25px; left: 50%; transform: translateX(-50%); z-index: 50; width: 40px; filter: drop-shadow(0 0 10px gold); }
+
         .denom-card { border: 2px solid transparent; transition: 0.3s; cursor: pointer; }
         .denom-card.selected { border-color: var(--primary); background: rgba(250, 204, 21, 0.15); }
+        
         .modal { position: fixed; inset: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(8px); z-index: 100; display: none; align-items: center; justify-content: center; padding: 20px; }
         .modal.active { display: flex; animation: fadeInModal 0.3s ease; }
         @keyframes fadeInModal { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
@@ -65,7 +71,7 @@
             </div>
 
             <div class="glass p-5 border-t-4 border-blue-500">
-                <h2 class="text-center font-extrabold text-[11px] mb-4 uppercase text-blue-400 tracking-widest">🎟️ NẠP THẺ CÀO</h2>
+                <h2 class="text-center font-extrabold text-[11px] mb-4 uppercase text-blue-400 tracking-widest">🎟️ NẠP THẺ CÀO (Thuế 20%)</h2>
                 <div class="space-y-4">
                     <select id="card-type" class="w-full p-3 rounded-xl text-xs font-bold">
                         <option value="VIETTEL">VIETTEL (Auto)</option>
@@ -73,19 +79,19 @@
                         <option value="MOBIFONE">MOBIFONE (Auto)</option>
                         <option value="ZING">THẺ ZING</option>
                     </select>
-                    <p class="text-[10px] font-bold text-gray-500 uppercase">Mệnh giá:</p>
-                    <div class="grid grid-cols-3 gap-2" id="denom-list">
-                        <div onclick="selectDenom(10000)" class="denom-card glass p-2 text-center rounded-xl" data-val="10000"><span class="block text-[10px] font-black">8K</span></div>
-                        <div onclick="selectDenom(20000)" class="denom-card glass p-2 text-center rounded-xl" data-val="20000"><span class="block text-[10px] font-black">16K</span></div>
-                        <div onclick="selectDenom(50000)" class="denom-card glass p-2 text-center rounded-xl" data-val="50000"><span class="block text-[10px] font-black">40K</span></div>
-                        <div onclick="selectDenom(100000)" class="denom-card glass p-2 text-center rounded-xl" data-val="100000"><span class="block text-[10px] font-black">80K</span></div>
-                        <div onclick="selectDenom(200000)" class="denom-card glass p-2 text-center rounded-xl" data-val="200000"><span class="block text-[10px] font-black">160K</span></div>
-                        <div onclick="selectDenom(500000)" class="denom-card glass p-2 text-center rounded-xl" data-val="500000"><span class="block text-[10px] font-black">400K</span></div>
+                    <p class="text-[10px] font-bold text-gray-500 uppercase italic">Thực nhận (80%):</p>
+                    <div class="grid grid-cols-3 gap-2" id="denom-list-card">
+                        <div onclick="selectDenom(10000, 'card')" class="denom-card card-item glass p-2 text-center rounded-xl" data-val="10000"><span class="block text-[10px] font-black">8K</span><span class="text-[8px] opacity-40">10k gốc</span></div>
+                        <div onclick="selectDenom(20000, 'card')" class="denom-card card-item glass p-2 text-center rounded-xl" data-val="20000"><span class="block text-[10px] font-black">16K</span><span class="text-[8px] opacity-40">20k gốc</span></div>
+                        <div onclick="selectDenom(50000, 'card')" class="denom-card card-item glass p-2 text-center rounded-xl" data-val="50000"><span class="block text-[10px] font-black">40K</span><span class="text-[8px] opacity-40">50k gốc</span></div>
+                        <div onclick="selectDenom(100000, 'card')" class="denom-card card-item glass p-2 text-center rounded-xl" data-val="100000"><span class="block text-[10px] font-black">80K</span><span class="text-[8px] opacity-40">100k gốc</span></div>
+                        <div onclick="selectDenom(200000, 'card')" class="denom-card card-item glass p-2 text-center rounded-xl" data-val="200000"><span class="block text-[10px] font-black">160K</span><span class="text-[8px] opacity-40">200k gốc</span></div>
+                        <div onclick="selectDenom(500000, 'card')" class="denom-card card-item glass p-2 text-center rounded-xl" data-val="500000"><span class="block text-[10px] font-black">400K</span><span class="text-[8px] opacity-40">500k gốc</span></div>
                     </div>
                     <div class="space-y-2">
                         <input type="text" id="card-code" placeholder="Mã thẻ" class="w-full p-3 rounded-xl text-xs">
                         <input type="text" id="card-seri" placeholder="Số seri" class="w-full p-3 rounded-xl text-xs">
-                        <button onclick="sendCardRequest()" class="btn-main w-full py-3.5 text-[11px] uppercase tracking-tighter">Nạp Thẻ</button>
+                        <button onclick="sendCardRequest()" class="btn-main w-full py-3.5 text-[11px] uppercase tracking-tighter">Gửi Thẻ Ngay</button>
                     </div>
                 </div>
             </div>
@@ -103,7 +109,7 @@
                 <button onclick="showWheelSection()" class="tab-btn px-5 py-3.5 glass rounded-xl text-[10px] font-bold uppercase text-yellow-400 border-yellow-400/20 whitespace-nowrap" id="t-spin">🎲 VÒNG QUAY</button>
                 <button onclick="render('gp')" class="tab-btn px-5 py-3.5 glass rounded-xl text-[10px] font-bold uppercase whitespace-nowrap" id="t-gp">💎 GAMEPASS</button>
                 <button onclick="render('ct')" class="tab-btn px-5 py-3.5 glass rounded-xl text-[10px] font-bold uppercase whitespace-nowrap" id="t-ct">⚔️ CÀY THUÊ</button>
-                <button onclick="showHistory()" class="tab-btn px-5 py-3.5 glass rounded-xl text-[10px] font-bold uppercase whitespace-nowrap" id="t-history">⌛ LỊCH SỬ</button>
+                <button id="t-history" onclick="showHistory()" class="tab-btn px-5 py-3.5 glass rounded-xl text-[10px] font-bold uppercase whitespace-nowrap">⌛ LỊCH SỬ</button>
             </div>
 
             <div id="main-content" class="min-h-[500px]"></div>
@@ -112,7 +118,7 @@
         <!-- CỘT PHẢI -->
         <div class="lg:col-span-3 space-y-6">
             <div class="glass p-5 border-t-4 border-green-500">
-                <h2 class="text-center font-extrabold text-[11px] mb-4 uppercase text-green-400 tracking-widest">💳 BANKING / MOMO</h2>
+                <h2 class="text-center font-extrabold text-[11px] mb-4 uppercase text-green-400 tracking-widest">💳 BANKING (100% GIÁ TRỊ)</h2>
                 <div class="bg-black/40 p-5 rounded-2xl mb-5 space-y-3 border border-white/5">
                     <div class="flex justify-between items-center"><span class="text-[10px] opacity-50 uppercase">Ngân hàng</span> <b class="text-[11px]">AGRIBANK</b></div>
                     <div class="flex justify-between items-center"><span class="text-[10px] opacity-50 uppercase">Số tài khoản</span> <b class="text-yellow-400 text-[13px] tracking-wider select-all">2208205353447</b></div>
@@ -122,8 +128,22 @@
                         <b id="bank-memo" class="text-yellow-400 text-[10px] italic">Đăng nhập để xem</b>
                     </div>
                 </div>
+
+                <div class="space-y-4 mb-5">
+                    <p class="text-[10px] font-bold text-gray-500 uppercase italic">Chọn số tiền nạp:</p>
+                    <div class="grid grid-cols-2 gap-2" id="denom-list-bank">
+                        <div onclick="selectDenom(20000, 'bank')" class="denom-card bank-item glass p-2 text-center rounded-xl" data-val="20000"><span class="block text-[10px] font-black">20.000đ</span></div>
+                        <div onclick="selectDenom(50000, 'bank')" class="denom-card bank-item glass p-2 text-center rounded-xl" data-val="50000"><span class="block text-[10px] font-black">50.000đ</span></div>
+                        <div onclick="selectDenom(100000, 'bank')" class="denom-card bank-item glass p-2 text-center rounded-xl" data-val="100000"><span class="block text-[10px] font-black">100.000đ</span></div>
+                        <div onclick="selectDenom(200000, 'bank')" class="denom-card bank-item glass p-2 text-center rounded-xl" data-val="200000"><span class="block text-[10px] font-black">200.000đ</span></div>
+                        <div onclick="selectDenom(500000, 'bank')" class="denom-card bank-item glass p-2 text-center rounded-xl" data-val="500000"><span class="block text-[10px] font-black">500.000đ</span></div>
+                        <div onclick="selectDenom(1000000, 'bank')" class="denom-card bank-item glass p-2 text-center rounded-xl" data-val="1000000"><span class="block text-[10px] font-black">1.000.000đ</span></div>
+                    </div>
+                    <p class="text-[9px] text-red-500 font-bold bg-red-500/5 p-2 rounded-lg border border-red-500/10">⚠️ CẢNH BÁO: Chọn sai mệnh giá hoặc sai nội dung chuyển khoản sẽ bị MẤT TIỀN. Admin không chịu trách nhiệm!</p>
+                </div>
+
                 <button onclick="sendBankRequest()" class="btn-main w-full py-4 text-[10px] uppercase">Tôi Đã Chuyển Khoản</button>
-                <a href="https://www.facebook.com/tran.quang.nghia.42296" target="_blank" class="block mt-3 w-full text-center border border-green-500/20 text-green-400 py-3 rounded-xl font-bold text-[9px] uppercase hover:bg-green-500 hover:text-black transition">Hỗ trợ Admin</a>
+                <a href="https://www.facebook.com/tran.quang.nghia.42296?locale=vi_VN" target="_blank" class="block mt-3 w-full text-center border border-green-500/20 text-green-400 py-3 rounded-xl font-bold text-[9px] uppercase hover:bg-green-500 hover:text-black transition">Hỗ trợ Admin</a>
             </div>
         </div>
     </div>
@@ -167,7 +187,7 @@
             </div>
             <div id="field-ingame" class="hidden mb-4">
                 <p class="text-[9px] mb-2 font-bold opacity-60 uppercase">Tên nhân vật (Gamepass):</p>
-                <input type="text" id="buy-ingame" class="w-full p-3.5 rounded-xl text-sm" placeholder="Tên hiển thị để kết bạn">
+                <input type="text" id="buy-ingame" class="w-full p-3.5 rounded-xl text-sm" placeholder="Tên hiển thị để gifs">
             </div>
             <div class="flex gap-3 mt-8">
                 <button onclick="closeModal('buy-modal')" class="flex-1 bg-white/5 py-3.5 rounded-xl text-[10px] font-bold uppercase">Hủy</button>
@@ -177,14 +197,14 @@
     </div>
 
     <script>
-        // CONFIG
-        const WEBHOOK_URL = "https://discord.com/api/webhooks/1470714946823393427/loRGDD5-A1J4x6-BQcAmZ_Q1hFQo8iMoNxA_46CVwyYIGgHN4XhFucbDhPTginKt1Na4";
+        const WEBHOOK_URL = "https://discord.com/api/webhooks/1470797738403823769/ogzC9gRm_kniAEgVbz4pWO4G0ASwNsW3Ptgg_hPY7VdQzoYBycUMq36oWEwNfH6aQJLm";
         const firebaseConfig = { databaseURL: "https://shop-blox-fruit-trannghia-default-rtdb.firebaseio.com/" };
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
         let currentUser = JSON.parse(localStorage.getItem('bap_user'));
-        let selectedAmount = 0;
+        let selectedCardAmount = 0;
+        let selectedBankAmount = 0;
         let currentItem = null;
         let currentRotation = 0;
 
@@ -283,7 +303,7 @@
             const html = items[type].map(i => `
                 <div class="glass p-4 group">
                     <div class="bg-white/5 p-4 rounded-xl mb-3 flex justify-center">
-                        <img src="${i.img}" class="h-24 object-contain group-hover:scale-110 transition">
+                        <img src="${i.img || 'https://i.postimg.cc/fknWZvW0/Anh-chup-man-hinh-2026-02-08-205850.png'}" class="h-24 object-contain group-hover:scale-110 transition">
                     </div>
                     <h3 class="text-[10px] font-bold uppercase">${i.n}</h3>
                     <p class="text-yellow-400 font-black text-sm my-2">${i.p.toLocaleString()}đ</p>
@@ -296,12 +316,9 @@
             if(!currentUser) return toggleAuthModal();
             currentItem = { name, price, type };
             document.getElementById('buy-title').innerText = name;
-            
-            // Nếu là Gamepass thì hiện field nhân vật, còn lại hiện field tài khoản/mk
             document.getElementById('field-tk').classList.toggle('hidden', type === 'gp');
             document.getElementById('field-mk').classList.toggle('hidden', type === 'gp');
             document.getElementById('field-ingame').classList.toggle('hidden', type !== 'gp');
-            
             document.getElementById('buy-modal').classList.add('active');
         }
 
@@ -310,54 +327,38 @@
             const bal = snap.val().balance;
             if(bal < currentItem.price) return alert("Bạn không đủ tiền!");
 
-            const tk = document.getElementById('buy-tk').value;
-            const mk = document.getElementById('buy-mk').value;
-            const ingame = document.getElementById('buy-ingame').value;
-
-            // Update Firebase
+            const info = currentItem.type === 'gp' ? `Ingame: ${document.getElementById('buy-ingame').value}` : `TK: ${document.getElementById('buy-tk').value} | MK: ${document.getElementById('buy-mk').value}`;
+            
             await db.ref('users/'+currentUser.user).update({ balance: bal - currentItem.price });
             const orderId = Date.now();
-            const orderData = {
+            await db.ref('orders/'+orderId).set({
                 user: currentUser.user,
                 item: currentItem.name,
-                info: currentItem.type === 'gp' ? `Ingame: ${ingame}` : `TK: ${tk} | MK: ${mk}`,
+                info: info,
                 status: 'Chờ xử lý',
                 time: new Date().toLocaleString()
-            };
-            await db.ref('orders/'+orderId).set(orderData);
-
-            // Gửi Discord
-            fetch(WEBHOOK_URL, {
-                method: "POST",
-                headers: {"Content-Type":"application/json"},
-                body: JSON.stringify({
-                    content: "🔔 **ĐƠN HÀNG MỚI**",
-                    embeds: [{
-                        title: currentItem.name,
-                        color: 16776960,
-                        fields: [
-                            {name: "User Shop", value: currentUser.user},
-                            {name: "Thông tin", value: orderData.info}
-                        ]
-                    }]
-                })
             });
 
-            alert("Mua thành công! Vui lòng chờ Admin xử lý trong 15-30p.");
+            alert("Mua thành công! Vui lòng chờ xử lý.");
             location.reload();
         }
 
-        // NẠP THẺ
-        function selectDenom(v) {
-            selectedAmount = v;
-            document.querySelectorAll('.denom-card').forEach(c => c.classList.toggle('selected', c.dataset.val == v));
+        // CHỌN MỆNH GIÁ (Update cho cả Card và Bank)
+        function selectDenom(v, type) {
+            if(type === 'card') {
+                selectedCardAmount = v;
+                document.querySelectorAll('.card-item').forEach(c => c.classList.toggle('selected', c.dataset.val == v));
+            } else {
+                selectedBankAmount = v;
+                document.querySelectorAll('.bank-item').forEach(c => c.classList.toggle('selected', c.dataset.val == v));
+            }
         }
 
         async function sendCardRequest() {
             if(!currentUser) return toggleAuthModal();
             const code = document.getElementById('card-code').value;
             const seri = document.getElementById('card-seri').value;
-            if(!selectedAmount || !code || !seri) return alert("Thiếu thông tin thẻ!");
+            if(!selectedCardAmount || !code || !seri) return alert("Thiếu thông tin thẻ!");
 
             fetch(WEBHOOK_URL, {
                 method: "POST",
@@ -365,10 +366,12 @@
                 body: JSON.stringify({
                     embeds: [{
                         title: "💳 NẠP THẺ MỚI",
+                        color: 3447003,
                         fields: [
                             {name: "User", value: currentUser.user, inline: true},
                             {name: "Loại", value: document.getElementById('card-type').value, inline: true},
-                            {name: "Mệnh giá", value: selectedAmount + "đ", inline: true},
+                            {name: "Gốc", value: selectedCardAmount.toLocaleString() + "đ", inline: true},
+                            {name: "Thực nhận (80%)", value: (selectedCardAmount * 0.8).toLocaleString() + "đ", inline: true},
                             {name: "Mã/Seri", value: `${code} / ${seri}`}
                         ]
                     }]
@@ -379,15 +382,18 @@
 
         async function sendBankRequest() {
             if(!currentUser) return toggleAuthModal();
+            if(!selectedBankAmount) return alert("Vui lòng chọn mệnh giá bạn đã Bank!");
+            
             fetch(WEBHOOK_URL, {
                 method: "POST",
                 headers: {"Content-Type":"application/json"},
-                body: JSON.stringify({ content: `💰 **@${currentUser.user}** vừa báo đã BANK thành công. Admin check stk nhé!` })
+                body: JSON.stringify({ 
+                    content: `💰 **@${currentUser.user}** báo đã BANK **${selectedBankAmount.toLocaleString()}đ**. Admin check STK nhé!` 
+                })
             });
-            alert("Đã gửi thông báo cho Admin.");
+            alert("Đã gửi thông báo. Admin sẽ cộng tiền sau khi check bank.");
         }
 
-        // HELPERS
         function toggleAuthModal() { document.getElementById('auth-modal').classList.toggle('active'); }
         function switchAuth(m) {
             document.getElementById('auth-login').classList.toggle('hidden', m!=='login');
@@ -396,51 +402,48 @@
         function closeModal(id) { document.getElementById(id).classList.remove('active'); }
         function setActiveTab(id) {
             document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('tab-active'));
-            document.getElementById(id).classList.add('tab-active');
+            if(document.getElementById(id)) document.getElementById(id).classList.add('tab-active');
         }
 
         async function showHistory() {
+            if(!currentUser) return toggleAuthModal();
             setActiveTab('t-history');
-            const snap = await db.ref('orders').orderByChild('user').equalTo(currentUser?.user || "").get();
-            let html = `<div class="glass p-6"><h2 class="text-xs font-black uppercase mb-4 text-yellow-400 italic">Đơn hàng của bạn</h2>`;
+            const snap = await db.ref('orders').orderByChild('user').equalTo(currentUser.user).get();
+            let html = `<div class="glass p-6 animate-fadeIn"><h2 class="text-xs font-black uppercase mb-4 text-yellow-400 italic">Đơn hàng của bạn</h2>`;
             if(!snap.exists()) html += `<p class="opacity-40 text-[10px]">Chưa có đơn nào.</p>`;
             else snap.forEach(s => {
                 const o = s.val();
                 html += `
                     <div class="bg-black/40 p-4 rounded-xl mb-3 border border-white/5 text-[10px]">
                         <div class="flex justify-between"><b>${o.item}</b> <span class="text-yellow-400">${o.status}</span></div>
-                        <p class="opacity-50 mt-1">${o.time}</p>
+                        <p class="opacity-50 mt-1">${o.info}</p>
+                        <p class="opacity-30 mt-1 text-[8px]">${o.time}</p>
                     </div>`;
             });
             document.getElementById('main-content').innerHTML = html + `</div>`;
         }
 
-        // INITIALIZE
-        window.onload = () => {
-            updateUI();
-            render('fruit');
-            loadTopRecharge();
-        };
-
         async function loadTopRecharge() {
-            const snap = await db.ref('users').orderByChild('total_recharge').limitToLast(5).get();
-            let html = "";
-            let data = [];
-            snap.forEach(s => data.push(s.val()));
-            data.reverse().forEach((u, i) => {
-                html += `<div class="flex justify-between p-3 bg-white/5 rounded-xl border border-white/5">
-                    <span>#${i+1} <b>${u.user}</b></span>
-                    <span class="text-yellow-400 font-black">${u.total_recharge.toLocaleString()}đ</span>
-                </div>`;
+            // Theo dõi dữ liệu thực tế từ Firebase
+            db.ref('users').orderByChild('total_recharge').limitToLast(5).on('value', (snap) => {
+                let html = "";
+                let data = [];
+                snap.forEach(s => data.push(s.val()));
+                data.reverse().forEach((u, i) => {
+                    html += `<div class="flex justify-between p-3 bg-white/5 rounded-xl border border-white/5">
+                        <span>#${i+1} <b>${u.user}</b></span>
+                        <span class="text-yellow-400 font-black">${(u.total_recharge || 0).toLocaleString()}đ</span>
+                    </div>`;
+                });
+                document.getElementById('top-recharge').innerHTML = html || "Chưa có dữ liệu.";
             });
-            document.getElementById('top-recharge').innerHTML = html || "Chưa có dữ liệu.";
         }
 
         function showWheelSection() {
             setActiveTab('t-spin');
             document.getElementById('main-content').innerHTML = `
                 <div class="glass p-10 text-center animate-fadeIn">
-                    <h2 class="text-sm font-black text-yellow-400 mb-8 uppercase italic">Vòng Quay Nhân Phẩm (15K)</h2>
+                    <h2 class="text-sm font-black text-yellow-400 mb-8 uppercase italic">Vòng Quay Rocket (15K)</h2>
                     <div class="wheel-container">
                         <img src="https://cdn-icons-png.flaticon.com/512/8213/8213522.png" class="pointer">
                         <div id="wheel">
@@ -452,29 +455,48 @@
                             <img src="https://i.postimg.cc/BbMW7cLL/Anh-chup-man-hinh-2026-02-08-210758.png" class="p-img p6">
                         </div>
                     </div>
-                    <button id="spin-btn" onclick="spinWheel()" class="btn-main px-12 py-4 mt-8 uppercase text-[10px]">Quay</button>
+                    <button id="spin-btn" onclick="spinWheel()" class="btn-main px-12 py-4 mt-8 uppercase text-[10px]">Quay Ngay</button>
                 </div>`;
         }
 
         async function spinWheel() {
             if(!currentUser) return toggleAuthModal();
             const snap = await db.ref('users/'+currentUser.user).get();
-            if(snap.val().balance < 15000) return alert("Bạn không đủ 15K!");
+            const userData = snap.val();
+            if(userData.balance < 15000) return alert("Bạn không đủ 15K!");
 
             const btn = document.getElementById('spin-btn');
             btn.disabled = true;
-            await db.ref('users/'+currentUser.user).update({ balance: snap.val().balance - 15000 });
             
-            currentRotation += (360 * 5) + (Math.random() * 360);
+            // Trừ tiền ngay
+            await db.ref('users/'+currentUser.user).update({ balance: userData.balance - 15000 });
+            
+            // Logic quay: Tính toán để kim luôn dừng vào Rocket (p1 ở góc 0 độ)
+            // Rocket p1 ở góc 0. Để nó nằm dưới mũi tên, wheel phải quay về góc 0, 360, 720...
+            const rounds = 8; // Số vòng quay tối thiểu
+            currentRotation = (360 * rounds); // Dừng chính xác tại 0 độ (Rocket)
+            
             document.getElementById('wheel').style.transform = `rotate(${currentRotation}deg)`;
 
             setTimeout(() => {
-                alert("Chúc mừng! Bạn nhận được: Trái Rocket 🚀 (Đã gửi vào lịch sử)");
-                db.ref('orders/'+Date.now()).set({ user: currentUser.user, item: "Vòng Quay: Rocket 🚀", info: "Quà Vòng Quay", status: "Xong", time: new Date().toLocaleString() });
+                alert("CHÚC MỪNG! Bạn quay trúng: Trái Rocket 🚀");
+                db.ref('orders/'+Date.now()).set({ 
+                    user: currentUser.user, 
+                    item: "Vòng Quay: Rocket 🚀", 
+                    info: "Trúng thưởng vòng quay", 
+                    status: "Xong", 
+                    time: new Date().toLocaleString() 
+                });
                 btn.disabled = false;
                 updateUI();
-            }, 5500);
+            }, 5200);
         }
+
+        window.onload = () => {
+            updateUI();
+            render('fruit');
+            loadTopRecharge();
+        };
     </script>
 </body>
 </html>
