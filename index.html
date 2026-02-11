@@ -6,7 +6,6 @@
     <title>SHOP BẮP - BLOX FRUIT Uy Tín</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@600;700;800&family=Pacifico&display=swap" rel="stylesheet">
-    <!-- Sử dụng Firebase Compatibility Mode -->
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
     <style>
@@ -23,19 +22,24 @@
         .wheel-container { position: relative; width: 300px; height: 300px; margin: 20px auto; }
         #wheel { 
             width: 100%; height: 100%; border-radius: 50%; border: 8px solid #1e293b; 
-            position: relative; transition: transform 5s cubic-bezier(0.15, 0, 0.15, 1); 
+            position: relative; transition: transform 5s cubic-bezier(0.1, 0, 0.1, 1); 
             background: conic-gradient(#1e293b 0deg 60deg, #0f172a 60deg 120deg, #1e293b 120deg 180deg, #0f172a 180deg 240deg, #1e293b 240deg 300deg, #0f172a 300deg 360deg);
         }
         .p-img { position: absolute; width: 50px; height: 50px; left: 50%; top: 50%; margin: -25px; object-fit: contain; z-index: 10; }
-        .p1 { transform: rotate(0deg) translateY(-100px); } /* ROCKET */
-        .p2 { transform: rotate(60deg) translateY(-100px); }
-        .p3 { transform: rotate(120deg) translateY(-100px); }
-        .p4 { transform: rotate(180deg) translateY(-100px); }
-        .p5 { transform: rotate(240deg) translateY(-100px); }
-        .p6 { transform: rotate(300deg) translateY(-100px); }
+        /* Vị trí các phần thưởng */
+        .p1 { transform: rotate(0deg) translateY(-100px); }   /* Rocket (Target) */
+        .p2 { transform: rotate(60deg) translateY(-100px); }  
+        .p3 { transform: rotate(120deg) translateY(-100px); } 
+        .p4 { transform: rotate(180deg) translateY(-100px); } 
+        .p5 { transform: rotate(240deg) translateY(-100px); } 
+        .p6 { transform: rotate(300deg) translateY(-100px); } 
         
-        /* Mũi tên chỉ xuống */
-        .pointer { position: absolute; top: -25px; left: 50%; transform: translateX(-50%); z-index: 50; width: 40px; filter: drop-shadow(0 0 10px gold); }
+        /* Kim chỉ ở dưới hướng lên */
+        .pointer-bottom { 
+            position: absolute; bottom: -30px; left: 50%; transform: translateX(-50%); z-index: 50; 
+            width: 0; height: 0; border-left: 15px solid transparent; border-right: 15px solid transparent;
+            border-bottom: 40px solid #facc15; filter: drop-shadow(0 0 10px gold); 
+        }
 
         .denom-card { border: 2px solid transparent; transition: 0.3s; cursor: pointer; }
         .denom-card.selected { border-color: var(--primary); background: rgba(250, 204, 21, 0.15); }
@@ -44,6 +48,10 @@
         .modal.active { display: flex; animation: fadeInModal 0.3s ease; }
         @keyframes fadeInModal { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
         .no-scrollbar::-webkit-scrollbar { display: none; }
+        
+        /* Hiệu ứng nháy cảnh báo */
+        @keyframes blink-red { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+        .warning-blink { animation: blink-red 1.5s infinite; }
     </style>
 </head>
 <body class="notranslate">
@@ -71,7 +79,13 @@
             </div>
 
             <div class="glass p-5 border-t-4 border-blue-500">
-                <h2 class="text-center font-extrabold text-[11px] mb-4 uppercase text-blue-400 tracking-widest">🎟️ NẠP THẺ CÀO (Thuế 20%)</h2>
+                <h2 class="text-center font-extrabold text-[11px] mb-4 uppercase text-blue-400 tracking-widest">🎟️ NẠP THẺ CÀO</h2>
+                
+                <!-- CẢNH BÁO NẠP THẺ -->
+                <div class="bg-red-500/10 border border-red-500/50 p-3 rounded-xl mb-4 warning-blink">
+                    <p class="text-[9px] font-black text-red-500 uppercase leading-tight">⚠️ CẢNH BÁO: Chọn SAI MỆNH GIÁ hệ thống sẽ NUỐT THẺ. Admin không hỗ trợ trường hợp này!</p>
+                </div>
+
                 <div class="space-y-4">
                     <select id="card-type" class="w-full p-3 rounded-xl text-xs font-bold">
                         <option value="VIETTEL">VIETTEL (Auto)</option>
@@ -79,7 +93,6 @@
                         <option value="MOBIFONE">MOBIFONE (Auto)</option>
                         <option value="ZING">THẺ ZING</option>
                     </select>
-                    <p class="text-[10px] font-bold text-gray-500 uppercase italic">Thực nhận (80%):</p>
                     <div class="grid grid-cols-3 gap-2" id="denom-list-card">
                         <div onclick="selectDenom(10000, 'card')" class="denom-card card-item glass p-2 text-center rounded-xl" data-val="10000"><span class="block text-[10px] font-black">8K</span><span class="text-[8px] opacity-40">10k gốc</span></div>
                         <div onclick="selectDenom(20000, 'card')" class="denom-card card-item glass p-2 text-center rounded-xl" data-val="20000"><span class="block text-[10px] font-black">16K</span><span class="text-[8px] opacity-40">20k gốc</span></div>
@@ -101,7 +114,7 @@
         <div class="lg:col-span-6">
             <div class="bg-red-500/10 border border-red-500/30 p-4 rounded-2xl mb-8 flex items-center gap-4">
                 <span class="text-xl animate-bounce">⚠️</span>
-                <p class="text-[10px] font-bold text-red-400 uppercase leading-relaxed">Thông báo: Sau 23h hệ thống ngân hàng bảo trì. Vui lòng không chuyển khoản để tránh mất tiền!</p>
+                <p class="text-[10px] font-bold text-red-400 uppercase leading-relaxed">Thông báo: Sau 23h hệ thống ngân hàng bảo trì. Vui lòng không chuyển khoản!</p>
             </div>
 
             <div class="flex gap-2 mb-8 overflow-x-auto pb-2 no-scrollbar">
@@ -118,7 +131,7 @@
         <!-- CỘT PHẢI -->
         <div class="lg:col-span-3 space-y-6">
             <div class="glass p-5 border-t-4 border-green-500">
-                <h2 class="text-center font-extrabold text-[11px] mb-4 uppercase text-green-400 tracking-widest">💳 BANKING (100% GIÁ TRỊ)</h2>
+                <h2 class="text-center font-extrabold text-[11px] mb-4 uppercase text-green-400 tracking-widest">💳 BANKING</h2>
                 <div class="bg-black/40 p-5 rounded-2xl mb-5 space-y-3 border border-white/5">
                     <div class="flex justify-between items-center"><span class="text-[10px] opacity-50 uppercase">Ngân hàng</span> <b class="text-[11px]">AGRIBANK</b></div>
                     <div class="flex justify-between items-center"><span class="text-[10px] opacity-50 uppercase">Số tài khoản</span> <b class="text-yellow-400 text-[13px] tracking-wider select-all">2208205353447</b></div>
@@ -130,27 +143,22 @@
                 </div>
 
                 <div class="space-y-4 mb-5">
-                    <p class="text-[10px] font-bold text-gray-500 uppercase italic">Chọn số tiền nạp:</p>
                     <div class="grid grid-cols-2 gap-2" id="denom-list-bank">
                         <div onclick="selectDenom(20000, 'bank')" class="denom-card bank-item glass p-2 text-center rounded-xl" data-val="20000"><span class="block text-[10px] font-black">20.000đ</span></div>
                         <div onclick="selectDenom(50000, 'bank')" class="denom-card bank-item glass p-2 text-center rounded-xl" data-val="50000"><span class="block text-[10px] font-black">50.000đ</span></div>
                         <div onclick="selectDenom(100000, 'bank')" class="denom-card bank-item glass p-2 text-center rounded-xl" data-val="100000"><span class="block text-[10px] font-black">100.000đ</span></div>
-                        <div onclick="selectDenom(200000, 'bank')" class="denom-card bank-item glass p-2 text-center rounded-xl" data-val="200000"><span class="block text-[10px] font-black">200.000đ</span></div>
                         <div onclick="selectDenom(500000, 'bank')" class="denom-card bank-item glass p-2 text-center rounded-xl" data-val="500000"><span class="block text-[10px] font-black">500.000đ</span></div>
-                        <div onclick="selectDenom(1000000, 'bank')" class="denom-card bank-item glass p-2 text-center rounded-xl" data-val="1000000"><span class="block text-[10px] font-black">1.000.000đ</span></div>
                     </div>
-                    <p class="text-[9px] text-red-500 font-bold bg-red-500/5 p-2 rounded-lg border border-red-500/10">⚠️ CẢNH BÁO: Chọn sai mệnh giá hoặc sai nội dung chuyển khoản sẽ bị MẤT TIỀN. Admin không chịu trách nhiệm!</p>
                 </div>
 
                 <button onclick="sendBankRequest()" class="btn-main w-full py-4 text-[10px] uppercase">Tôi Đã Chuyển Khoản</button>
-                <a href="https://www.facebook.com/tran.quang.nghia.42296?locale=vi_VN" target="_blank" class="block mt-3 w-full text-center border border-green-500/20 text-green-400 py-3 rounded-xl font-bold text-[9px] uppercase hover:bg-green-500 hover:text-black transition">Hỗ trợ Admin</a>
             </div>
         </div>
     </div>
 
     <!-- MODAL ĐĂNG NHẬP -->
     <div id="auth-modal" class="modal">
-        <div class="glass p-8 w-full max-w-sm relative">
+        <div class="glass p-8 w-full max-sm relative">
             <button onclick="toggleAuthModal()" class="absolute top-4 right-4 text-white/30 hover:text-white">✕</button>
             <div id="auth-login">
                 <h2 class="text-xl font-black mb-4 text-yellow-400 uppercase italic">Đăng Nhập</h2>
@@ -164,7 +172,7 @@
             <div id="auth-reg" class="hidden">
                 <h2 class="text-xl font-black mb-4 text-blue-400 uppercase italic">Đăng Ký</h2>
                 <div class="space-y-4">
-                    <input type="text" id="reg-user" placeholder="Tên đăng ký (không dấu)" class="w-full p-3.5 rounded-xl text-sm">
+                    <input type="text" id="reg-user" placeholder="Tên đăng ký" class="w-full p-3.5 rounded-xl text-sm">
                     <input type="password" id="reg-pass" placeholder="Mật khẩu" class="w-full p-3.5 rounded-xl text-sm">
                     <button onclick="handleAuth('reg')" class="btn-main w-full py-3.5 text-xs uppercase tracking-widest !bg-blue-500 !text-white">Tạo tài khoản</button>
                     <p class="text-center text-[10px] opacity-50 mt-4">Đã có tài khoản? <span onclick="switchAuth('login')" class="text-blue-400 cursor-pointer font-bold underline">Đăng nhập</span></p>
@@ -197,7 +205,7 @@
     </div>
 
     <script>
-        const WEBHOOK_URL = "https://discord.com/api/webhooks/1470797738403823769/ogzC9gRm_kniAEgVbz4pWO4G0ASwNsW3Ptgg_hPY7VdQzoYBycUMq36oWEwNfH6aQJLm";
+        const WEBHOOK_URL = "https://discord.com/api/webhooks/1471049723095027782/eNZeKtTswwSsPWV2ifqJkfzpMqTRNwPsRXBnonsSzydh6ZrJquS6zF80naZGNdgmIt1T";
         const firebaseConfig = { databaseURL: "https://shop-blox-fruit-trannghia-default-rtdb.firebaseio.com/" };
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
@@ -206,6 +214,7 @@
         let selectedCardAmount = 0;
         let selectedBankAmount = 0;
         let currentItem = null;
+        let isSpinning = false;
         let currentRotation = 0;
 
         const items = {
@@ -255,7 +264,7 @@
                 {n:"Fast Boat VV", p:40000, img:"https://i.postimg.cc/HkLBLt3Y/Anh-chup-man-hinh-2026-01-28-113635.png"}
             ],
 
-            ct: [
+        ct: [
                 {n:"Cày Thuê Level 1-2800", p:20000},
                 {n:"Lấy Võ V2 (Tặng Full Chiêu)", p:30000},
                 {n:"Thức Tỉnh Trái V2 (Lửa-Chấn Động)", p:20000},
@@ -264,16 +273,12 @@
                 {n:"Lấy Song Kiếm Full", p:50000}
             ]
         };
-
-        // AUTH
         async function handleAuth(type) {
             const u = document.getElementById(type+'-user').value.trim().toLowerCase();
             const p = document.getElementById(type+'-pass').value.trim();
             if(!u || !p) return alert("Vui lòng điền đủ!");
-
             const ref = db.ref('users/'+u);
             const snap = await ref.get();
-
             if(type === 'login') {
                 if(!snap.exists() || snap.val().pass !== p) return alert("Sai thông tin!");
             } else {
@@ -297,10 +302,10 @@
             document.getElementById('bank-memo').innerText = "BAP " + data.user;
         }
 
-        // CONTENT
         function render(type) {
             setActiveTab('t-'+type);
-            const html = items[type].map(i => `
+            const list = items[type] || [];
+            const html = list.map(i => `
                 <div class="glass p-4 group">
                     <div class="bg-white/5 p-4 rounded-xl mb-3 flex justify-center">
                         <img src="${i.img || 'https://i.postimg.cc/fknWZvW0/Anh-chup-man-hinh-2026-02-08-205850.png'}" class="h-24 object-contain group-hover:scale-110 transition">
@@ -326,9 +331,7 @@
             const snap = await db.ref('users/'+currentUser.user).get();
             const bal = snap.val().balance;
             if(bal < currentItem.price) return alert("Bạn không đủ tiền!");
-
             const info = currentItem.type === 'gp' ? `Ingame: ${document.getElementById('buy-ingame').value}` : `TK: ${document.getElementById('buy-tk').value} | MK: ${document.getElementById('buy-mk').value}`;
-            
             await db.ref('users/'+currentUser.user).update({ balance: bal - currentItem.price });
             const orderId = Date.now();
             await db.ref('orders/'+orderId).set({
@@ -338,12 +341,10 @@
                 status: 'Chờ xử lý',
                 time: new Date().toLocaleString()
             });
-
             alert("Mua thành công! Vui lòng chờ xử lý.");
             location.reload();
         }
 
-        // CHỌN MỆNH GIÁ (Update cho cả Card và Bank)
         function selectDenom(v, type) {
             if(type === 'card') {
                 selectedCardAmount = v;
@@ -359,19 +360,17 @@
             const code = document.getElementById('card-code').value;
             const seri = document.getElementById('card-seri').value;
             if(!selectedCardAmount || !code || !seri) return alert("Thiếu thông tin thẻ!");
-
             fetch(WEBHOOK_URL, {
                 method: "POST",
                 headers: {"Content-Type":"application/json"},
                 body: JSON.stringify({
                     embeds: [{
                         title: "💳 NẠP THẺ MỚI",
-                        color: 3447003,
+                        color: 16711680,
                         fields: [
                             {name: "User", value: currentUser.user, inline: true},
                             {name: "Loại", value: document.getElementById('card-type').value, inline: true},
-                            {name: "Gốc", value: selectedCardAmount.toLocaleString() + "đ", inline: true},
-                            {name: "Thực nhận (80%)", value: (selectedCardAmount * 0.8).toLocaleString() + "đ", inline: true},
+                            {name: "Mệnh giá", value: selectedCardAmount.toLocaleString() + "đ", inline: true},
                             {name: "Mã/Seri", value: `${code} / ${seri}`}
                         ]
                     }]
@@ -382,16 +381,86 @@
 
         async function sendBankRequest() {
             if(!currentUser) return toggleAuthModal();
-            if(!selectedBankAmount) return alert("Vui lòng chọn mệnh giá bạn đã Bank!");
-            
+            if(!selectedBankAmount) return alert("Vui lòng chọn mệnh giá!");
             fetch(WEBHOOK_URL, {
                 method: "POST",
                 headers: {"Content-Type":"application/json"},
-                body: JSON.stringify({ 
-                    content: `💰 **@${currentUser.user}** báo đã BANK **${selectedBankAmount.toLocaleString()}đ**. Admin check STK nhé!` 
-                })
+                body: JSON.stringify({ content: `💰 **@${currentUser.user}** báo đã BANK **${selectedBankAmount.toLocaleString()}đ**` })
             });
-            alert("Đã gửi thông báo. Admin sẽ cộng tiền sau khi check bank.");
+            alert("Đã gửi thông báo. Admin sẽ cộng tiền sau khi check!");
+        }
+
+        function showWheelSection() {
+            setActiveTab('t-spin');
+            document.getElementById('main-content').innerHTML = `
+                <div class="glass p-10 text-center animate-fadeIn">
+                    <h2 class="text-sm font-black text-yellow-400 mb-8 uppercase italic">Vòng Quay Rocket (15K)</h2>
+                    <div class="wheel-container">
+                        <div id="wheel">
+                            <img src="https://i.postimg.cc/fknWZvW0/Anh-chup-man-hinh-2026-02-08-205850.png" class="p-img p1">
+                            <img src="https://i.postimg.cc/NMkZL7x7/Anh-chup-man-hinh-2026-02-08-210850.png" class="p-img p2">
+                            <img src="https://i.postimg.cc/J7Bkw6Ph/Anh-chup-man-hinh-2026-02-08-210111.png" class="p-img p3">
+                            <img src="https://i.postimg.cc/tT6CcfvP/Anh-chup-man-hinh-2026-02-08-210515.png" class="p-img p4">
+                            <img src="https://i.postimg.cc/kGtT7My6/Anh-chup-man-hinh-2026-01-28-113414.png" class="p-img p5">
+                            <img src="https://i.postimg.cc/gj6gGcKM/Anh-chup-man-hinh-2026-01-28-113428.png" class="p-img p6">
+                        </div>
+                        <div class="pointer-bottom"></div>
+                    </div>
+                    <button onclick="startSpin()" id="spin-btn" class="btn-main px-12 py-4 mt-8 uppercase text-xs">Quay Ngay</button>
+                    <p class="text-[10px] opacity-40 mt-4 italic font-bold">Lưu ý: Kim ở dưới - Trúng ô nằm ở dưới cùng</p>
+                </div>`;
+        }
+
+        async function startSpin() {
+            if(isSpinning) return;
+            if(!currentUser) return toggleAuthModal();
+            
+            const snap = await db.ref('users/'+currentUser.user).get();
+            if(snap.val().balance < 15000) return alert("Bạn không đủ 15K!");
+
+            isSpinning = true;
+            await db.ref('users/'+currentUser.user).update({ balance: snap.val().balance - 15000 });
+            updateUI();
+
+            const wheel = document.getElementById('wheel');
+            // Ô P1 (Rocket) ở vị trí 0 độ. Để nó dừng ở ĐÁY (180 độ)
+            // Ta cần xoay = (180 - 0) + (số vòng quay * 360)
+            const rotations = 10;
+            currentRotation += (rotations * 360) + 180;
+            wheel.style.transform = `rotate(${currentRotation}deg)`;
+
+            setTimeout(async () => {
+                isSpinning = false;
+                alert("CHÚC MỪNG! BẠN TRÚNG ROCKET ");
+                await db.ref('orders/'+Date.now()).set({
+                    user: currentUser.user,
+                    item: "Rocket  (Vòng Quay)",
+                    info: "Trúng từ vòng quay",
+                    status: "Chờ xử lý",
+                    time: new Date().toLocaleString()
+                });
+            }, 5000);
+        }
+
+        async function showHistory() {
+            if(!currentUser) return toggleAuthModal();
+            setActiveTab('t-history');
+            const snap = await db.ref('orders').orderByChild('user').equalTo(currentUser.user).get();
+            let html = `<div class="glass p-6 animate-fadeIn"><h2 class="text-xs font-black uppercase mb-4 text-yellow-400 italic">Đơn hàng của bạn</h2>`;
+            if(!snap.exists()) html += `<p class="opacity-40 text-[10px]">Chưa có đơn nào.</p>`;
+            else {
+                let rows = [];
+                snap.forEach(s => rows.push(s.val()));
+                rows.reverse().forEach(o => {
+                    html += `
+                        <div class="bg-black/40 p-4 rounded-xl mb-3 border border-white/5 text-[10px]">
+                            <div class="flex justify-between"><b>${o.item}</b> <span class="text-yellow-400">${o.status}</span></div>
+                            <p class="opacity-50 mt-1">${o.info}</p>
+                            <p class="opacity-30 mt-1 text-[8px]">${o.time}</p>
+                        </div>`;
+                });
+            }
+            document.getElementById('main-content').innerHTML = html + `</div>`;
         }
 
         function toggleAuthModal() { document.getElementById('auth-modal').classList.toggle('active'); }
@@ -405,26 +474,9 @@
             if(document.getElementById(id)) document.getElementById(id).classList.add('tab-active');
         }
 
-        async function showHistory() {
-            if(!currentUser) return toggleAuthModal();
-            setActiveTab('t-history');
-            const snap = await db.ref('orders').orderByChild('user').equalTo(currentUser.user).get();
-            let html = `<div class="glass p-6 animate-fadeIn"><h2 class="text-xs font-black uppercase mb-4 text-yellow-400 italic">Đơn hàng của bạn</h2>`;
-            if(!snap.exists()) html += `<p class="opacity-40 text-[10px]">Chưa có đơn nào.</p>`;
-            else snap.forEach(s => {
-                const o = s.val();
-                html += `
-                    <div class="bg-black/40 p-4 rounded-xl mb-3 border border-white/5 text-[10px]">
-                        <div class="flex justify-between"><b>${o.item}</b> <span class="text-yellow-400">${o.status}</span></div>
-                        <p class="opacity-50 mt-1">${o.info}</p>
-                        <p class="opacity-30 mt-1 text-[8px]">${o.time}</p>
-                    </div>`;
-            });
-            document.getElementById('main-content').innerHTML = html + `</div>`;
-        }
-
-        async function loadTopRecharge() {
-            // Theo dõi dữ liệu thực tế từ Firebase
+        window.onload = () => {
+            updateUI();
+            render('fruit');
             db.ref('users').orderByChild('total_recharge').limitToLast(5).on('value', (snap) => {
                 let html = "";
                 let data = [];
@@ -437,65 +489,6 @@
                 });
                 document.getElementById('top-recharge').innerHTML = html || "Chưa có dữ liệu.";
             });
-        }
-
-        function showWheelSection() {
-            setActiveTab('t-spin');
-            document.getElementById('main-content').innerHTML = `
-                <div class="glass p-10 text-center animate-fadeIn">
-                    <h2 class="text-sm font-black text-yellow-400 mb-8 uppercase italic">Vòng Quay Rocket (15K)</h2>
-                    <div class="wheel-container">
-                        <img src="https://cdn-icons-png.flaticon.com/512/8213/8213522.png" class="pointer">
-                        <div id="wheel">
-                            <img src="https://i.postimg.cc/fknWZvW0/Anh-chup-man-hinh-2026-02-08-205850.png" class="p-img p1">
-                            <img src="https://i.postimg.cc/NMkZL7x7/Anh-chup-man-hinh-2026-02-08-210850.png" class="p-img p2">
-                            <img src="https://i.postimg.cc/J7Bkw6Ph/Anh-chup-man-hinh-2026-02-08-210111.png" class="p-img p3">
-                            <img src="https://i.postimg.cc/tT6CcfpJ/Anh-chup-man-hinh-2026-02-08-210420.png" class="p-img p4">
-                            <img src="https://i.postimg.cc/vmqVyCJq/Anh-chup-man-hinh-2026-02-08-210017.png" class="p-img p5">
-                            <img src="https://i.postimg.cc/BbMW7cLL/Anh-chup-man-hinh-2026-02-08-210758.png" class="p-img p6">
-                        </div>
-                    </div>
-                    <button id="spin-btn" onclick="spinWheel()" class="btn-main px-12 py-4 mt-8 uppercase text-[10px]">Quay Ngay</button>
-                </div>`;
-        }
-
-        async function spinWheel() {
-            if(!currentUser) return toggleAuthModal();
-            const snap = await db.ref('users/'+currentUser.user).get();
-            const userData = snap.val();
-            if(userData.balance < 15000) return alert("Bạn không đủ 15K!");
-
-            const btn = document.getElementById('spin-btn');
-            btn.disabled = true;
-            
-            // Trừ tiền ngay
-            await db.ref('users/'+currentUser.user).update({ balance: userData.balance - 15000 });
-            
-            // Logic quay: Tính toán để kim luôn dừng vào Rocket (p1 ở góc 0 độ)
-            // Rocket p1 ở góc 0. Để nó nằm dưới mũi tên, wheel phải quay về góc 0, 360, 720...
-            const rounds = 8; // Số vòng quay tối thiểu
-            currentRotation = (360 * rounds); // Dừng chính xác tại 0 độ (Rocket)
-            
-            document.getElementById('wheel').style.transform = `rotate(${currentRotation}deg)`;
-
-            setTimeout(() => {
-                alert("CHÚC MỪNG! Bạn quay trúng: Trái Rocket 🚀");
-                db.ref('orders/'+Date.now()).set({ 
-                    user: currentUser.user, 
-                    item: "Vòng Quay: Rocket 🚀", 
-                    info: "Trúng thưởng vòng quay", 
-                    status: "Xong", 
-                    time: new Date().toLocaleString() 
-                });
-                btn.disabled = false;
-                updateUI();
-            }, 5200);
-        }
-
-        window.onload = () => {
-            updateUI();
-            render('fruit');
-            loadTopRecharge();
         };
     </script>
 </body>
