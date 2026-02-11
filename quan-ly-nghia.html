@@ -3,307 +3,210 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>HỆ THỐNG QUẢN TRỊ - SHOP BẮP</title>
+    <title>ADMIN SHOP - FIX LỖI KẾT NỐI</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Sử dụng bản mới nhất của Firebase để đảm bảo ổn định -->
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap');
-        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #020617; color: #f8fafc; }
-        .glass-card { background: rgba(15, 23, 42, 0.8); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.05); border-radius: 20px; }
-        .tab-active { background: #3b82f6; color: white; box-shadow: 0 0 20px rgba(59, 130, 246, 0.3); }
-        .btn-approve { background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%); }
-        .btn-complete { background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); }
-        .status-badge { padding: 4px 10px; border-radius: 8px; font-size: 10px; font-weight: 800; text-transform: uppercase; }
-        ::-webkit-scrollbar { width: 5px; }
-        ::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 10px; }
-        .loader { border: 3px solid #1e293b; border-top: 3px solid #3b82f6; border-radius: 50%; width: 24px; height: 24px; animation: spin 1s linear infinite; }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
+        body { font-family: 'Inter', sans-serif; background: #0f172a; color: #e2e8f0; }
+        .card { background: #1e293b; border: 1px solid #334155; border-radius: 12px; }
+        .status-online { color: #10b981; }
+        .status-offline { color: #ef4444; }
+        .debug-box { background: #000; font-family: monospace; color: #00ff00; padding: 10px; border-radius: 5px; font-size: 11px; max-height: 150px; overflow-y: auto; }
     </style>
 </head>
-<body class="min-h-screen">
+<body class="p-4 md:p-8">
 
-    <div class="max-w-6xl mx-auto p-4 md:p-10">
+    <div class="max-w-5xl mx-auto">
         <!-- Dashboard Header -->
-        <header class="flex flex-col md:flex-row justify-between items-center mb-12 gap-6">
-            <div class="flex items-center gap-5">
-                <div class="w-16 h-16 bg-gradient-to-tr from-yellow-400 to-orange-500 rounded-2xl flex items-center justify-center text-slate-900 shadow-2xl">
-                    <i class="fas fa-shield-halved text-3xl"></i>
-                </div>
-                <div>
-                    <h1 class="text-4xl font-black tracking-tight">ADMIN <span class="text-yellow-400">PANEL</span></h1>
-                    <p class="text-slate-500 text-xs font-bold uppercase tracking-widest mt-1">Cấu hình: Đồng bộ Discord & Realtime</p>
-                </div>
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
+            <div>
+                <h1 class="text-3xl font-black text-white italic">ADMIN <span class="text-blue-500">CONTROL</span></h1>
+                <p class="text-slate-400 text-sm">Hệ thống đồng bộ dữ liệu Realtime</p>
             </div>
-
-            <nav class="flex bg-slate-900/50 p-1.5 rounded-2xl border border-slate-800">
-                <button onclick="switchView('bank')" id="tab-bank" class="tab-active px-8 py-3 rounded-xl text-sm font-black transition-all duration-300">
-                    <i class="fas fa-university mr-2"></i>Duyệt Bank
-                </button>
-                <button onclick="switchView('orders')" id="tab-orders" class="px-8 py-3 rounded-xl text-sm font-black text-slate-400 transition-all duration-300">
-                    <i class="fas fa-shopping-bag mr-2"></i>Đơn Dịch Vụ
-                </button>
-            </nav>
-        </header>
-
-        <!-- Stats -->
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-10">
-            <div class="glass-card p-5 border-l-4 border-yellow-500">
-                <p class="text-[10px] font-extrabold text-slate-500 uppercase tracking-wider mb-1">Nạp Chờ Duyệt</p>
-                <h3 id="stat-bank" class="text-3xl font-black">0</h3>
-            </div>
-            <div class="glass-card p-5 border-l-4 border-blue-500">
-                <p class="text-[10px] font-extrabold text-slate-500 uppercase tracking-wider mb-1">Đơn Chờ Xử Lý</p>
-                <h3 id="stat-orders" class="text-3xl font-black text-blue-400">0</h3>
-            </div>
-            <div class="glass-card p-5 border-l-4 border-emerald-500">
-                <p class="text-[10px] font-extrabold text-slate-500 uppercase tracking-wider mb-1">Kết nối DB</p>
-                <h3 id="db-status" class="text-sm font-black text-amber-500 uppercase flex items-center gap-2 mt-2 italic">
-                    <span class="w-2 h-2 bg-amber-500 rounded-full"></span> Đang kết nối...
-                </h3>
-            </div>
-            <div class="glass-card p-5 border-l-4 border-slate-700">
-                <p class="text-[10px] font-extrabold text-slate-500 uppercase tracking-wider mb-1">Discord</p>
-                <h3 id="discord-status" class="text-[10px] font-black text-slate-500 uppercase mt-2">Chưa cấu hình Webhook</h3>
+            <div id="connection-status" class="bg-slate-800 px-4 py-2 rounded-full text-xs font-bold border border-slate-700">
+                <i class="fas fa-circle mr-2"></i> ĐANG KIỂM TRA KẾT NỐI...
             </div>
         </div>
 
-        <!-- Main Workspace -->
-        <main>
-            <!-- Bank Section -->
-            <div id="view-bank" class="space-y-6">
-                <div class="flex items-center justify-between">
-                    <h2 class="text-xl font-black flex items-center gap-3 italic"><i class="fas fa-money-bill-transfer text-emerald-400"></i> DUYỆT NẠP TIỀN BANK</h2>
-                    <button onclick="testDiscord('bank')" class="text-[9px] font-bold bg-slate-800 px-3 py-1 rounded-lg hover:bg-slate-700">Test Discord Webhook</button>
-                </div>
-                <div id="list-bank" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-                    <div class="col-span-full flex justify-center py-12"><div class="loader"></div></div>
-                </div>
+        <!-- Debugging Helper (Dành cho chủ shop kiểm tra lỗi) -->
+        <div class="card p-4 mb-6 border-l-4 border-yellow-500">
+            <h2 class="text-sm font-bold mb-2 text-yellow-500"><i class="fas fa-bug mr-2"></i>TRÌNH KIỂM TRA ĐƯỜNG DẪN (DEBUG)</h2>
+            <p class="text-[11px] text-slate-400 mb-2 italic">* Nếu bạn bấm mua mà không hiện, hãy nhìn vào ô bên dưới xem tên "nhánh" nào vừa xuất hiện.</p>
+            <div id="debug-log" class="debug-box">
+                [Hệ thống]: Đang lắng nghe thay đổi trên toàn bộ Database...
             </div>
+        </div>
 
-            <!-- Orders Section -->
-            <div id="view-orders" class="space-y-6 hidden">
-                <div class="flex items-center justify-between">
-                    <h2 class="text-xl font-black flex items-center gap-3 italic"><i class="fas fa-boxes-packing text-blue-400"></i> ĐƠN HÀNG DỊCH VỤ</h2>
-                </div>
-                <div id="list-orders" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-                    <div class="col-span-full flex justify-center py-12"><div class="loader"></div></div>
-                </div>
+        <!-- Tabs -->
+        <div class="flex gap-2 mb-6">
+            <button onclick="showTab('bank')" id="btn-bank" class="px-6 py-2 rounded-lg bg-blue-600 text-white font-bold text-sm">NẠP TIỀN</button>
+            <button onclick="showTab('orders')" id="btn-orders" class="px-6 py-2 rounded-lg bg-slate-800 text-slate-400 font-bold text-sm">ĐƠN HÀNG</button>
+        </div>
+
+        <!-- Content Bank -->
+        <div id="tab-bank">
+            <div id="list-bank" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="col-span-full text-center py-10 text-slate-500">Đang tải dữ liệu nạp tiền...</div>
             </div>
-        </main>
-    </div>
+        </div>
 
-    <!-- Notification system -->
-    <div id="notify" class="fixed bottom-10 right-10 translate-y-32 opacity-0 transition-all duration-500 z-50">
-        <div class="bg-white text-slate-900 px-8 py-4 rounded-2xl shadow-2xl font-black flex items-center gap-4 border-b-4 border-blue-500">
-            <i class="fas fa-bell text-blue-500"></i>
-            <span id="notify-msg">Thành công!</span>
+        <!-- Content Orders -->
+        <div id="tab-orders" class="hidden">
+            <div id="list-orders" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="col-span-full text-center py-10 text-slate-500">Đang tải dữ liệu đơn hàng...</div>
+            </div>
         </div>
     </div>
 
     <script>
-        // --- CẤU HÌNH QUAN TRỌNG ---
-        const firebaseConfig = { databaseURL: "https://shop-blox-fruit-trannghia-default-rtdb.firebaseio.com/" };
+        // 1. CẤU HÌNH (THAY DATABASE CỦA BẠN VÀO ĐÂY)
+        const firebaseConfig = {
+            databaseURL: "https://shop-blox-fruit-trannghia-default-rtdb.firebaseio.com/"
+        };
         
-        // Dán URL Webhook Discord của bạn vào đây
-        const DISCORD_WEBHOOK_URL = "https://discord.com/api/webhooks/1471073517863702570/w-6BHDb9CwxlG_XMYeqqnoWcqmv3kPrG8H2SepceylI7ei1zrsDWKyKTo0S7k9BGUwgD";
+        // 2. WEBHOOK DISCORD
+        const DISCORD_WEBHOOK = "https://discord.com/api/webhooks/1471073517863702570/w-6BHDb9CwxlG_XMYeqqnoWcqmv3kPrG8H2SepceylI7ei1zrsDWKyKTo0S7k9BGUwgD";
 
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
-        // Kiểm tra kết nối DB
-        db.ref('.info/connected').on('value', snap => {
-            const status = document.getElementById('db-status');
+        // Kiểm tra kết nối
+        db.ref(".info/connected").on("value", (snap) => {
+            const el = document.getElementById('connection-status');
             if (snap.val() === true) {
-                status.innerHTML = '<span class="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></span> Đã kết nối DB';
-                status.className = "text-sm font-black text-emerald-500 uppercase flex items-center gap-2 mt-2 italic";
+                el.innerHTML = '<i class="fas fa-circle mr-2 status-online"></i> DATABASE: ĐÃ KẾT NỐI';
+                el.className = "bg-slate-800 px-4 py-2 rounded-full text-xs font-bold border border-emerald-900 text-emerald-400";
             } else {
-                status.innerHTML = '<span class="w-2 h-2 bg-red-500 rounded-full"></span> Mất kết nối';
-                status.className = "text-sm font-black text-red-500 uppercase flex items-center gap-2 mt-2 italic";
+                el.innerHTML = '<i class="fas fa-circle mr-2 status-offline"></i> DATABASE: MẤT KẾT NỐI';
+                el.className = "bg-slate-800 px-4 py-2 rounded-full text-xs font-bold border border-red-900 text-red-400";
             }
         });
 
-        if(DISCORD_WEBHOOK_URL !== "DÁN_WEBHOOK_DISCORD_CỦA_BẠN_VÀO_ĐÂY") {
-            document.getElementById('discord-status').innerText = "Đã bật Webhook";
-            document.getElementById('discord-status').classList.replace('text-slate-500', 'text-emerald-400');
+        // 3. HÀM DEBUG TỰ ĐỘNG (RẤT QUAN TRỌNG)
+        // Hàm này sẽ theo dõi toàn bộ Database, nếu có bất kỳ thay đổi nào nó sẽ in ra tên nhánh đó.
+        db.ref().on('child_changed', (snapshot) => {
+            logDebug(`Nhánh [${snapshot.key}] vừa có thay đổi dữ liệu!`);
+        });
+        db.ref().on('child_added', (snapshot) => {
+            logDebug(`Nhánh mới xuất hiện: [${snapshot.key}]`);
+        });
+
+        function logDebug(msg) {
+            const log = document.getElementById('debug-log');
+            const now = new Date().toLocaleTimeString();
+            log.innerHTML += `<div>[${now}] ${msg}</div>`;
+            log.scrollTop = log.scrollHeight;
         }
 
-        // --- Gửi thông báo tới Discord ---
-        async function sendDiscord(type, data) {
-            if(!DISCORD_WEBHOOK_URL || DISCORD_WEBHOOK_URL.includes("DÁN_WEBHOOK")) return;
+        // 4. LẮNG NGHE DỮ LIỆU
+        // Thử lắng nghe nhiều nhánh phổ biến nếu nhánh chính không có
+        const bankPaths = ['requests', 'naptien', 'napthe', 'bank_logs'];
+        const orderPaths = ['orders', 'donhang', 'muado', 'history'];
 
-            let embed = {
-                title: type === 'bank' ? "💰 THÔNG BÁO NẠP TIỀN" : "📦 CÓ ĐƠN HÀNG MỚI",
-                color: type === 'bank' ? 3066993 : 3447003,
-                timestamp: new Date().toISOString(),
-                fields: []
-            };
-
-            if(type === 'bank') {
-                embed.fields = [
-                    { name: "Người nạp", value: `@${data.user}`, inline: true },
-                    { name: "Số tiền", value: `${data.amount.toLocaleString()}đ`, inline: true },
-                    { name: "Nội dung", value: data.memo || "Không có" }
-                ];
-            } else {
-                embed.fields = [
-                    { name: "Khách hàng", value: `@${data.user}`, inline: true },
-                    { name: "Sản phẩm", value: data.item, inline: true },
-                    { name: "Thông tin ACC", value: `\`\`\`${data.info}\`\`\`` }
-                ];
-            }
-
-            try {
-                await fetch(DISCORD_WEBHOOK_URL, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ embeds: [embed] })
+        function loadData(paths, containerId, type) {
+            paths.forEach(path => {
+                db.ref(path).on('value', (snapshot) => {
+                    const data = snapshot.val();
+                    if(data) {
+                        logDebug(`Đã tìm thấy dữ liệu tại nhánh: ${path}`);
+                        renderUI(data, containerId, type, path);
+                    }
                 });
-            } catch (e) { console.error("Discord Error", e); }
+            });
         }
 
-        // --- Duyệt Bank ---
-        // SỬA ĐỔI: Lắng nghe chính xác đường dẫn 'requests' hoặc 'naptien' tùy code web của bạn
-        db.ref('requests').on('value', snapshot => {
-            const container = document.getElementById('list-bank');
-            const data = snapshot.val();
-            let count = 0;
+        function renderUI(data, containerId, type, pathName) {
+            const container = document.getElementById(containerId);
             container.innerHTML = "";
-
-            if(!data) {
-                container.innerHTML = `<div class="col-span-full glass-card p-12 text-center text-slate-600 font-bold uppercase tracking-widest border-2 border-dashed border-slate-800">Không có yêu cầu nạp tiền nào</div>`;
-                document.getElementById('stat-bank').innerText = 0;
-                return;
-            }
-
-            Object.keys(data).forEach(key => {
-                count++;
-                const item = data[key];
-                container.innerHTML += `
-                    <div class="glass-card p-6 border-t-2 border-emerald-500 shadow-xl hover:scale-[1.02] transition-transform">
-                        <div class="flex justify-between items-start mb-6">
-                            <div>
-                                <h4 class="text-white font-black text-lg">@${item.user || 'Ẩn danh'}</h4>
-                                <p class="text-[10px] text-slate-500 font-bold">${item.time || 'Vừa xong'}</p>
-                            </div>
-                            <div class="text-right">
-                                <p class="text-emerald-400 font-black text-xl">+${(item.amount || 0).toLocaleString()}đ</p>
-                            </div>
-                        </div>
-                        <div class="bg-black/20 p-3 rounded-lg mb-4 border border-slate-800/50">
-                             <p class="text-[9px] text-slate-500 font-bold uppercase mb-1">Nội dung chuyển khoản:</p>
-                             <p class="text-xs font-bold text-slate-300">${item.memo || 'Không có'}</p>
-                        </div>
-                        <div class="space-y-2">
-                            <button onclick="approveBank('${item.user}', ${item.amount}, '${key}')" class="w-full btn-approve text-white font-black py-3 rounded-xl shadow-lg active:scale-95 transition-all">DUYỆT TIỀN</button>
-                            <button onclick="rejectReq('${key}')" class="w-full text-[10px] font-bold text-slate-600 hover:text-red-400 py-2 transition-colors uppercase">Hủy bỏ</button>
-                        </div>
-                    </div>
-                `;
-            });
-            document.getElementById('stat-bank').innerText = count;
-        });
-
-        // --- Đơn Hàng ---
-        db.ref('orders').on('value', snapshot => {
-            const container = document.getElementById('list-orders');
-            const data = snapshot.val();
-            let pending = 0;
-            container.innerHTML = "";
-
-            if(!data) {
-                container.innerHTML = `<div class="col-span-full glass-card p-12 text-center text-slate-600 font-bold uppercase tracking-widest border-2 border-dashed border-slate-800">Không có đơn hàng mới</div>`;
-                document.getElementById('stat-orders').innerText = 0;
-                return;
-            }
-
+            
             Object.keys(data).reverse().forEach(key => {
                 const item = data[key];
-                if(item.status === 'Đang xử lý') {
-                    pending++;
+                if(type === 'bank') {
                     container.innerHTML += `
-                        <div class="glass-card p-6 border-t-2 border-blue-500 shadow-xl">
-                            <div class="flex justify-between mb-4">
-                                <span class="bg-blue-500/10 text-blue-400 px-2 py-1 rounded-md text-[10px] font-black uppercase">${item.item}</span>
-                                <span class="text-[10px] text-slate-600 font-bold">${item.time}</span>
+                        <div class="card p-5 border-l-4 border-emerald-500 shadow-lg">
+                            <div class="flex justify-between items-start mb-4">
+                                <div>
+                                    <h3 class="font-black text-white">@${item.user || 'User'}</h3>
+                                    <p class="text-[10px] text-slate-500 uppercase font-bold">Nhánh: ${pathName}</p>
+                                </div>
+                                <span class="text-emerald-400 font-black text-xl">${Number(item.amount).toLocaleString()}đ</span>
                             </div>
-                            <p class="text-sm font-bold text-slate-400 mb-4">Khách: <span class="text-white">@${item.user}</span></p>
-                            
-                            <div class="bg-black/40 p-4 rounded-xl border border-slate-800 mb-6 group relative">
-                                <p class="text-[9px] text-slate-600 font-bold uppercase mb-2">Thông tin tài khoản:</p>
-                                <p id="txt-${key}" class="text-xs font-mono text-blue-300 break-all">${item.info}</p>
-                                <button onclick="copyTxt('${key}')" class="absolute top-3 right-3 text-slate-700 hover:text-white transition-colors">
-                                    <i class="fas fa-copy"></i>
-                                </button>
+                            <div class="bg-black/30 p-2 rounded text-xs mb-4 text-slate-300">ND: ${item.memo || 'Trống'}</div>
+                            <button onclick="approveBank('${item.user}', ${item.amount}, '${key}', '${pathName}')" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-black py-2 rounded-lg transition-all text-sm">XÁC NHẬN NẠP</button>
+                        </div>
+                    `;
+                } else {
+                    container.innerHTML += `
+                        <div class="card p-5 border-l-4 border-blue-500 shadow-lg">
+                            <div class="flex justify-between items-start mb-4">
+                                <div>
+                                    <h3 class="font-black text-white">${item.item || 'Sản phẩm'}</h3>
+                                    <p class="text-[10px] text-slate-500 font-bold">Khách: @${item.user}</p>
+                                </div>
+                                <span class="bg-blue-900/50 text-blue-400 text-[10px] px-2 py-1 rounded font-bold">${item.status || 'Chờ xử lý'}</span>
                             </div>
-
-                            <div class="grid grid-cols-4 gap-2">
-                                <button onclick="doneOrder('${key}')" class="col-span-3 btn-complete text-white font-black py-3 rounded-xl shadow-lg active:scale-95 transition-all">HOÀN TẤT</button>
-                                <button onclick="delOrder('${key}')" class="bg-slate-800 hover:bg-red-900/40 text-slate-500 rounded-xl transition-all"><i class="fas fa-trash"></i></button>
+                            <div class="bg-black/30 p-3 rounded text-xs font-mono mb-4 text-blue-200 break-all">${item.info || 'Không có info'}</div>
+                            <div class="flex gap-2">
+                                <button onclick="completeOrder('${key}', '${pathName}')" class="flex-1 bg-blue-600 text-white font-black py-2 rounded-lg text-sm">HOÀN TẤT</button>
+                                <button onclick="deleteItem('${key}', '${pathName}')" class="px-4 bg-slate-700 text-slate-400 rounded-lg"><i class="fas fa-trash"></i></button>
                             </div>
                         </div>
                     `;
                 }
             });
-            document.getElementById('stat-orders').innerText = pending;
-        });
+        }
 
-        // --- Logic Xử lý ---
-        async function approveBank(user, amount, key) {
-            if(!confirm(`Xác nhận cộng ${amount.toLocaleString()}đ cho ${user}?`)) return;
+        // 5. CÁC HÀM XỬ LÝ
+        async function approveBank(username, amount, key, path) {
+            if(!confirm(`Cộng ${amount}đ cho ${username}?`)) return;
             try {
-                const userRef = db.ref('users/' + user);
+                // Cộng tiền cho user (Giả định nhánh user là 'users/tên_user')
+                const userRef = db.ref('users/' + username);
                 const snap = await userRef.once('value');
                 const curBalance = (snap.val()?.balance) || 0;
+                await userRef.update({ balance: curBalance + Number(amount) });
                 
-                await userRef.update({ balance: curBalance + amount });
-                const reqData = (await db.ref('requests/' + key).get()).val();
-                await db.ref('requests/' + key).remove();
+                // Xóa yêu cầu
+                await db.ref(path + '/' + key).remove();
+                alert("Đã duyệt thành công!");
                 
-                showNotify(`Đã nạp thành công cho @${user}`);
-                sendDiscord('bank', reqData);
-            } catch(e) { showNotify("Lỗi: " + e.message); }
+                // Gửi Discord
+                sendDiscord(`✅ NẠP TIỀN THÀNH CÔNG\nNgười dùng: ${username}\nSố tiền: ${amount}đ`);
+            } catch(e) { alert("Lỗi: " + e.message); }
         }
 
-        async function doneOrder(key) {
-            await db.ref('orders/' + key).update({ status: 'Hoàn thành' });
-            showNotify("Đã hoàn tất đơn hàng!");
+        async function completeOrder(key, path) {
+            await db.ref(path + '/' + key).update({ status: 'Hoàn thành' });
+            alert("Đã xong đơn!");
         }
 
-        function rejectReq(key) { if(confirm("Hủy yêu cầu này?")) db.ref('requests/' + key).remove(); }
-        function delOrder(key) { if(confirm("Xóa đơn này?")) db.ref('orders/' + key).remove(); }
-
-        function switchView(view) {
-            document.getElementById('view-bank').classList.toggle('hidden', view !== 'bank');
-            document.getElementById('view-orders').classList.toggle('hidden', view !== 'orders');
-            document.getElementById('tab-bank').className = (view === 'bank' ? 'tab-active' : '') + ' px-8 py-3 rounded-xl text-sm font-black transition-all';
-            document.getElementById('tab-orders').className = (view === 'orders' ? 'tab-active' : '') + ' px-8 py-3 rounded-xl text-sm font-black transition-all';
+        async function deleteItem(key, path) {
+            if(confirm("Xóa vĩnh viễn?")) await db.ref(path + '/' + key).remove();
         }
 
-        function showNotify(msg) {
-            const toast = document.getElementById('notify');
-            document.getElementById('notify-msg').innerText = msg;
-            toast.classList.remove('translate-y-32', 'opacity-0');
-            setTimeout(() => toast.classList.add('translate-y-32', 'opacity-0'), 3000);
+        async function sendDiscord(msg) {
+            if(!DISCORD_WEBHOOK.includes("http")) return;
+            fetch(DISCORD_WEBHOOK, {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ content: msg })
+            });
         }
 
-        function copyTxt(key) {
-            const text = document.getElementById('txt-' + key).innerText;
-            const el = document.createElement('textarea');
-            el.value = text;
-            document.body.appendChild(el);
-            el.select();
-            document.execCommand('copy');
-            document.body.removeChild(el);
-            showNotify("Đã sao chép!");
+        function showTab(type) {
+            document.getElementById('tab-bank').classList.toggle('hidden', type !== 'bank');
+            document.getElementById('tab-orders').classList.toggle('hidden', type !== 'orders');
+            document.getElementById('btn-bank').className = type === 'bank' ? "px-6 py-2 rounded-lg bg-blue-600 text-white font-bold text-sm" : "px-6 py-2 rounded-lg bg-slate-800 text-slate-400 font-bold text-sm";
+            document.getElementById('btn-orders').className = type === 'orders' ? "px-6 py-2 rounded-lg bg-blue-600 text-white font-bold text-sm" : "px-6 py-2 rounded-lg bg-slate-800 text-slate-400 font-bold text-sm";
         }
 
-        async function testDiscord(type) {
-            showNotify("Đang gửi thử Discord...");
-            await sendDiscord(type, { user: "Admin_Test", amount: 100000, memo: "Nạp thử nghiệm", item: "Sản phẩm Test", info: "Tài khoản: admin | Pass: 123" });
-        }
+        // Khởi chạy
+        loadData(bankPaths, 'list-bank', 'bank');
+        loadData(orderPaths, 'list-orders', 'orders');
+
     </script>
 </body>
 </html>
