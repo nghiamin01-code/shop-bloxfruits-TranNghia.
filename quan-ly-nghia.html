@@ -3,246 +3,247 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>QUẢN TRỊ VIÊN - SHOP BẮP</title>
+    <title>HỆ THỐNG QUẢN TRỊ - SHOP BẮP</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap');
-        body { font-family: 'Inter', sans-serif; background-color: #0f172a; color: #f8fafc; }
-        .glass-card { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.1); border-radius: 24px; }
-        .status-pill { padding: 4px 12px; border-radius: 9999px; font-size: 11px; font-weight: 800; text-transform: uppercase; }
-        .tab-btn.active { background: #3b82f6; color: white; box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4); }
-        ::-webkit-scrollbar { width: 6px; }
-        ::-webkit-scrollbar-thumb { background: #334155; border-radius: 10px; }
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap');
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #020617; color: #f8fafc; }
+        .glass-card { background: rgba(15, 23, 42, 0.8); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.05); border-radius: 20px; }
+        .tab-active { background: #3b82f6; color: white; box-shadow: 0 0 20px rgba(59, 130, 246, 0.3); }
+        .btn-approve { background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%); }
+        .btn-complete { background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); }
+        .status-badge { padding: 4px 10px; border-radius: 8px; font-size: 10px; font-weight: 800; text-transform: uppercase; }
+        ::-webkit-scrollbar { width: 5px; }
+        ::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 10px; }
     </style>
 </head>
-<body class="min-h-screen p-4 md:p-8">
+<body class="min-h-screen">
 
-    <div class="max-w-7xl mx-auto">
-        <!-- Header -->
-        <header class="flex flex-col md:flex-row justify-between items-center mb-10 gap-6">
-            <div class="flex items-center gap-4">
-                <div class="w-14 h-14 bg-yellow-400 rounded-2xl flex items-center justify-center text-slate-900 shadow-[0_0_20px_rgba(250,204,21,0.3)]">
-                    <i class="fas fa-crown text-2xl"></i>
+    <div class="max-w-6xl mx-auto p-4 md:p-10">
+        <!-- Dashboard Header -->
+        <header class="flex flex-col md:flex-row justify-between items-center mb-12 gap-6">
+            <div class="flex items-center gap-5">
+                <div class="w-16 h-16 bg-gradient-to-tr from-yellow-400 to-orange-500 rounded-2xl flex items-center justify-center text-slate-900 shadow-2xl">
+                    <i class="fas fa-shield-halved text-3xl"></i>
                 </div>
                 <div>
-                    <h1 class="text-3xl font-black tracking-tighter text-white">SHOP BẮP <span class="text-yellow-400">ADMIN</span></h1>
-                    <p class="text-slate-400 text-xs font-bold uppercase tracking-widest">Hệ thống quản lý thời gian thực</p>
+                    <h1 class="text-4xl font-black tracking-tight">ADMIN <span class="text-yellow-400">PANEL</span></h1>
+                    <p class="text-slate-500 text-xs font-bold uppercase tracking-widest mt-1">Hệ thống điều hành Shop Bắp</p>
                 </div>
             </div>
 
-            <div class="flex bg-slate-800/50 p-1.5 rounded-2xl border border-slate-700">
-                <button onclick="switchTab('bank')" id="btn-bank" class="tab-btn active px-6 py-2.5 rounded-xl text-sm font-bold transition-all">
+            <!-- Navigation Tabs -->
+            <nav class="flex bg-slate-900/50 p-1.5 rounded-2xl border border-slate-800">
+                <button onclick="switchView('bank')" id="tab-bank" class="tab-active px-8 py-3 rounded-xl text-sm font-black transition-all duration-300">
                     <i class="fas fa-university mr-2"></i>Duyệt Bank
                 </button>
-                <button onclick="switchTab('orders')" id="btn-orders" class="tab-btn px-6 py-2.5 rounded-xl text-sm font-bold transition-all">
-                    <i class="fas fa-shopping-cart mr-2"></i>Đơn Hàng
+                <button onclick="switchView('orders')" id="tab-orders" class="px-8 py-3 rounded-xl text-sm font-black text-slate-400 transition-all duration-300">
+                    <i class="fas fa-shopping-bag mr-2"></i>Đơn Dịch Vụ
                 </button>
-            </div>
+            </nav>
         </header>
 
-        <!-- Stats -->
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-            <div class="glass-card p-5 border-l-4 border-yellow-400">
-                <p class="text-[10px] font-bold text-slate-400 uppercase mb-1">Yêu cầu nạp</p>
-                <p id="count-bank" class="text-2xl font-black text-white">0</p>
+        <!-- Statistics Quick View -->
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-10">
+            <div class="glass-card p-5 border-l-4 border-yellow-500">
+                <p class="text-[10px] font-extrabold text-slate-500 uppercase tracking-wider mb-1">Yêu cầu nạp</p>
+                <h3 id="stat-bank" class="text-3xl font-black">0</h3>
             </div>
-            <div class="glass-card p-5 border-l-4 border-blue-400">
-                <p class="text-[10px] font-bold text-slate-400 uppercase mb-1">Đơn chờ duyệt</p>
-                <p id="count-orders" class="text-2xl font-black text-white">0</p>
+            <div class="glass-card p-5 border-l-4 border-blue-500">
+                <p class="text-[10px] font-extrabold text-slate-500 uppercase tracking-wider mb-1">Đơn đang chờ</p>
+                <h3 id="stat-orders" class="text-3xl font-black text-blue-400">0</h3>
             </div>
-            <div class="glass-card p-5 border-l-4 border-green-400">
-                <p class="text-[10px] font-bold text-slate-400 uppercase mb-1">Đã hoàn tất</p>
-                <p id="count-done" class="text-2xl font-black text-white">0</p>
+            <div class="glass-card p-5 border-l-4 border-emerald-500">
+                <p class="text-[10px] font-extrabold text-slate-500 uppercase tracking-wider mb-1">Tổng hoàn tất</p>
+                <h3 id="stat-done" class="text-3xl font-black text-emerald-400">0</h3>
             </div>
-            <div class="glass-card p-5 border-l-4 border-indigo-400">
-                <p class="text-[10px] font-bold text-slate-400 uppercase mb-1">Trạng thái DB</p>
-                <p class="text-sm font-black text-green-400 uppercase">Online</p>
+            <div class="glass-card p-5 border-l-4 border-slate-700">
+                <p class="text-[10px] font-extrabold text-slate-500 uppercase tracking-wider mb-1">Máy chủ</p>
+                <h3 class="text-sm font-black text-emerald-500 uppercase flex items-center gap-2 mt-2">
+                    <span class="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></span> Hoạt động
+                </h3>
             </div>
         </div>
 
-        <!-- Main Content Area -->
-        <div class="grid grid-cols-1 gap-8">
-            <!-- Bank List Section -->
-            <section id="section-bank" class="space-y-4">
-                <div class="flex items-center justify-between px-2">
-                    <h2 class="font-black text-xl flex items-center gap-2"><i class="fas fa-money-check-alt text-green-400"></i> DUYỆT NẠP TIỀN</h2>
-                    <span class="text-xs text-slate-500 font-bold uppercase tracking-tighter">Tự động cập nhật mỗi 1s</span>
+        <!-- Main Workspace -->
+        <main>
+            <!-- Bank Section -->
+            <div id="view-bank" class="space-y-6">
+                <div class="flex items-center justify-between">
+                    <h2 class="text-xl font-black flex items-center gap-3 italic"><i class="fas fa-money-bill-transfer text-emerald-400"></i> DUYỆT NẠP TIỀN BANK</h2>
+                    <span class="text-[10px] bg-emerald-500/10 text-emerald-400 px-3 py-1 rounded-full font-bold">REALTIME</span>
                 </div>
-                <div id="bank-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 text-slate-300 italic">
-                    Đang kết nối cơ sở dữ liệu...
+                <div id="list-bank" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 text-slate-500 italic">
+                    Đang tải dữ liệu ngân hàng...
                 </div>
-            </section>
+            </div>
 
-            <!-- Order List Section -->
-            <section id="section-orders" class="space-y-4 hidden">
-                <div class="flex items-center justify-between px-2">
-                    <h2 class="font-black text-xl flex items-center gap-2"><i class="fas fa-box-open text-blue-400"></i> ĐƠN HÀNG DỊCH VỤ</h2>
-                    <span class="text-xs text-slate-500 font-bold uppercase tracking-tighter">Xử lý ngay kẻo khách đợi</span>
+            <!-- Orders Section -->
+            <div id="view-orders" class="space-y-6 hidden">
+                <div class="flex items-center justify-between">
+                    <h2 class="text-xl font-black flex items-center gap-3 italic"><i class="fas fa-boxes-packing text-blue-400"></i> ĐƠN HÀNG DỊCH VỤ</h2>
+                    <span class="text-[10px] bg-blue-500/10 text-blue-400 px-3 py-1 rounded-full font-bold">XỬ LÝ NGAY</span>
                 </div>
-                <div id="order-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 text-slate-300 italic">
-                    Đang tải danh sách đơn hàng...
+                <div id="list-orders" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 text-slate-500 italic">
+                    Đang quét danh sách đơn hàng...
                 </div>
-            </section>
-        </div>
+            </div>
+        </main>
     </div>
 
-    <!-- Notification Toast -->
-    <div id="toast" class="fixed bottom-10 right-10 translate-y-20 opacity-0 transition-all duration-500 z-50">
-        <div class="bg-blue-600 text-white px-6 py-4 rounded-2xl shadow-2xl flex items-center gap-4 border border-blue-400">
-            <i class="fas fa-bell animate-bounce"></i>
-            <span id="toast-msg" class="font-bold text-sm">Thông báo hệ thống</span>
+    <!-- Notification system -->
+    <div id="notify" class="fixed bottom-10 right-10 translate-y-32 opacity-0 transition-all duration-500 z-50">
+        <div class="bg-white text-slate-900 px-8 py-4 rounded-2xl shadow-2xl font-black flex items-center gap-4">
+            <i class="fas fa-check-circle text-emerald-500 text-xl"></i>
+            <span id="notify-msg">Thành công!</span>
         </div>
     </div>
 
     <script>
-        // --- CẤU HÌNH FIREBASE ---
+        // Cấu hình Firebase - Giữ nguyên Database của bạn
         const firebaseConfig = { databaseURL: "https://shop-blox-fruit-trannghia-default-rtdb.firebaseio.com/" };
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
-        let currentTab = 'bank';
-
-        function switchTab(tab) {
-            currentTab = tab;
-            document.getElementById('section-bank').classList.toggle('hidden', tab !== 'bank');
-            document.getElementById('section-orders').classList.toggle('hidden', tab !== 'orders');
-            document.getElementById('btn-bank').classList.toggle('active', tab === 'bank');
-            document.getElementById('btn-orders').classList.toggle('active', tab === 'orders');
+        // Chuyển đổi giao diện
+        function switchView(view) {
+            document.getElementById('view-bank').classList.toggle('hidden', view !== 'bank');
+            document.getElementById('view-orders').classList.toggle('hidden', view !== 'orders');
+            document.getElementById('tab-bank').className = (view === 'bank' ? 'tab-active' : '') + ' px-8 py-3 rounded-xl text-sm font-black transition-all duration-300';
+            document.getElementById('tab-orders').className = (view === 'orders' ? 'tab-active' : '') + ' px-8 py-3 rounded-xl text-sm font-black transition-all duration-300';
         }
 
-        // --- 1. THEO DÕI NẠP BANK ---
-        db.ref('requests').on('value', s => {
-            const list = document.getElementById('bank-list');
-            const data = s.val();
+        // --- 1. Xử lý Nạp Bank ---
+        db.ref('requests').on('value', snapshot => {
+            const container = document.getElementById('list-bank');
+            const data = snapshot.val();
             let count = 0;
-            list.innerHTML = "";
+            container.innerHTML = "";
 
             if(!data) {
-                list.innerHTML = `<div class="col-span-full glass-card p-10 text-center text-slate-500 font-bold">✅ Hiện tại không có yêu cầu nạp tiền nào.</div>`;
-                document.getElementById('count-bank').innerText = 0;
+                container.innerHTML = `<div class="col-span-full glass-card p-12 text-center text-slate-600 font-bold uppercase tracking-widest">Không có yêu cầu nạp tiền</div>`;
+                document.getElementById('stat-bank').innerText = 0;
                 return;
             }
 
             Object.keys(data).forEach(key => {
                 count++;
                 const item = data[key];
-                list.innerHTML += `
-                    <div class="glass-card p-6 border-t-4 border-green-500 hover:scale-[1.02] transition-transform">
-                        <div class="flex justify-between items-start mb-4">
+                container.innerHTML += `
+                    <div class="glass-card p-6 border-t-2 border-emerald-500 shadow-xl">
+                        <div class="flex justify-between items-start mb-6">
                             <div>
-                                <p class="text-yellow-400 font-black text-lg">@${item.user}</p>
-                                <p class="text-[10px] text-slate-500 font-bold uppercase">${item.time}</p>
+                                <h4 class="text-white font-black text-lg">@${item.user}</h4>
+                                <p class="text-[10px] text-slate-500 font-bold">${item.time}</p>
                             </div>
-                            <span class="bg-green-500/10 text-green-400 px-3 py-1 rounded-lg font-black text-sm">+${item.amount.toLocaleString()}đ</span>
+                            <div class="text-right">
+                                <p class="text-emerald-400 font-black text-xl">+${item.amount.toLocaleString()}đ</p>
+                                <p class="text-[9px] text-slate-600 font-bold uppercase mt-1">Nội dung: ${item.memo || 'Trống'}</p>
+                            </div>
                         </div>
-                        <div class="flex flex-col gap-2 mt-6">
-                            <button onclick="approveBank('${item.user}', ${item.amount}, '${key}')" class="w-full bg-green-600 hover:bg-green-500 text-white font-black py-3 rounded-xl shadow-lg shadow-green-900/20 transition-all active:scale-95">DUYỆT NGAY</button>
-                            <button onclick="deleteReq('${key}')" class="text-xs text-slate-500 font-bold hover:text-red-400 transition-colors uppercase tracking-widest mt-2">Từ chối & Xóa</button>
+                        <div class="space-y-2">
+                            <button onclick="approveBank('${item.user}', ${item.amount}, '${key}')" class="w-full btn-approve text-white font-black py-3 rounded-xl shadow-lg active:scale-95 transition-all">DUYỆT TIỀN</button>
+                            <button onclick="rejectReq('${key}')" class="w-full text-[10px] font-bold text-slate-600 hover:text-red-400 py-2 transition-colors uppercase">Hủy & Xóa yêu cầu</button>
                         </div>
-                    </div>`;
+                    </div>
+                `;
             });
-            document.getElementById('count-bank').innerText = count;
+            document.getElementById('stat-bank').innerText = count;
         });
 
         async function approveBank(user, amount, key) {
-            if(confirm(`Xác nhận cộng ${amount.toLocaleString()}đ cho tài khoản ${user}?`)) {
-                try {
-                    const userRef = db.ref('users/' + user);
-                    const snapshot = await userRef.get();
-                    const userData = snapshot.val() || { balance: 0 };
-                    const currentBalance = userData.balance || 0;
-                    
-                    await userRef.update({ balance: currentBalance + amount });
-                    await db.ref('requests/' + key).remove();
-                    showToast(`Đã cộng ${amount.toLocaleString()}đ cho ${user}!`);
-                } catch (e) {
-                    alert("Lỗi khi cộng tiền: " + e.message);
-                }
-            }
+            if(!confirm(`Xác nhận cộng ${amount.toLocaleString()}đ cho ${user}?`)) return;
+            
+            const userRef = db.ref('users/' + user);
+            const userSnap = await userRef.get();
+            const currentBalance = (userSnap.val()?.balance) || 0;
+
+            await userRef.update({ balance: currentBalance + amount });
+            await db.ref('requests/' + key).remove();
+            showNotify(`Đã nạp ${amount.toLocaleString()}đ cho @${user}`);
         }
 
-        function deleteReq(key) { if(confirm("Xóa yêu cầu này?")) db.ref('requests/' + key).remove(); }
+        function rejectReq(key) { if(confirm("Xóa yêu cầu nạp này?")) db.ref('requests/' + key).remove(); }
 
-        // --- 2. THEO DÕI ĐƠN HÀNG ---
-        db.ref('orders').on('value', s => {
-            const list = document.getElementById('order-list');
-            const data = s.val();
-            let countPending = 0;
-            let countDone = 0;
-            list.innerHTML = "";
+        // --- 2. Xử lý Đơn Hàng ---
+        db.ref('orders').on('value', snapshot => {
+            const container = document.getElementById('list-orders');
+            const data = snapshot.val();
+            let pending = 0;
+            let done = 0;
+            container.innerHTML = "";
 
             if(!data) {
-                list.innerHTML = `<div class="col-span-full glass-card p-10 text-center text-slate-500 font-bold">☕ Chưa có đơn hàng nào trong hệ thống.</div>`;
-                document.getElementById('count-orders').innerText = 0;
+                container.innerHTML = `<div class="col-span-full glass-card p-12 text-center text-slate-600 font-bold uppercase tracking-widest">Hiện không có đơn hàng nào</div>`;
+                document.getElementById('stat-orders').innerText = 0;
                 return;
             }
 
             Object.keys(data).reverse().forEach(key => {
                 const item = data[key];
                 if(item.status === 'Đang xử lý') {
-                    countPending++;
-                    list.innerHTML += `
-                        <div class="glass-card p-6 border-t-4 border-blue-500">
-                            <div class="flex justify-between items-center mb-4">
-                                <span class="bg-blue-500 text-white text-[10px] font-black px-2 py-1 rounded uppercase">${item.item}</span>
-                                <span class="text-[10px] text-slate-500 font-bold">${item.time}</span>
+                    pending++;
+                    container.innerHTML += `
+                        <div class="glass-card p-6 border-t-2 border-blue-500 shadow-xl">
+                            <div class="flex justify-between mb-4">
+                                <span class="bg-blue-500/10 text-blue-400 px-2 py-1 rounded-md text-[10px] font-black uppercase">${item.item}</span>
+                                <span class="text-[10px] text-slate-600 font-bold">${item.time}</span>
                             </div>
-                            <p class="text-sm mb-4">👤 Khách: <b class="text-yellow-400 font-black">${item.user}</b></p>
+                            <p class="text-sm font-bold text-slate-400 mb-4">Khách hàng: <span class="text-white">@${item.user}</span></p>
                             
-                            <div class="bg-slate-900/80 p-4 rounded-xl border border-slate-700 mb-6 relative group">
-                                <p class="text-[10px] text-slate-500 uppercase font-bold mb-1">Thông tin đăng nhập:</p>
-                                <p id="info-${key}" class="text-xs font-mono text-blue-300 break-all leading-relaxed">${item.info}</p>
-                                <button onclick="copyInfo('${key}')" class="absolute top-2 right-2 text-slate-600 hover:text-white transition-colors">
+                            <div class="bg-black/40 p-4 rounded-xl border border-slate-800 mb-6 group relative">
+                                <p class="text-[9px] text-slate-600 font-bold uppercase mb-2 italic">Thông tin ACC:</p>
+                                <p id="txt-${key}" class="text-xs font-mono text-blue-300 break-all">${item.info}</p>
+                                <button onclick="copyTxt('${key}')" class="absolute top-3 right-3 text-slate-700 hover:text-white transition-colors">
                                     <i class="fas fa-copy"></i>
                                 </button>
                             </div>
 
-                            <div class="flex gap-2">
-                                <button onclick="completeOrder('${key}')" class="flex-1 bg-blue-600 hover:bg-blue-500 text-white font-black py-3 rounded-xl transition-all shadow-lg shadow-blue-900/20 active:scale-95">XONG ✅</button>
-                                <button onclick="deleteOrder('${key}')" class="bg-slate-800 hover:bg-red-900/50 text-slate-400 px-4 rounded-xl transition-colors border border-slate-700">
-                                    <i class="fas fa-trash"></i>
+                            <div class="grid grid-cols-4 gap-2">
+                                <button onclick="doneOrder('${key}')" class="col-span-3 btn-complete text-white font-black py-3 rounded-xl shadow-lg active:scale-95 transition-all">HOÀN TẤT ĐƠN ✅</button>
+                                <button onclick="delOrder('${key}')" class="bg-slate-800 hover:bg-red-900/40 text-slate-500 rounded-xl transition-all">
+                                    <i class="fas fa-trash-alt"></i>
                                 </button>
                             </div>
-                        </div>`;
+                        </div>
+                    `;
                 } else {
-                    countDone++;
+                    done++;
                 }
             });
-            document.getElementById('count-orders').innerText = countPending;
-            document.getElementById('count-done').innerText = countDone;
+            document.getElementById('stat-orders').innerText = pending;
+            document.getElementById('stat-done').innerText = done;
         });
 
-        async function completeOrder(key) {
-            if(confirm("Đã trả xong đơn này cho khách?")) {
+        async function doneOrder(key) {
+            if(confirm("Xác nhận đã xử lý xong đơn hàng này?")) {
                 await db.ref('orders/' + key).update({ status: 'Hoàn thành' });
-                showToast("Đã cập nhật trạng thái đơn thành HOÀN THÀNH!");
+                showNotify("Đã chuyển trạng thái: HOÀN THÀNH");
             }
         }
 
-        function deleteOrder(key) { if(confirm("Xóa bỏ vĩnh viễn đơn hàng này?")) db.ref('orders/' + key).remove(); }
+        function delOrder(key) { if(confirm("Xóa vĩnh viễn đơn hàng này?")) db.ref('orders/' + key).remove(); }
 
-        // --- UTILS ---
-        function showToast(msg) {
-            const toast = document.getElementById('toast');
-            document.getElementById('toast-msg').innerText = msg;
-            toast.classList.remove('translate-y-20', 'opacity-0');
-            setTimeout(() => {
-                toast.classList.add('translate-y-20', 'opacity-0');
-            }, 3000);
+        // Công cụ
+        function showNotify(msg) {
+            const toast = document.getElementById('notify');
+            document.getElementById('notify-msg').innerText = msg;
+            toast.classList.remove('translate-y-32', 'opacity-0');
+            setTimeout(() => toast.classList.add('translate-y-32', 'opacity-0'), 3000);
         }
 
-        function copyInfo(key) {
-            const text = document.getElementById('info-' + key).innerText;
+        function copyTxt(key) {
+            const text = document.getElementById('txt-' + key).innerText;
             const el = document.createElement('textarea');
             el.value = text;
             document.body.appendChild(el);
             el.select();
             document.execCommand('copy');
             document.body.removeChild(el);
-            showToast("Đã copy thông tin tài khoản!");
+            showNotify("Đã copy thông tin ACC!");
         }
     </script>
 </body>
