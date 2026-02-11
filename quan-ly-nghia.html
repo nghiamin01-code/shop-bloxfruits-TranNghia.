@@ -3,230 +3,349 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ADMIN - DUYỆT NẠP TIỀN</title>
+    <title>ADMIN DASHBOARD - BLOX FRUIT SHOP</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap');
-        body { font-family: 'Plus Jakarta Sans', sans-serif; background: #0b0f1a; color: #f8fafc; }
-        .glass-card { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.05); }
-        .status-pending { background: rgba(245, 158, 11, 0.1); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.2); }
-        .status-done { background: rgba(16, 185, 129, 0.1); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.2); }
-        .btn-confirm { background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); box-shadow: 0 4px 15px rgba(37, 99, 235, 0.3); }
-        .loading-shimmer { background: linear-gradient(90deg, #1e293b 25%, #334155 50%, #1e293b 75%); background-size: 200% 100%; animation: shimmer 1.5s infinite; }
-        @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+        
+        :root {
+            --bg-dark: #0f172a;
+            --card-bg: #1e293b;
+            --primary: #3b82f6;
+            --success: #10b981;
+            --warning: #f59e0b;
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: var(--bg-dark);
+            color: #f8fafc;
+            overflow-x: hidden;
+        }
+
+        .glass {
+            background: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .sidebar-item.active {
+            background: rgba(59, 130, 246, 0.15);
+            color: var(--primary);
+            border-right: 3px solid var(--primary);
+        }
+
+        .btn-approve {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            transition: all 0.3s ease;
+        }
+
+        .btn-approve:hover {
+            box-shadow: 0 0 15px rgba(16, 185, 129, 0.4);
+            transform: translateY(-1px);
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: var(--bg-dark); }
+        ::-webkit-scrollbar-thumb { background: #334155; border-radius: 10px; }
     </style>
 </head>
-<body class="min-h-screen pb-10">
+<body class="min-h-screen">
 
-    <div class="max-w-4xl mx-auto px-4 pt-8">
-        <!-- Header -->
-        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
-            <div>
-                <h1 class="text-2xl font-extrabold tracking-tight italic">BANKING <span class="text-blue-500 italic">CONTROL</span></h1>
-                <p class="text-slate-400 text-xs mt-1">Hệ thống duyệt nạp tiền tự động ẩn khi hoàn tất</p>
+    <div class="flex flex-col md:flex-row min-h-screen">
+        <!-- Sidebar -->
+        <aside class="w-full md:w-64 glass border-r border-slate-800 flex flex-col z-20">
+            <div class="p-6">
+                <h1 class="text-xl font-black italic tracking-tighter text-blue-500">ADMIN <span class="text-white">PANEL</span></h1>
             </div>
-            <div id="connection-badge" class="flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-900 border border-slate-800 text-[10px] font-bold">
-                <span class="w-2 h-2 rounded-full bg-slate-500 animate-pulse"></span>
-                ĐANG KẾT NỐI...
-            </div>
-        </div>
-
-        <!-- Toolbar -->
-        <div class="flex flex-wrap items-center justify-between gap-4 mb-6 p-4 glass-card rounded-2xl">
-            <div class="flex gap-2">
-                <button onclick="refreshData()" class="p-2 bg-slate-800 rounded-lg hover:bg-slate-700 transition-colors">
-                    <i class="fas fa-sync-alt text-sm"></i>
+            
+            <nav class="flex-1 px-4 space-y-2">
+                <button onclick="switchTab('overview')" id="btn-overview" class="sidebar-item active w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold transition-all">
+                    <i class="fas fa-chart-pie w-5"></i> Tổng quan
                 </button>
-                <div class="h-8 w-[1px] bg-slate-700 mx-1"></div>
-                <select id="filter-status" onchange="renderUI()" class="bg-slate-800 border-none text-xs font-bold rounded-lg px-3 py-2 outline-none cursor-pointer">
-                    <option value="pending">CHƯA DUYỆT (ẨN KHI XONG)</option>
-                    <option value="all">TẤT CẢ LỊCH SỬ</option>
-                </select>
-            </div>
-            <div class="text-right">
-                <span id="counter" class="text-[10px] font-mono text-blue-400 bg-blue-500/10 px-2 py-1 rounded">Đang tải...</span>
-            </div>
-        </div>
+                <button onclick="switchTab('requests')" id="btn-requests" class="sidebar-item w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold transition-all relative">
+                    <i class="fas fa-university w-5"></i> Duyệt nạp tiền
+                    <span id="badge-count" class="hidden absolute right-4 bg-red-500 text-white text-[10px] px-1.5 py-0.5 rounded-full">0</span>
+                </button>
+                <button onclick="switchTab('users')" id="btn-users" class="sidebar-item w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold transition-all">
+                    <i class="fas fa-users w-5"></i> Người dùng
+                </button>
+            </nav>
 
-        <!-- List Content -->
-        <div id="bank-list" class="grid gap-3">
-            <!-- Items load here -->
-            <div class="loading-shimmer h-24 rounded-2xl"></div>
-            <div class="loading-shimmer h-24 rounded-2xl opacity-50"></div>
-        </div>
+            <div class="p-4 mt-auto">
+                <div id="status-conn" class="flex items-center gap-2 text-[10px] font-bold text-slate-500 bg-slate-900/50 p-3 rounded-xl border border-slate-800">
+                    <div class="w-2 h-2 rounded-full bg-red-500 animate-pulse"></div>
+                    DATABASE: ĐANG KẾT NỐI...
+                </div>
+            </div>
+        </aside>
 
-        <!-- Empty State -->
-        <div id="empty-state" class="hidden flex flex-col items-center justify-center py-20 text-slate-500">
-            <i class="fas fa-check-double text-5xl mb-4 opacity-20"></i>
-            <p class="font-bold tracking-wide">KHÔNG CÓ ĐƠN NÀO ĐANG CHỜ</p>
-            <p class="text-[10px] mt-1 opacity-60">Mọi thứ đã được xử lý sạch sẽ!</p>
-        </div>
+        <!-- Main Content -->
+        <main class="flex-1 p-4 md:p-8 overflow-y-auto">
+            
+            <!-- Tab: Overview -->
+            <section id="tab-overview" class="tab-content space-y-6">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div class="glass p-6 rounded-3xl">
+                        <p class="text-slate-400 text-xs font-bold uppercase tracking-wider">Tổng số dư User</p>
+                        <h2 id="stat-total-balance" class="text-3xl font-black mt-2 text-emerald-400">0đ</h2>
+                    </div>
+                    <div class="glass p-6 rounded-3xl">
+                        <p class="text-slate-400 text-xs font-bold uppercase tracking-wider">Đơn chờ duyệt</p>
+                        <h2 id="stat-pending-req" class="text-3xl font-black mt-2 text-orange-400">0</h2>
+                    </div>
+                    <div class="glass p-6 rounded-3xl">
+                        <p class="text-slate-400 text-xs font-bold uppercase tracking-wider">Thành viên</p>
+                        <h2 id="stat-total-users" class="text-3xl font-black mt-2 text-blue-400">0</h2>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Tab: Requests (Duyệt nạp) -->
+            <section id="tab-requests" class="tab-content hidden space-y-4">
+                <div class="flex items-center justify-between mb-4">
+                    <h2 class="text-xl font-extrabold italic">DANH SÁCH <span class="text-blue-500">CHỜ DUYỆT</span></h2>
+                    <div class="text-[10px] text-slate-500 bg-slate-800 px-3 py-1 rounded-full uppercase font-bold">Auto-refresh</div>
+                </div>
+
+                <div id="request-list" class="grid gap-3">
+                    <!-- Skeleton -->
+                    <div class="h-24 bg-slate-800/50 animate-pulse rounded-2xl"></div>
+                </div>
+
+                <div id="request-empty" class="hidden py-20 flex flex-col items-center opacity-30">
+                    <i class="fas fa-check-circle text-6xl mb-4"></i>
+                    <p class="font-bold">ĐÃ XỬ LÝ HẾT CÁC ĐƠN HÀNG</p>
+                </div>
+            </section>
+
+            <!-- Tab: Users -->
+            <section id="tab-users" class="tab-content hidden">
+                <div class="glass rounded-3xl overflow-hidden">
+                    <table class="w-full text-left text-sm">
+                        <thead class="bg-slate-800/50 text-slate-400 font-bold">
+                            <tr>
+                                <th class="p-4">Tên đăng nhập</th>
+                                <th class="p-4">Số dư hiện tại</th>
+                                <th class="p-4 text-right">Hành động</th>
+                            </tr>
+                        </thead>
+                        <tbody id="user-table-body">
+                            <!-- User rows -->
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+        </main>
     </div>
 
-    <!-- Notification Toast -->
-    <div id="toast" class="fixed bottom-5 right-5 transform translate-y-20 opacity-0 transition-all duration-300 px-6 py-3 rounded-xl glass-card border-blue-500/50 flex items-center gap-3 z-50">
-        <div class="w-8 h-8 rounded-full bg-blue-500/20 flex items-center justify-center">
-            <i class="fas fa-info-circle text-blue-500"></i>
+    <!-- Notification -->
+    <div id="notif" class="fixed bottom-6 right-6 translate-y-20 opacity-0 transition-all duration-500 z-50">
+        <div class="glass border-blue-500/50 p-4 rounded-2xl shadow-2xl flex items-center gap-4">
+            <div id="notif-icon" class="w-10 h-10 rounded-full bg-blue-500/20 flex items-center justify-center text-blue-500">
+                <i class="fas fa-bell"></i>
+            </div>
+            <div>
+                <p id="notif-text" class="text-xs font-bold text-white uppercase tracking-tight"></p>
+                <p class="text-[10px] text-slate-400">Hệ thống quản trị thời gian thực</p>
+            </div>
         </div>
-        <p id="toast-msg" class="text-xs font-bold"></p>
     </div>
 
     <script>
+        // CẤU HÌNH FIREBASE (Thay bằng config của bạn nếu khác)
         const firebaseConfig = {
             databaseURL: "https://shop-blox-fruit-trannghia-default-rtdb.firebaseio.com/"
         };
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
-        let bankRequests = [];
+        let allUsers = {};
+        let allRequests = [];
 
-        // 1. Sync Data Realtime
-        function initRealtime() {
-            // Lắng nghe nhánh requests (thường dùng cho nạp thẻ/bank)
-            db.ref('requests').on('value', (snapshot) => {
-                const data = snapshot.val() || {};
-                bankRequests = Object.keys(data).map(key => ({
-                    id: key,
-                    ...data[key],
-                    dbPath: 'requests'
-                }));
-                renderUI();
+        // 1. CHUYỂN TAB
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            document.querySelectorAll('.sidebar-item').forEach(el => el.classList.remove('active'));
+            
+            document.getElementById('tab-' + tabName).classList.remove('hidden');
+            document.getElementById('btn-' + tabName).classList.add('active');
+        }
+
+        // 2. KẾT NỐI REALTIME
+        function initData() {
+            // Lắng nghe người dùng
+            db.ref('users').on('value', snap => {
+                allUsers = snap.val() || {};
+                renderUsers();
+                updateStats();
             });
 
-            // Lắng nghe kết nối
-            db.ref(".info/connected").on("value", (snap) => {
-                const badge = document.getElementById('connection-badge');
-                if (snap.val() === true) {
-                    badge.innerHTML = '<span class="w-2 h-2 rounded-full bg-emerald-500"></span> ONLINE';
-                    badge.classList.add('text-emerald-500');
+            // Lắng nghe yêu cầu nạp tiền
+            db.ref('requests').on('value', snap => {
+                const data = snap.val() || {};
+                allRequests = Object.keys(data).map(key => ({
+                    id: key,
+                    ...data[key]
+                }));
+                renderRequests();
+                updateStats();
+            });
+
+            // Status kết nối
+            db.ref('.info/connected').on('value', snap => {
+                const conn = document.getElementById('status-conn');
+                if (snap.val()) {
+                    conn.innerHTML = '<div class="w-2 h-2 rounded-full bg-emerald-500"></div> DATABASE: ONLINE';
+                    conn.classList.replace('text-slate-500', 'text-emerald-500');
                 } else {
-                    badge.innerHTML = '<span class="w-2 h-2 rounded-full bg-red-500"></span> OFFLINE';
-                    badge.classList.add('text-red-500');
+                    conn.innerHTML = '<div class="w-2 h-2 rounded-full bg-red-500 animate-pulse"></div> DATABASE: OFFLINE';
+                    conn.classList.replace('text-emerald-500', 'text-slate-500');
                 }
             });
         }
 
-        // 2. Render UI
-        function renderUI() {
-            const listEl = document.getElementById('bank-list');
-            const filter = document.getElementById('filter-status').value;
-            const emptyEl = document.getElementById('empty-state');
-            const counterEl = document.getElementById('counter');
+        // 3. HIỂN THỊ YÊU CẦU NẠP (CHỈ HIỆN ĐƠN CHƯA DUYỆT)
+        function renderRequests() {
+            const list = document.getElementById('request-list');
+            const empty = document.getElementById('request-empty');
+            const badge = document.getElementById('badge-count');
             
-            listEl.innerHTML = "";
+            // Lọc đơn chưa duyệt (status != 'completed' hoặc 'done')
+            const pending = allRequests.filter(r => r.status !== 'completed' && r.status !== 'done' && r.status !== 1);
+            
+            list.innerHTML = "";
+            badge.innerText = pending.length;
+            badge.classList.toggle('hidden', pending.length === 0);
 
-            // Lọc dữ liệu: Nếu là 'pending' thì chỉ hiện đơn chưa hoàn thành
-            const filteredData = bankRequests.filter(item => {
-                const isDone = (item.status === 'completed' || item.status === 'done' || item.status === 1);
-                if (filter === 'pending') return !isDone;
-                return true;
-            }).reverse();
-
-            counterEl.innerText = `CÓ ${filteredData.length} ĐƠN`;
-
-            if (filteredData.length === 0) {
-                emptyEl.classList.remove('hidden');
+            if (pending.length === 0) {
+                empty.classList.remove('hidden');
             } else {
-                emptyEl.classList.add('hidden');
-                filteredData.forEach(item => {
-                    const isDone = (item.status === 'completed' || item.status === 'done' || item.status === 1);
+                empty.classList.add('hidden');
+                pending.reverse().forEach(req => {
                     const div = document.createElement('div');
-                    div.className = "p-5 glass-card rounded-2xl flex flex-col md:flex-row justify-between items-center gap-4 transition-all hover:border-slate-600";
-                    
+                    div.className = "glass p-5 rounded-2xl flex flex-col md:flex-row justify-between items-center gap-4 hover:border-slate-500 transition-all";
                     div.innerHTML = `
-                        <div class="flex-1 w-full">
-                            <div class="flex items-center gap-3 mb-2">
-                                <span class="text-[10px] font-mono text-slate-500">ID: ${item.id.slice(-6)}</span>
-                                <span class="px-2 py-0.5 rounded text-[9px] font-bold uppercase ${isDone ? 'status-done' : 'status-pending'}">
-                                    ${isDone ? 'Đã duyệt' : 'Đang chờ'}
-                                </span>
+                        <div class="flex-1">
+                            <div class="flex items-center gap-2 mb-1">
+                                <span class="text-[10px] font-mono text-slate-500 uppercase">Ref: ${req.id.slice(-6)}</span>
+                                <span class="bg-orange-500/10 text-orange-500 text-[9px] font-black px-2 py-0.5 rounded uppercase">Chờ xử lý</span>
                             </div>
-                            <div class="flex items-baseline gap-2">
-                                <span class="text-xl font-black text-blue-400">${Number(item.amount || 0).toLocaleString()}</span>
-                                <span class="text-[10px] font-bold text-slate-500 tracking-widest">VNĐ</span>
-                            </div>
-                            <div class="mt-2 flex flex-col gap-1">
-                                <p class="text-xs font-bold text-slate-300"><i class="far fa-user mr-2 text-slate-500"></i>${item.user || 'Ẩn danh'}</p>
-                                <p class="text-[10px] text-slate-500 italic bg-black/20 p-2 rounded-lg border border-white/5 mt-1">"${item.memo || item.content || 'Nạp tiền vào tài khoản'}"</p>
-                            </div>
+                            <h3 class="text-xl font-black text-white">${Number(req.amount || 0).toLocaleString()} <span class="text-xs text-slate-500">VNĐ</span></h3>
+                            <p class="text-xs font-bold text-blue-400 mt-1"><i class="fas fa-user-circle mr-1"></i> ${req.user}</p>
+                            <p class="text-[10px] text-slate-500 italic mt-1 bg-black/20 p-2 rounded-lg border border-white/5 line-clamp-1">Nội dung: ${req.memo || req.content || 'Nạp qua ngân hàng'}</p>
                         </div>
                         <div class="flex gap-2 w-full md:w-auto">
-                            ${!isDone ? `
-                                <button onclick="approveDeposit('${item.id}', '${item.user}', ${item.amount})" class="btn-confirm flex-1 md:flex-none px-6 py-3 rounded-xl text-xs font-black tracking-widest text-white uppercase transition-all active:scale-95">
-                                    Xác nhận nạp
-                                </button>
-                            ` : ''}
-                            <button onclick="deleteRequest('${item.id}')" class="p-3 rounded-xl bg-slate-800 text-slate-500 hover:text-red-400 transition-colors">
+                            <button onclick="approveRequest('${req.id}', '${req.user}', ${req.amount})" class="btn-approve flex-1 md:flex-none px-6 py-3 rounded-xl text-xs font-black text-white uppercase tracking-widest">
+                                Duyệt tiền
+                            </button>
+                            <button onclick="rejectRequest('${req.id}')" class="bg-slate-800 p-3 rounded-xl text-slate-500 hover:text-red-500 transition-all">
                                 <i class="fas fa-trash-alt"></i>
                             </button>
                         </div>
                     `;
-                    listEl.appendChild(div);
+                    list.appendChild(div);
                 });
             }
         }
 
-        // 3. Logic Duyệt Tiền (Cộng số dư + Đổi trạng thái)
-        async function approveDeposit(id, username, amount) {
+        // 4. HIỂN THỊ DANH SÁCH USER
+        function renderUsers() {
+            const tbody = document.getElementById('user-table-body');
+            tbody.innerHTML = "";
+            
+            Object.keys(allUsers).forEach(username => {
+                const user = allUsers[username];
+                const tr = document.createElement('tr');
+                tr.className = "border-b border-slate-800 hover:bg-white/5 transition-all";
+                tr.innerHTML = `
+                    <td class="p-4 font-bold text-slate-200">${username}</td>
+                    <td class="p-4 font-black text-emerald-400">${Number(user.balance || 0).toLocaleString()}đ</td>
+                    <td class="p-4 text-right">
+                        <button onclick="adjustBalance('${username}')" class="text-[10px] font-black bg-blue-500/10 text-blue-500 px-3 py-1 rounded-lg border border-blue-500/20 uppercase">Sửa số dư</button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        // 5. CẬP NHẬT THỐNG KÊ
+        function updateStats() {
+            let totalB = 0;
+            Object.values(allUsers).forEach(u => totalB += Number(u.balance || 0));
+            
+            document.getElementById('stat-total-balance').innerText = totalB.toLocaleString() + 'đ';
+            document.getElementById('stat-total-users').innerText = Object.keys(allUsers).length;
+            document.getElementById('stat-pending-req').innerText = allRequests.filter(r => r.status !== 'completed' && r.status !== 'done' && r.status !== 1).length;
+        }
+
+        // 6. LOGIC DUYỆT NẠP (QUAN TRỌNG NHẤT)
+        async function approveRequest(id, username, amount) {
             try {
-                if(!username) {
-                    showToast("Lỗi: Không tìm thấy tên người dùng!");
+                // Bước 1: Cộng tiền cho User
+                const userRef = db.ref('users/' + username);
+                const userSnap = await userRef.once('value');
+                const userData = userSnap.val();
+
+                if (userData) {
+                    const oldBalance = Number(userData.balance || 0);
+                    const newBalance = oldBalance + Number(amount);
+                    await userRef.update({ balance: newBalance });
+                } else {
+                    notify("User không tồn tại!", "error");
                     return;
                 }
 
-                // A. Cộng tiền vào ví user
-                const userRef = db.ref('users/' + username);
-                const snapshot = await userRef.once('value');
-                const userData = snapshot.val();
-                
-                if (userData) {
-                    const currentBalance = Number(userData.balance || 0);
-                    const newBalance = currentBalance + Number(amount);
-                    await userRef.update({ balance: newBalance });
-                } else {
-                    showToast("Cảnh báo: User không tồn tại nhưng vẫn duyệt trạng thái...");
-                }
-
-                // B. Cập nhật trạng thái đơn nạp -> TỰ ĐỘNG BIẾN MẤT KHỎI LIST
-                await db.ref('requests/' + id).update({ 
+                // Bước 2: Đánh dấu đơn đã hoàn thành -> NÓ SẼ TỰ BIẾN MẤT TRÊN UI DO BỘ LỌC PENDING
+                await db.ref('requests/' + id).update({
                     status: 'completed',
                     processedAt: Date.now()
                 });
 
-                showToast(`Đã nạp +${Number(amount).toLocaleString()}đ cho ${username}`);
-            } catch (error) {
-                console.error(error);
-                showToast("Lỗi hệ thống Firebase!");
+                notify(`ĐÃ DUYỆT +${amount.toLocaleString()}đ CHO ${username}`, "success");
+            } catch (err) {
+                notify("Lỗi duyệt đơn: " + err.message, "error");
             }
         }
 
-        // 4. Xóa yêu cầu
-        async function deleteRequest(id) {
-            if(confirm("Bạn có chắc chắn muốn xóa đơn này vĩnh viễn?")) {
-                await db.ref('requests/' + id).remove();
-                showToast("Đã xóa yêu cầu.");
+        // 7. CÁC HÀM PHỤ TRỢ
+        function rejectRequest(id) {
+            if(confirm("Xóa vĩnh viễn đơn nạp này?")) {
+                db.ref('requests/' + id).remove();
+                notify("Đã xóa yêu cầu nạp", "info");
             }
         }
 
-        function showToast(msg) {
-            const toast = document.getElementById('toast');
-            document.getElementById('toast-msg').innerText = msg;
+        async function adjustBalance(username) {
+            const amount = prompt(`Nhập số dư MỚI cho ${username}:`);
+            if (amount !== null && !isNaN(amount)) {
+                await db.ref('users/' + username).update({ balance: Number(amount) });
+                notify(`Đã cập nhật số dư cho ${username}`, "success");
+            }
+        }
+
+        function notify(msg, type = "info") {
+            const toast = document.getElementById('notif');
+            const text = document.getElementById('notif-text');
+            const icon = document.getElementById('notif-icon');
+            
+            text.innerText = msg;
+            
+            if (type === "success") icon.className = "w-10 h-10 rounded-full bg-emerald-500/20 flex items-center justify-center text-emerald-500";
+            else if (type === "error") icon.className = "w-10 h-10 rounded-full bg-red-500/20 flex items-center justify-center text-red-500";
+            else icon.className = "w-10 h-10 rounded-full bg-blue-500/20 flex items-center justify-center text-blue-500";
+
             toast.classList.remove('translate-y-20', 'opacity-0');
-            setTimeout(() => {
-                toast.classList.add('translate-y-20', 'opacity-0');
-            }, 3000);
+            setTimeout(() => toast.classList.add('translate-y-20', 'opacity-0'), 3000);
         }
 
-        function refreshData() {
-            showToast("Đang đồng bộ dữ liệu...");
-            renderUI();
-        }
-
-        // Chạy hệ thống
-        initRealtime();
+        // Khởi động
+        initData();
     </script>
 </body>
 </html>
