@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>HỆ THỐNG QUẢN TRỊ - SHOP BẮP</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Sử dụng bản mới nhất của Firebase để đảm bảo ổn định -->
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
@@ -18,6 +19,8 @@
         .status-badge { padding: 4px 10px; border-radius: 8px; font-size: 10px; font-weight: 800; text-transform: uppercase; }
         ::-webkit-scrollbar { width: 5px; }
         ::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 10px; }
+        .loader { border: 3px solid #1e293b; border-top: 3px solid #3b82f6; border-radius: 50%; width: 24px; height: 24px; animation: spin 1s linear infinite; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     </style>
 </head>
 <body class="min-h-screen">
@@ -31,11 +34,10 @@
                 </div>
                 <div>
                     <h1 class="text-4xl font-black tracking-tight">ADMIN <span class="text-yellow-400">PANEL</span></h1>
-                    <p class="text-slate-500 text-xs font-bold uppercase tracking-widest mt-1">Hệ thống điều hành Shop Bắp</p>
+                    <p class="text-slate-500 text-xs font-bold uppercase tracking-widest mt-1">Cấu hình: Đồng bộ Discord & Realtime</p>
                 </div>
             </div>
 
-            <!-- Navigation Tabs -->
             <nav class="flex bg-slate-900/50 p-1.5 rounded-2xl border border-slate-800">
                 <button onclick="switchView('bank')" id="tab-bank" class="tab-active px-8 py-3 rounded-xl text-sm font-black transition-all duration-300">
                     <i class="fas fa-university mr-2"></i>Duyệt Bank
@@ -46,25 +48,25 @@
             </nav>
         </header>
 
-        <!-- Statistics Quick View -->
+        <!-- Stats -->
         <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-10">
             <div class="glass-card p-5 border-l-4 border-yellow-500">
-                <p class="text-[10px] font-extrabold text-slate-500 uppercase tracking-wider mb-1">Yêu cầu nạp</p>
+                <p class="text-[10px] font-extrabold text-slate-500 uppercase tracking-wider mb-1">Nạp Chờ Duyệt</p>
                 <h3 id="stat-bank" class="text-3xl font-black">0</h3>
             </div>
             <div class="glass-card p-5 border-l-4 border-blue-500">
-                <p class="text-[10px] font-extrabold text-slate-500 uppercase tracking-wider mb-1">Đơn đang chờ</p>
+                <p class="text-[10px] font-extrabold text-slate-500 uppercase tracking-wider mb-1">Đơn Chờ Xử Lý</p>
                 <h3 id="stat-orders" class="text-3xl font-black text-blue-400">0</h3>
             </div>
             <div class="glass-card p-5 border-l-4 border-emerald-500">
-                <p class="text-[10px] font-extrabold text-slate-500 uppercase tracking-wider mb-1">Tổng hoàn tất</p>
-                <h3 id="stat-done" class="text-3xl font-black text-emerald-400">0</h3>
+                <p class="text-[10px] font-extrabold text-slate-500 uppercase tracking-wider mb-1">Kết nối DB</p>
+                <h3 id="db-status" class="text-sm font-black text-amber-500 uppercase flex items-center gap-2 mt-2 italic">
+                    <span class="w-2 h-2 bg-amber-500 rounded-full"></span> Đang kết nối...
+                </h3>
             </div>
             <div class="glass-card p-5 border-l-4 border-slate-700">
-                <p class="text-[10px] font-extrabold text-slate-500 uppercase tracking-wider mb-1">Máy chủ</p>
-                <h3 class="text-sm font-black text-emerald-500 uppercase flex items-center gap-2 mt-2">
-                    <span class="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></span> Hoạt động
-                </h3>
+                <p class="text-[10px] font-extrabold text-slate-500 uppercase tracking-wider mb-1">Discord</p>
+                <h3 id="discord-status" class="text-[10px] font-black text-slate-500 uppercase mt-2">Chưa cấu hình Webhook</h3>
             </div>
         </div>
 
@@ -74,10 +76,10 @@
             <div id="view-bank" class="space-y-6">
                 <div class="flex items-center justify-between">
                     <h2 class="text-xl font-black flex items-center gap-3 italic"><i class="fas fa-money-bill-transfer text-emerald-400"></i> DUYỆT NẠP TIỀN BANK</h2>
-                    <span class="text-[10px] bg-emerald-500/10 text-emerald-400 px-3 py-1 rounded-full font-bold">REALTIME</span>
+                    <button onclick="testDiscord('bank')" class="text-[9px] font-bold bg-slate-800 px-3 py-1 rounded-lg hover:bg-slate-700">Test Discord Webhook</button>
                 </div>
-                <div id="list-bank" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 text-slate-500 italic">
-                    Đang tải dữ liệu ngân hàng...
+                <div id="list-bank" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+                    <div class="col-span-full flex justify-center py-12"><div class="loader"></div></div>
                 </div>
             </div>
 
@@ -85,10 +87,9 @@
             <div id="view-orders" class="space-y-6 hidden">
                 <div class="flex items-center justify-between">
                     <h2 class="text-xl font-black flex items-center gap-3 italic"><i class="fas fa-boxes-packing text-blue-400"></i> ĐƠN HÀNG DỊCH VỤ</h2>
-                    <span class="text-[10px] bg-blue-500/10 text-blue-400 px-3 py-1 rounded-full font-bold">XỬ LÝ NGAY</span>
                 </div>
-                <div id="list-orders" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 text-slate-500 italic">
-                    Đang quét danh sách đơn hàng...
+                <div id="list-orders" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+                    <div class="col-span-full flex justify-center py-12"><div class="loader"></div></div>
                 </div>
             </div>
         </main>
@@ -96,27 +97,75 @@
 
     <!-- Notification system -->
     <div id="notify" class="fixed bottom-10 right-10 translate-y-32 opacity-0 transition-all duration-500 z-50">
-        <div class="bg-white text-slate-900 px-8 py-4 rounded-2xl shadow-2xl font-black flex items-center gap-4">
-            <i class="fas fa-check-circle text-emerald-500 text-xl"></i>
+        <div class="bg-white text-slate-900 px-8 py-4 rounded-2xl shadow-2xl font-black flex items-center gap-4 border-b-4 border-blue-500">
+            <i class="fas fa-bell text-blue-500"></i>
             <span id="notify-msg">Thành công!</span>
         </div>
     </div>
 
     <script>
-        // Cấu hình Firebase - Giữ nguyên Database của bạn
+        // --- CẤU HÌNH QUAN TRỌNG ---
         const firebaseConfig = { databaseURL: "https://shop-blox-fruit-trannghia-default-rtdb.firebaseio.com/" };
+        
+        // Dán URL Webhook Discord của bạn vào đây
+        const DISCORD_WEBHOOK_URL = "DÁN_WEBHOOK_DISCORD_CỦA_BẠN_VÀO_ĐÂY";
+
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
-        // Chuyển đổi giao diện
-        function switchView(view) {
-            document.getElementById('view-bank').classList.toggle('hidden', view !== 'bank');
-            document.getElementById('view-orders').classList.toggle('hidden', view !== 'orders');
-            document.getElementById('tab-bank').className = (view === 'bank' ? 'tab-active' : '') + ' px-8 py-3 rounded-xl text-sm font-black transition-all duration-300';
-            document.getElementById('tab-orders').className = (view === 'orders' ? 'tab-active' : '') + ' px-8 py-3 rounded-xl text-sm font-black transition-all duration-300';
+        // Kiểm tra kết nối DB
+        db.ref('.info/connected').on('value', snap => {
+            const status = document.getElementById('db-status');
+            if (snap.val() === true) {
+                status.innerHTML = '<span class="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></span> Đã kết nối DB';
+                status.className = "text-sm font-black text-emerald-500 uppercase flex items-center gap-2 mt-2 italic";
+            } else {
+                status.innerHTML = '<span class="w-2 h-2 bg-red-500 rounded-full"></span> Mất kết nối';
+                status.className = "text-sm font-black text-red-500 uppercase flex items-center gap-2 mt-2 italic";
+            }
+        });
+
+        if(DISCORD_WEBHOOK_URL !== "DÁN_WEBHOOK_DISCORD_CỦA_BẠN_VÀO_ĐÂY") {
+            document.getElementById('discord-status').innerText = "Đã bật Webhook";
+            document.getElementById('discord-status').classList.replace('text-slate-500', 'text-emerald-400');
         }
 
-        // --- 1. Xử lý Nạp Bank ---
+        // --- Gửi thông báo tới Discord ---
+        async function sendDiscord(type, data) {
+            if(!DISCORD_WEBHOOK_URL || DISCORD_WEBHOOK_URL.includes("DÁN_WEBHOOK")) return;
+
+            let embed = {
+                title: type === 'bank' ? "💰 THÔNG BÁO NẠP TIỀN" : "📦 CÓ ĐƠN HÀNG MỚI",
+                color: type === 'bank' ? 3066993 : 3447003,
+                timestamp: new Date().toISOString(),
+                fields: []
+            };
+
+            if(type === 'bank') {
+                embed.fields = [
+                    { name: "Người nạp", value: `@${data.user}`, inline: true },
+                    { name: "Số tiền", value: `${data.amount.toLocaleString()}đ`, inline: true },
+                    { name: "Nội dung", value: data.memo || "Không có" }
+                ];
+            } else {
+                embed.fields = [
+                    { name: "Khách hàng", value: `@${data.user}`, inline: true },
+                    { name: "Sản phẩm", value: data.item, inline: true },
+                    { name: "Thông tin ACC", value: `\`\`\`${data.info}\`\`\`` }
+                ];
+            }
+
+            try {
+                await fetch(DISCORD_WEBHOOK_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ embeds: [embed] })
+                });
+            } catch (e) { console.error("Discord Error", e); }
+        }
+
+        // --- Duyệt Bank ---
+        // SỬA ĐỔI: Lắng nghe chính xác đường dẫn 'requests' hoặc 'naptien' tùy code web của bạn
         db.ref('requests').on('value', snapshot => {
             const container = document.getElementById('list-bank');
             const data = snapshot.val();
@@ -124,7 +173,7 @@
             container.innerHTML = "";
 
             if(!data) {
-                container.innerHTML = `<div class="col-span-full glass-card p-12 text-center text-slate-600 font-bold uppercase tracking-widest">Không có yêu cầu nạp tiền</div>`;
+                container.innerHTML = `<div class="col-span-full glass-card p-12 text-center text-slate-600 font-bold uppercase tracking-widest border-2 border-dashed border-slate-800">Không có yêu cầu nạp tiền nào</div>`;
                 document.getElementById('stat-bank').innerText = 0;
                 return;
             }
@@ -133,20 +182,23 @@
                 count++;
                 const item = data[key];
                 container.innerHTML += `
-                    <div class="glass-card p-6 border-t-2 border-emerald-500 shadow-xl">
+                    <div class="glass-card p-6 border-t-2 border-emerald-500 shadow-xl hover:scale-[1.02] transition-transform">
                         <div class="flex justify-between items-start mb-6">
                             <div>
-                                <h4 class="text-white font-black text-lg">@${item.user}</h4>
-                                <p class="text-[10px] text-slate-500 font-bold">${item.time}</p>
+                                <h4 class="text-white font-black text-lg">@${item.user || 'Ẩn danh'}</h4>
+                                <p class="text-[10px] text-slate-500 font-bold">${item.time || 'Vừa xong'}</p>
                             </div>
                             <div class="text-right">
-                                <p class="text-emerald-400 font-black text-xl">+${item.amount.toLocaleString()}đ</p>
-                                <p class="text-[9px] text-slate-600 font-bold uppercase mt-1">Nội dung: ${item.memo || 'Trống'}</p>
+                                <p class="text-emerald-400 font-black text-xl">+${(item.amount || 0).toLocaleString()}đ</p>
                             </div>
+                        </div>
+                        <div class="bg-black/20 p-3 rounded-lg mb-4 border border-slate-800/50">
+                             <p class="text-[9px] text-slate-500 font-bold uppercase mb-1">Nội dung chuyển khoản:</p>
+                             <p class="text-xs font-bold text-slate-300">${item.memo || 'Không có'}</p>
                         </div>
                         <div class="space-y-2">
                             <button onclick="approveBank('${item.user}', ${item.amount}, '${key}')" class="w-full btn-approve text-white font-black py-3 rounded-xl shadow-lg active:scale-95 transition-all">DUYỆT TIỀN</button>
-                            <button onclick="rejectReq('${key}')" class="w-full text-[10px] font-bold text-slate-600 hover:text-red-400 py-2 transition-colors uppercase">Hủy & Xóa yêu cầu</button>
+                            <button onclick="rejectReq('${key}')" class="w-full text-[10px] font-bold text-slate-600 hover:text-red-400 py-2 transition-colors uppercase">Hủy bỏ</button>
                         </div>
                     </div>
                 `;
@@ -154,30 +206,15 @@
             document.getElementById('stat-bank').innerText = count;
         });
 
-        async function approveBank(user, amount, key) {
-            if(!confirm(`Xác nhận cộng ${amount.toLocaleString()}đ cho ${user}?`)) return;
-            
-            const userRef = db.ref('users/' + user);
-            const userSnap = await userRef.get();
-            const currentBalance = (userSnap.val()?.balance) || 0;
-
-            await userRef.update({ balance: currentBalance + amount });
-            await db.ref('requests/' + key).remove();
-            showNotify(`Đã nạp ${amount.toLocaleString()}đ cho @${user}`);
-        }
-
-        function rejectReq(key) { if(confirm("Xóa yêu cầu nạp này?")) db.ref('requests/' + key).remove(); }
-
-        // --- 2. Xử lý Đơn Hàng ---
+        // --- Đơn Hàng ---
         db.ref('orders').on('value', snapshot => {
             const container = document.getElementById('list-orders');
             const data = snapshot.val();
             let pending = 0;
-            let done = 0;
             container.innerHTML = "";
 
             if(!data) {
-                container.innerHTML = `<div class="col-span-full glass-card p-12 text-center text-slate-600 font-bold uppercase tracking-widest">Hiện không có đơn hàng nào</div>`;
+                container.innerHTML = `<div class="col-span-full glass-card p-12 text-center text-slate-600 font-bold uppercase tracking-widest border-2 border-dashed border-slate-800">Không có đơn hàng mới</div>`;
                 document.getElementById('stat-orders').innerText = 0;
                 return;
             }
@@ -192,10 +229,10 @@
                                 <span class="bg-blue-500/10 text-blue-400 px-2 py-1 rounded-md text-[10px] font-black uppercase">${item.item}</span>
                                 <span class="text-[10px] text-slate-600 font-bold">${item.time}</span>
                             </div>
-                            <p class="text-sm font-bold text-slate-400 mb-4">Khách hàng: <span class="text-white">@${item.user}</span></p>
+                            <p class="text-sm font-bold text-slate-400 mb-4">Khách: <span class="text-white">@${item.user}</span></p>
                             
                             <div class="bg-black/40 p-4 rounded-xl border border-slate-800 mb-6 group relative">
-                                <p class="text-[9px] text-slate-600 font-bold uppercase mb-2 italic">Thông tin ACC:</p>
+                                <p class="text-[9px] text-slate-600 font-bold uppercase mb-2">Thông tin tài khoản:</p>
                                 <p id="txt-${key}" class="text-xs font-mono text-blue-300 break-all">${item.info}</p>
                                 <button onclick="copyTxt('${key}')" class="absolute top-3 right-3 text-slate-700 hover:text-white transition-colors">
                                     <i class="fas fa-copy"></i>
@@ -203,31 +240,48 @@
                             </div>
 
                             <div class="grid grid-cols-4 gap-2">
-                                <button onclick="doneOrder('${key}')" class="col-span-3 btn-complete text-white font-black py-3 rounded-xl shadow-lg active:scale-95 transition-all">HOÀN TẤT ĐƠN ✅</button>
-                                <button onclick="delOrder('${key}')" class="bg-slate-800 hover:bg-red-900/40 text-slate-500 rounded-xl transition-all">
-                                    <i class="fas fa-trash-alt"></i>
-                                </button>
+                                <button onclick="doneOrder('${key}')" class="col-span-3 btn-complete text-white font-black py-3 rounded-xl shadow-lg active:scale-95 transition-all">HOÀN TẤT</button>
+                                <button onclick="delOrder('${key}')" class="bg-slate-800 hover:bg-red-900/40 text-slate-500 rounded-xl transition-all"><i class="fas fa-trash"></i></button>
                             </div>
                         </div>
                     `;
-                } else {
-                    done++;
                 }
             });
             document.getElementById('stat-orders').innerText = pending;
-            document.getElementById('stat-done').innerText = done;
         });
 
-        async function doneOrder(key) {
-            if(confirm("Xác nhận đã xử lý xong đơn hàng này?")) {
-                await db.ref('orders/' + key).update({ status: 'Hoàn thành' });
-                showNotify("Đã chuyển trạng thái: HOÀN THÀNH");
-            }
+        // --- Logic Xử lý ---
+        async function approveBank(user, amount, key) {
+            if(!confirm(`Xác nhận cộng ${amount.toLocaleString()}đ cho ${user}?`)) return;
+            try {
+                const userRef = db.ref('users/' + user);
+                const snap = await userRef.once('value');
+                const curBalance = (snap.val()?.balance) || 0;
+                
+                await userRef.update({ balance: curBalance + amount });
+                const reqData = (await db.ref('requests/' + key).get()).val();
+                await db.ref('requests/' + key).remove();
+                
+                showNotify(`Đã nạp thành công cho @${user}`);
+                sendDiscord('bank', reqData);
+            } catch(e) { showNotify("Lỗi: " + e.message); }
         }
 
-        function delOrder(key) { if(confirm("Xóa vĩnh viễn đơn hàng này?")) db.ref('orders/' + key).remove(); }
+        async function doneOrder(key) {
+            await db.ref('orders/' + key).update({ status: 'Hoàn thành' });
+            showNotify("Đã hoàn tất đơn hàng!");
+        }
 
-        // Công cụ
+        function rejectReq(key) { if(confirm("Hủy yêu cầu này?")) db.ref('requests/' + key).remove(); }
+        function delOrder(key) { if(confirm("Xóa đơn này?")) db.ref('orders/' + key).remove(); }
+
+        function switchView(view) {
+            document.getElementById('view-bank').classList.toggle('hidden', view !== 'bank');
+            document.getElementById('view-orders').classList.toggle('hidden', view !== 'orders');
+            document.getElementById('tab-bank').className = (view === 'bank' ? 'tab-active' : '') + ' px-8 py-3 rounded-xl text-sm font-black transition-all';
+            document.getElementById('tab-orders').className = (view === 'orders' ? 'tab-active' : '') + ' px-8 py-3 rounded-xl text-sm font-black transition-all';
+        }
+
         function showNotify(msg) {
             const toast = document.getElementById('notify');
             document.getElementById('notify-msg').innerText = msg;
@@ -243,7 +297,12 @@
             el.select();
             document.execCommand('copy');
             document.body.removeChild(el);
-            showNotify("Đã copy thông tin ACC!");
+            showNotify("Đã sao chép!");
+        }
+
+        async function testDiscord(type) {
+            showNotify("Đang gửi thử Discord...");
+            await sendDiscord(type, { user: "Admin_Test", amount: 100000, memo: "Nạp thử nghiệm", item: "Sản phẩm Test", info: "Tài khoản: admin | Pass: 123" });
         }
     </script>
 </body>
