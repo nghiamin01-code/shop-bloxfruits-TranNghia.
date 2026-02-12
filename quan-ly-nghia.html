@@ -1,45 +1,359 @@
-<!DOCTYPE html>
-<html lang="vi">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Quản lý Duyệt Đơn Hàng</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
-        body { font-family: 'Plus Jakarta Sans', sans-serif; }
-        .status-badge { padding: 4px 10px; border-radius: 6px; font-size: 0.75rem; font-weight: 600; text-transform: uppercase; }
-        .status-pending { background: #fff7ed; color: #c2410c; border: 1px solid #ffedd5; }
-        .status-confirmed { background: #f0fdf4; color: #15803d; border: 1px solid #dcfce7; }
-        .status-cancelled { background: #fef2f2; color: #b91c1c; border: 1px solid #fee2e2; }
-    </style>
-</head>
-<body class="bg-slate-50 min-h-screen text-slate-900">
+import React, { useState, useEffect } from 'react';
+import { 
+  CheckCircle2, 
+  XCircle, 
+  Wallet, 
+  Users, 
+  History, 
+  ArrowUpRight, 
+  Search,
+  PlusCircle,
+  Bell,
+  LayoutDashboard,
+  CreditCard,
+  TrendingUp,
+  ShieldCheck,
+  MoreVertical,
+  Filter,
+  Download
+} from 'lucide-react';
 
-    <div class="flex h-screen overflow-hidden">
-        <!-- Sidebar -->
-        <aside class="w-80 bg-white border-r border-slate-200 flex flex-col">
-            <div class="p-6 border-b border-slate-100">
-                <div class="flex items-center gap-3 mb-6">
-                    <div class="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center text-white shadow-lg shadow-indigo-200">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path></svg>
+const App = () => {
+  // Mock Data
+  const [customers, setCustomers] = useState([
+    { id: 'CUST-8821', name: 'Nguyễn Thanh Tùng', email: 'tung.nt@finance.vn', balance: 45200000, avatar: 'NT' },
+    { id: 'CUST-1092', name: 'Trần Thị Mai Anh', email: 'maianh.tr@gmail.com', balance: 1250000, avatar: 'MA' },
+    { id: 'CUST-5541', name: 'Phạm Minh Đức', email: 'duc.pm@work.com', balance: 8900000, avatar: 'MD' },
+  ]);
+
+  const [pendingRequests, setPendingRequests] = useState([
+    { id: 'TX-9021', customerId: 'CUST-8821', amount: 5000000, bank: 'Vietcombank', note: 'NAP TIEN GAME', status: 'pending', time: '10 phút trước' },
+    { id: 'TX-9022', customerId: 'CUST-1092', amount: 250000, bank: 'MB Bank', note: 'CHUYEN KHOAN', status: 'pending', time: '22 phút trước' },
+    { id: 'TX-9023', customerId: 'CUST-5541', amount: 1200000, bank: 'Techcombank', note: 'BILL 112233', status: 'pending', time: '1 giờ trước' },
+  ]);
+
+  const [history, setHistory] = useState([]);
+  const [notifications, setNotifications] = useState([]);
+
+  const addNotification = (text, type = 'success') => {
+    const id = Date.now();
+    setNotifications([{ id, text, type }, ...notifications]);
+    setTimeout(() => {
+      setNotifications(prev => prev.filter(n => n.id !== id));
+    }, 4000);
+  };
+
+  const approveTransaction = (req) => {
+    // Logic cộng tiền
+    setCustomers(prev => prev.map(c => 
+      c.id === req.customerId ? { ...c, balance: c.balance + req.amount } : c
+    ));
+    // Cập nhật trạng thái
+    setPendingRequests(prev => prev.filter(p => p.id !== req.id));
+    setHistory([{ ...req, status: 'approved', processedAt: 'Vừa xong' }, ...history]);
+    addNotification(`Đã duyệt +${req.amount.toLocaleString()}đ cho khách ${req.customerId}`);
+  };
+
+  const rejectTransaction = (req) => {
+    setPendingRequests(prev => prev.filter(p => p.id !== req.id));
+    setHistory([{ ...req, status: 'rejected', processedAt: 'Vừa xong' }, ...history]);
+    addNotification(`Đã từ chối giao dịch ${req.id}`, 'error');
+  };
+
+  return (
+    <div className="min-h-screen bg-[#f8fafc] text-slate-900 flex font-sans">
+      {/* Toast Notifications */}
+      <div className="fixed top-6 right-6 z-50 flex flex-col gap-3">
+        {notifications.map(n => (
+          <div key={n.id} className={`flex items-center gap-3 px-6 py-4 rounded-2xl shadow-2xl border animate-in slide-in-from-right duration-300 ${
+            n.type === 'success' ? 'bg-white border-emerald-100 text-emerald-700' : 'bg-white border-red-100 text-red-700'
+          }`}>
+            {n.type === 'success' ? <CheckCircle2 size={20} /> : <XCircle size={20} />}
+            <span className="font-semibold text-sm">{n.text}</span>
+          </div>
+        ))}
+      </div>
+
+      {/* Sidebar */}
+      <aside className="w-72 bg-white border-r border-slate-200 hidden xl:flex flex-col sticky top-0 h-screen">
+        <div className="p-8">
+          <div className="flex items-center gap-3 mb-10">
+            <div className="w-10 h-10 bg-gradient-to-tr from-indigo-600 to-violet-500 rounded-xl flex items-center justify-center text-white shadow-lg shadow-indigo-200">
+              <ShieldCheck size={24} />
+            </div>
+            <h1 className="text-xl font-black tracking-tighter bg-clip-text text-transparent bg-gradient-to-r from-slate-900 to-slate-600">
+              NEO BANK
+            </h1>
+          </div>
+
+          <nav className="space-y-1.5">
+            <NavItem icon={<LayoutDashboard size={20} />} label="Tổng quan" active />
+            <NavItem icon={<CreditCard size={20} />} label="Giao dịch Bank" count={pendingRequests.length} />
+            <NavItem icon={<Users size={20} />} label="Khách hàng" />
+            <NavItem icon={<History size={20} />} label="Lịch sử đối soát" />
+          </nav>
+        </div>
+
+        <div className="mt-auto p-8 border-t border-slate-100">
+          <div className="bg-slate-50 p-4 rounded-2xl flex items-center gap-3">
+            <div className="w-10 h-10 rounded-full bg-indigo-100 flex items-center justify-center font-bold text-indigo-600">AD</div>
+            <div>
+              <p className="text-sm font-bold">Admin Root</p>
+              <p className="text-[10px] text-slate-400 uppercase font-bold tracking-widest">Super User</p>
+            </div>
+          </div>
+        </div>
+      </aside>
+
+      {/* Main Content */}
+      <main className="flex-1 p-6 md:p-10 max-w-[1600px] mx-auto w-full">
+        {/* Header */}
+        <header className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-10">
+          <div>
+            <h2 className="text-3xl font-black text-slate-900 tracking-tight">Chào buổi sáng, Admin!</h2>
+            <p className="text-slate-500 font-medium">Hệ thống đang hoạt động bình thường.</p>
+          </div>
+          <div className="flex items-center gap-3">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+              <input 
+                type="text" 
+                placeholder="Tìm mã giao dịch..." 
+                className="pl-10 pr-4 py-2.5 bg-white border border-slate-200 rounded-xl w-64 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 transition-all text-sm"
+              />
+            </div>
+            <button className="p-2.5 bg-white border border-slate-200 rounded-xl hover:bg-slate-50 transition-all">
+              <Filter size={20} className="text-slate-600" />
+            </button>
+          </div>
+        </header>
+
+        {/* Stats Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
+          <StatCard 
+            title="Tổng nạp hôm nay" 
+            value="152.000.000đ" 
+            trend="+12.5%" 
+            icon={<TrendingUp className="text-emerald-500" />}
+            gradient="from-emerald-500/10 to-transparent"
+          />
+          <StatCard 
+            title="Đơn chờ duyệt" 
+            value={pendingRequests.length} 
+            trend="Khẩn cấp" 
+            icon={<Bell className="text-orange-500" />}
+            gradient="from-orange-500/10 to-transparent"
+          />
+          <StatCard 
+            title="Người dùng mới" 
+            value="42" 
+            trend="+5" 
+            icon={<Users className="text-indigo-500" />}
+            gradient="from-indigo-500/10 to-transparent"
+          />
+          <StatCard 
+            title="Tỷ lệ duyệt" 
+            value="98.2%" 
+            trend="Ổn định" 
+            icon={<ShieldCheck className="text-blue-500" />}
+            gradient="from-blue-500/10 to-transparent"
+          />
+        </div>
+
+        <div className="grid xl:grid-cols-3 gap-8">
+          {/* Pending Transactions Section */}
+          <div className="xl:col-span-2 space-y-6">
+            <div className="bg-white rounded-[2rem] border border-slate-200/60 shadow-sm overflow-hidden">
+              <div className="p-6 border-b border-slate-100 flex justify-between items-center">
+                <h3 className="font-bold text-lg flex items-center gap-2">
+                  <span className="w-2 h-6 bg-indigo-600 rounded-full"></span>
+                  Đơn nạp cần xử lý
+                </h3>
+                <button className="text-indigo-600 text-sm font-bold hover:underline">Xem tất cả</button>
+              </div>
+
+              <div className="divide-y divide-slate-50">
+                {pendingRequests.map(req => (
+                  <div key={req.id} className="p-6 hover:bg-slate-50/50 transition-all group">
+                    <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+                      <div className="flex gap-4">
+                        <div className="w-14 h-14 bg-slate-100 rounded-2xl flex items-center justify-center text-slate-400 group-hover:bg-indigo-600 group-hover:text-white transition-all duration-500 shadow-inner">
+                          <CreditCard size={24} />
+                        </div>
+                        <div>
+                          <p className="font-black text-slate-900 text-lg uppercase tracking-tight">{req.id}</p>
+                          <div className="flex items-center gap-2 mt-1">
+                            <span className="text-sm font-bold text-indigo-600">{req.customerId}</span>
+                            <span className="w-1 h-1 bg-slate-300 rounded-full"></span>
+                            <span className="text-xs font-medium text-slate-400">{req.bank}</span>
+                          </div>
+                          <p className="text-xs text-slate-400 mt-1 italic font-medium">"{req.note}"</p>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center justify-between lg:justify-end gap-8">
+                        <div className="text-right">
+                          <p className="text-2xl font-black text-slate-900 tracking-tight">+{req.amount.toLocaleString()}đ</p>
+                          <p className="text-xs font-bold text-orange-500 uppercase">{req.time}</p>
+                        </div>
+                        <div className="flex gap-2">
+                          <button 
+                            onClick={() => approveTransaction(req)}
+                            className="h-12 px-6 bg-slate-900 text-white rounded-xl font-bold text-sm hover:bg-indigo-600 transition-all shadow-xl shadow-slate-200 flex items-center gap-2"
+                          >
+                            <CheckCircle2 size={18} /> Duyệt đơn
+                          </button>
+                          <button 
+                            onClick={() => rejectTransaction(req)}
+                            className="w-12 h-12 flex items-center justify-center bg-white border border-slate-200 rounded-xl text-slate-400 hover:text-red-500 hover:border-red-100 transition-all"
+                          >
+                            <XCircle size={20} />
+                          </button>
+                        </div>
+                      </div>
                     </div>
-                    <span class="text-xl font-bold tracking-tight">OrderManager</span>
-                </div>
-                
-                <div class="relative">
-                    <span class="absolute inset-y-0 left-0 flex items-center pl-3">
-                        <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
-                    </span>
-                    <input type="text" id="orderSearch" placeholder="Tìm mã đơn, tên khách..." class="w-full pl-10 pr-4 py-2 bg-slate-100 border-none rounded-lg text-sm focus:ring-2 focus:ring-indigo-500" oninput="filterOrders()">
-                </div>
+                  </div>
+                ))}
+                {pendingRequests.length === 0 && (
+                  <div className="py-20 text-center space-y-3">
+                    <div className="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center mx-auto">
+                      <CheckCircle2 className="text-slate-200" size={32} />
+                    </div>
+                    <p className="text-slate-400 font-medium italic uppercase tracking-widest text-xs">Đã xử lý sạch đơn hàng</p>
+                  </div>
+                )}
+              </div>
             </div>
 
-            <div class="flex-1 overflow-y-auto p-4 space-y-2" id="orderSidebarList">
-                <!-- Danh sách đơn hàng nạp từ JS -->
+            {/* History List */}
+            <div className="bg-white rounded-[2rem] border border-slate-200/60 shadow-sm p-6">
+              <div className="flex items-center justify-between mb-6">
+                <h3 className="font-bold text-lg tracking-tight">Nhật ký hoạt động</h3>
+                <button className="flex items-center gap-2 text-xs font-bold text-slate-500 bg-slate-100 px-3 py-1.5 rounded-lg hover:bg-slate-200 transition-all">
+                  <Download size={14} /> Tải báo cáo
+                </button>
+              </div>
+              <div className="space-y-4">
+                {history.slice(0, 5).map((h, i) => (
+                  <div key={i} className="flex items-center justify-between p-4 bg-slate-50/50 rounded-2xl border border-slate-100">
+                    <div className="flex items-center gap-4">
+                      <div className={`p-2 rounded-lg ${h.status === 'approved' ? 'bg-emerald-100 text-emerald-600' : 'bg-red-100 text-red-600'}`}>
+                        {h.status === 'approved' ? <CheckCircle2 size={16} /> : <XCircle size={16} />}
+                      </div>
+                      <div>
+                        <p className="text-sm font-bold text-slate-800">{h.status === 'approved' ? 'Đã duyệt' : 'Đã từ chối'} đơn {h.id}</p>
+                        <p className="text-[10px] font-bold text-slate-400 uppercase">{h.processedAt}</p>
+                      </div>
+                    </div>
+                    <span className="text-sm font-black tracking-tight">{h.amount.toLocaleString()}đ</span>
+                  </div>
+                ))}
+                {history.length === 0 && <p className="text-center py-4 text-slate-400 text-sm italic">Chưa có lịch sử giao dịch.</p>}
+              </div>
             </div>
-        </aside>
+          </div>
 
-        <!-- Main Content -->
-        <main class="flex-1 flex flex-col bg-slate-50 overflow-hidden">
-            <!-- Top Nav -->
+          {/* Right Column: Customer List */}
+          <div className="space-y-8">
+            <div className="bg-gradient-to-br from-slate-900 to-indigo-950 rounded-[2.5rem] p-8 text-white shadow-2xl relative overflow-hidden">
+              <div className="relative z-10">
+                <div className="flex justify-between items-start mb-10">
+                  <div className="w-12 h-8 bg-amber-400/20 rounded-md border border-amber-400/30 flex items-center justify-center">
+                    <div className="w-6 h-4 bg-amber-400/40 rounded-sm"></div>
+                  </div>
+                  <p className="text-xs font-bold text-indigo-300 tracking-widest uppercase">Vault Secure</p>
+                </div>
+                <p className="text-indigo-200/60 text-xs font-bold uppercase tracking-widest mb-1">Số dư khả dụng</p>
+                <h4 className="text-4xl font-black tracking-tighter mb-8">9.451.200.000<span className="text-xl text-indigo-400 ml-1">đ</span></h4>
+                <div className="flex justify-between items-center bg-white/5 p-4 rounded-2xl backdrop-blur-md">
+                  <div>
+                    <p className="text-[10px] text-indigo-300 font-bold uppercase mb-0.5">Mã số ví</p>
+                    <p className="text-sm font-mono tracking-wider text-indigo-100">**** **** 8821</p>
+                  </div>
+                  <MoreVertical size={20} className="text-indigo-300" />
+                </div>
+              </div>
+              {/* Decorative circles */}
+              <div className="absolute -top-10 -right-10 w-40 h-40 bg-indigo-500 rounded-full blur-[100px] opacity-20"></div>
+              <div className="absolute -bottom-20 -left-20 w-60 h-60 bg-purple-600 rounded-full blur-[100px] opacity-10"></div>
+            </div>
+
+            <div className="bg-white rounded-[2rem] border border-slate-200/60 shadow-sm overflow-hidden">
+              <div className="p-6 border-b border-slate-100 flex items-center justify-between">
+                <h3 className="font-bold text-lg">Top khách hàng</h3>
+                <Users size={18} className="text-slate-400" />
+              </div>
+              <div className="p-4 space-y-1">
+                {customers.map(cust => (
+                  <div key={cust.id} className="flex items-center justify-between p-4 hover:bg-indigo-50/50 rounded-2xl transition-all cursor-pointer group">
+                    <div className="flex items-center gap-4">
+                      <div className="w-11 h-11 bg-slate-100 rounded-xl flex items-center justify-center font-bold text-slate-500 group-hover:bg-white group-hover:shadow-sm group-hover:text-indigo-600 transition-all duration-300 border border-transparent group-hover:border-indigo-100">
+                        {cust.avatar}
+                      </div>
+                      <div>
+                        <p className="text-sm font-bold text-slate-900">{cust.name}</p>
+                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-tighter">{cust.id}</p>
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-sm font-black text-slate-900">{cust.balance.toLocaleString()}đ</p>
+                      <p className="text-[10px] font-bold text-emerald-500 uppercase">Premium</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="p-8 bg-indigo-600 rounded-[2rem] text-white shadow-xl shadow-indigo-200 flex items-center gap-6 relative overflow-hidden group">
+               <div className="relative z-10">
+                 <h4 className="font-bold mb-1">Cần hỗ trợ?</h4>
+                 <p className="text-xs text-indigo-100 font-medium opacity-80 mb-4">Liên hệ kỹ thuật 24/7 khi gặp sự cố đồng bộ ngân hàng.</p>
+                 <button className="bg-white text-indigo-600 px-5 py-2 rounded-xl text-xs font-bold hover:scale-105 transition-all">Gửi Ticket</button>
+               </div>
+               <PlusCircle size={80} className="absolute -right-4 -bottom-4 text-white/10 group-hover:rotate-90 transition-all duration-700" />
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+  );
+};
+
+// Sub-components for cleaner code
+const NavItem = ({ icon, label, active = false, count = 0 }) => (
+  <button className={`flex items-center justify-between w-full p-4 rounded-2xl transition-all duration-300 group ${
+    active ? 'bg-slate-900 text-white shadow-xl shadow-slate-200' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-900'
+  }`}>
+    <div className="flex items-center gap-3">
+      <span className={`${active ? 'text-white' : 'text-slate-400 group-hover:text-indigo-600'} transition-colors`}>{icon}</span>
+      <span className="text-sm font-bold tracking-tight">{label}</span>
+    </div>
+    {count > 0 && (
+      <span className={`px-2 py-0.5 rounded-full text-[10px] font-black ${active ? 'bg-indigo-500 text-white' : 'bg-indigo-100 text-indigo-600'}`}>
+        {count}
+      </span>
+    )}
+  </button>
+);
+
+const StatCard = ({ title, value, trend, icon, gradient }) => (
+  <div className="bg-white p-6 rounded-[2rem] border border-slate-200/60 shadow-sm hover:shadow-md transition-all relative overflow-hidden">
+    <div className={`absolute inset-0 bg-gradient-to-br ${gradient}`}></div>
+    <div className="relative z-10">
+      <div className="flex justify-between items-start mb-4">
+        <div className="w-10 h-10 bg-slate-50 rounded-xl flex items-center justify-center">
+          {icon}
+        </div>
+        <span className={`text-[10px] font-black px-2 py-1 rounded-lg ${
+          trend.startsWith('+') ? 'bg-emerald-50 text-emerald-600' : 'bg-orange-50 text-orange-600'
+        }`}>
+          {trend}
+        </span>
+      </div>
+      <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">{title}</p>
+      <p className="text-2xl font-black text-slate-900 tracking-tighter">{value}</p>
+    </div>
+  </div>
+);
+
+export default App;
