@@ -3,300 +3,253 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>V-ADMIN | Hệ Thống Duyệt Tự Động</title>
+    <title>Hệ Thống Quản Lý Nghĩa - Bank & Order</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://unpkg.com/lucide@latest"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap');
-        body { font-family: 'Plus Jakarta Sans', sans-serif; }
-        .active-nav { background: #2563eb; color: white !important; }
-        .page-content { display: none; }
-        .page-content.active { display: block; }
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap');
+        body { font-family: 'Inter', sans-serif; }
+        .nav-btn.active { background-color: white; color: #4f46e5; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+        .glass-card { background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(10px); }
     </style>
 </head>
-<body class="bg-[#f8fafc] text-slate-900">
+<body class="bg-slate-50 min-h-screen">
 
-    <div class="flex h-screen overflow-hidden">
-        <!-- Sidebar -->
-        <aside id="sidebar" class="fixed inset-y-0 left-0 z-50 w-64 bg-slate-900 text-white transition-transform duration-300 transform -translate-x-full lg:translate-x-0 lg:static lg:inset-0">
-            <div class="flex items-center gap-3 px-6 py-6 border-b border-slate-800">
-                <div class="p-2 bg-blue-600 rounded-lg"><i data-lucide="zap" class="w-6 h-6 text-white"></i></div>
-                <span class="text-xl font-bold tracking-tight text-blue-400">V-ADMIN</span>
+    <!-- Thanh điều hướng -->
+    <nav class="bg-white/80 backdrop-blur-md border-b border-slate-200 sticky top-0 z-50 px-6 py-3 flex justify-between items-center">
+        <div class="flex items-center gap-2">
+            <div class="bg-gradient-to-br from-indigo-600 to-blue-500 p-2 rounded-lg text-white">
+                <i class="fas fa-shield-alt"></i>
             </div>
+            <span class="font-extrabold text-xl tracking-tighter">NGHIA<span class="text-indigo-600">PRO</span></span>
+        </div>
+        
+        <div class="flex bg-slate-100 p-1 rounded-xl border border-slate-200">
+            <button id="btn-shop" onclick="switchView('shop')" class="nav-btn active px-4 py-1.5 rounded-lg text-sm font-bold transition-all">
+                Giao diện Khách
+            </button>
+            <button id="btn-admin" onclick="switchView('admin')" class="nav-btn px-4 py-1.5 rounded-lg text-sm font-bold transition-all">
+                Bảng Quản Trị
+            </button>
+        </div>
+    </nav>
 
-            <nav class="mt-6 px-4 space-y-2">
-                <button onclick="switchPage('dashboard')" id="nav-dashboard" class="nav-item flex items-center gap-3 w-full px-4 py-3 text-slate-400 hover:text-white rounded-xl transition-all">
-                    <i data-lucide="layout-grid" class="w-5 h-5"></i>
-                    <span class="font-medium">Tổng quan</span>
-                </button>
-                <button onclick="switchPage('users')" id="nav-users" class="nav-item flex items-center gap-3 w-full px-4 py-3 text-slate-400 hover:text-white rounded-xl transition-all">
-                    <i data-lucide="users" class="w-5 h-5"></i>
-                    <span class="font-medium">Thành viên</span>
-                </button>
-                <button onclick="switchPage('orders')" id="nav-orders" class="nav-item flex items-center gap-3 w-full px-4 py-3 text-slate-400 hover:text-white rounded-xl transition-all">
-                    <i data-lucide="shopping-cart" class="w-5 h-5"></i>
-                    <span class="font-medium">Đơn hàng</span>
-                </button>
-                <button onclick="switchPage('bank')" id="nav-bank" class="nav-item flex items-center gap-3 w-full px-4 py-3 text-slate-400 hover:text-white rounded-xl transition-all">
-                    <i data-lucide="landmark" class="w-5 h-5"></i>
-                    <span class="font-medium">Duyệt Bank Nạp</span>
-                </button>
-            </nav>
-        </aside>
-
-        <!-- Main Content -->
-        <div class="flex-1 flex flex-col min-w-0">
-            <header class="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-6 shrink-0">
-                <button onclick="toggleSidebar()" class="lg:hidden p-2 hover:bg-slate-100 rounded-lg">
-                    <i data-lucide="menu" class="w-6 h-6"></i>
-                </button>
-                <div class="flex items-center gap-4">
-                    <div class="text-right">
-                        <p class="text-xs text-slate-400 font-bold uppercase">Admin Panel</p>
-                        <p class="text-sm font-semibold text-slate-700">Quản trị viên</p>
+    <div class="max-w-6xl mx-auto p-4 md:p-8">
+        
+        <!-- ================= GIAO DIỆN KHÁCH ================= -->
+        <section id="view-shop" class="space-y-6">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <!-- Thông tin chuyển khoản -->
+                <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-200">
+                    <h2 class="text-sm font-black uppercase text-slate-400 mb-4 tracking-widest">Thanh Toán</h2>
+                    <div class="space-y-3">
+                        <div class="p-4 bg-indigo-50 rounded-2xl border border-indigo-100">
+                            <p class="text-[10px] font-bold text-indigo-400 uppercase">Ngân hàng</p>
+                            <p class="font-bold text-slate-800">MB BANK (Quân Đội)</p>
+                        </div>
+                        <div class="p-4 bg-slate-50 rounded-2xl border border-slate-100">
+                            <p class="text-[10px] font-bold text-slate-400 uppercase">Số tài khoản</p>
+                            <p class="font-mono font-bold text-lg text-indigo-600">0987654321</p>
+                        </div>
+                        <div class="p-4 bg-slate-50 rounded-2xl border border-slate-100">
+                            <p class="text-[10px] font-bold text-slate-400 uppercase">Chủ tài khoản</p>
+                            <p class="font-bold text-slate-800 uppercase">NGUYEN VAN NGHIA</p>
+                        </div>
                     </div>
-                    <div class="w-10 h-10 bg-slate-100 border border-slate-200 rounded-full flex items-center justify-center text-slate-600 font-bold">A</div>
                 </div>
-            </header>
 
-            <div class="flex-1 overflow-y-auto p-6 lg:p-8">
-                
-                <!-- PAGE: DASHBOARD -->
-                <section id="page-dashboard" class="page-content active">
-                    <h2 class="text-2xl font-bold mb-6">Trạng thái hệ thống</h2>
-                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
-                        <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
-                            <p class="text-slate-400 text-xs font-bold uppercase">Tổng thành viên</p>
-                            <h3 id="stat-total-users" class="text-2xl font-bold mt-1 text-slate-800">0</h3>
+                <!-- Form Gửi Đơn -->
+                <div class="lg:col-span-2 bg-white p-6 md:p-8 rounded-3xl shadow-sm border border-slate-200">
+                    <h2 class="text-2xl font-extrabold text-slate-800 mb-2">Gửi yêu cầu nạp tiền</h2>
+                    <p class="text-slate-500 text-sm mb-6">Vui lòng chuyển khoản đúng số tiền và điền thông tin dưới đây.</p>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                        <div class="space-y-2">
+                            <label class="text-xs font-bold text-slate-500 ml-1">Tên khách hàng</label>
+                            <input type="text" id="cust-name" placeholder="Nhập tên của bạn..." class="w-full px-5 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-2 focus:ring-indigo-500 outline-none transition-all">
                         </div>
-                        <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
-                            <p class="text-slate-400 text-xs font-bold uppercase">Đơn chờ duyệt</p>
-                            <h3 id="stat-pending-orders" class="text-2xl font-bold mt-1 text-orange-500">0</h3>
-                        </div>
-                        <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
-                            <p class="text-slate-400 text-xs font-bold uppercase">Bank chưa duyệt</p>
-                            <h3 id="stat-pending-bank" class="text-2xl font-bold mt-1 text-blue-500">0</h3>
-                        </div>
-                        <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm border-l-4 border-l-green-500">
-                            <p class="text-slate-400 text-xs font-bold uppercase">Tổng vốn lưu động</p>
-                            <h3 id="stat-total-balance" class="text-2xl font-bold mt-1 text-green-600">0đ</h3>
+                        <div class="space-y-2">
+                            <label class="text-xs font-bold text-slate-500 ml-1">Số tiền nạp (VNĐ)</label>
+                            <input type="number" id="cust-amount" placeholder="Ví dụ: 100000" class="w-full px-5 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-2 focus:ring-indigo-500 outline-none transition-all font-mono">
                         </div>
                     </div>
-                </section>
-
-                <!-- PAGE: USERS -->
-                <section id="page-users" class="page-content">
-                    <h2 class="text-2xl font-bold mb-6">Danh sách thành viên</h2>
-                    <div class="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm">
-                        <table class="w-full text-left">
-                            <thead class="bg-slate-50 border-b border-slate-100 text-slate-500 text-xs uppercase">
-                                <tr>
-                                    <th class="px-6 py-4 font-bold">Username</th>
-                                    <th class="px-6 py-4 font-bold text-right">Số dư hiện tại</th>
-                                    <th class="px-6 py-4 font-bold">Ngày tham gia</th>
-                                </tr>
-                            </thead>
-                            <tbody id="user-table" class="divide-y divide-slate-50"></tbody>
-                        </table>
-                    </div>
-                </section>
-
-                <!-- PAGE: ORDERS -->
-                <section id="page-orders" class="page-content">
-                    <h2 class="text-2xl font-bold mb-6">Duyệt Đơn Hàng</h2>
-                    <div class="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm">
-                        <table class="w-full text-left">
-                            <thead class="bg-slate-50 border-b border-slate-100 text-slate-500 text-xs uppercase">
-                                <tr>
-                                    <th class="px-6 py-4 font-bold">Mã đơn</th>
-                                    <th class="px-6 py-4 font-bold">Khách hàng</th>
-                                    <th class="px-6 py-4 font-bold">Dịch vụ</th>
-                                    <th class="px-6 py-4 font-bold">Trạng thái</th>
-                                    <th class="px-6 py-4 font-bold text-center">Thao tác</th>
-                                </tr>
-                            </thead>
-                            <tbody id="order-table" class="divide-y divide-slate-50"></tbody>
-                        </table>
-                    </div>
-                </section>
-
-                <!-- PAGE: BANK -->
-                <section id="page-bank" class="page-content">
-                    <h2 class="text-2xl font-bold mb-2">Duyệt Giao Dịch Ngân Hàng</h2>
-                    <p class="text-slate-500 text-sm mb-6">Khi ấn "Duyệt", tiền sẽ tự động cộng vào số dư của khách tương ứng.</p>
-                    <div class="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm">
-                        <table class="w-full text-left">
-                            <thead class="bg-slate-50 border-b border-slate-100 text-slate-500 text-xs uppercase">
-                                <tr>
-                                    <th class="px-6 py-4 font-bold">Nội dung (User)</th>
-                                    <th class="px-6 py-4 font-bold">Số tiền nạp</th>
-                                    <th class="px-6 py-4 font-bold text-center">Thao tác cộng tiền</th>
-                                </tr>
-                            </thead>
-                            <tbody id="bank-table" class="divide-y divide-slate-50"></tbody>
-                        </table>
-                    </div>
-                </section>
-
+                    
+                    <button onclick="submitDeposit()" class="w-full bg-slate-900 hover:bg-indigo-600 text-white font-bold py-4 rounded-2xl shadow-lg transition-all flex items-center justify-center gap-3 active:scale-95">
+                        <i class="fas fa-check-circle"></i> XÁC NHẬN ĐÃ CHUYỂN TIỀN
+                    </button>
+                </div>
             </div>
-        </div>
+        </section>
+
+        <!-- ================= GIAO DIỆN ADMIN ================= -->
+        <section id="view-admin" class="hidden space-y-6">
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div>
+                    <h2 class="text-3xl font-black text-slate-900 tracking-tighter">Quản Lý Giao Dịch</h2>
+                    <p class="text-slate-500 text-sm">Kiểm tra Bank và Duyệt trạng thái đơn hàng</p>
+                </div>
+                <div class="flex gap-3">
+                    <div class="bg-white px-4 py-2 rounded-xl border border-slate-200 shadow-sm flex items-center gap-3">
+                        <div class="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
+                        <span class="text-xs font-bold text-slate-600 uppercase tracking-widest">Real-time Connected</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bảng Dữ Liệu -->
+            <div class="bg-white rounded-3xl shadow-xl shadow-slate-200/50 border border-slate-200 overflow-hidden">
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left">
+                        <thead>
+                            <tr class="bg-slate-50 border-b border-slate-100">
+                                <th class="px-6 py-4 text-[10px] font-black uppercase text-slate-400 tracking-widest">Khách hàng</th>
+                                <th class="px-6 py-4 text-[10px] font-black uppercase text-slate-400 tracking-widest">Số tiền</th>
+                                <th class="px-6 py-4 text-[10px] font-black uppercase text-slate-400 tracking-widest">Duyệt Bank</th>
+                                <th class="px-6 py-4 text-[10px] font-black uppercase text-slate-400 tracking-widest">Trạng thái đơn</th>
+                                <th class="px-6 py-4 text-[10px] font-black uppercase text-slate-400 tracking-widest text-right">Thao tác</th>
+                            </tr>
+                        </thead>
+                        <tbody id="admin-list" class="divide-y divide-slate-50">
+                            <tr>
+                                <td colspan="5" class="px-6 py-20 text-center text-slate-400 italic">Đang tải dữ liệu...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
     </div>
 
-    <!-- Toast Notification -->
-    <div id="toast" class="fixed bottom-6 right-6 z-[100] transform translate-y-20 opacity-0 transition-all duration-300">
-        <div id="toast-bg" class="bg-slate-900 text-white px-6 py-4 rounded-2xl shadow-2xl flex items-center gap-3 min-w-[300px]">
-            <i id="toast-icon" data-lucide="info" class="w-5 h-5"></i>
-            <span id="toast-msg" class="font-medium text-sm"></span>
-        </div>
-    </div>
+    <!-- Firebase Configuration & Logic -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, addDoc, onSnapshot, doc, updateDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-    <script>
-        // DATA BAN ĐẦU
-        let users = [
-            { username: 'hoanganh01', balance: 50000, joinDate: '2024-02-01' },
-            { username: 'minhtuan99', balance: 0, joinDate: '2024-02-10' },
-            { username: 'thuthao_vn', balance: 1200000, joinDate: '2024-01-15' }
-        ];
+        const firebaseConfig = JSON.parse(__firebase_config);
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'nghia-bank-v2';
 
-        let orders = [
-            { id: '1025', username: 'hoanganh01', service: 'VIP 1', status: 'pending' },
-            { id: '1026', username: 'thuthao_vn', service: 'Buff Sub', status: 'pending' }
-        ];
+        let user = null;
 
-        let pendingBank = [
-            { id: 1, username: 'hoanganh01', amount: 200000 },
-            { id: 2, username: 'minhtuan99', amount: 1000000 }
-        ];
-
-        lucide.createIcons();
-
-        // CHUYỂN TRANG
-        function switchPage(pageId) {
-            document.querySelectorAll('.page-content').forEach(p => p.classList.remove('active'));
-            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active-nav'));
-            document.getElementById('page-' + pageId).classList.add('active');
-            document.getElementById('nav-' + pageId).classList.add('active-nav');
-            if(window.innerWidth < 1024) toggleSidebar();
-            renderAll();
-        }
-
-        function toggleSidebar() {
-            document.getElementById('sidebar').classList.toggle('-translate-x-full');
-        }
-
-        // RENDER DỮ LIỆU
-        function renderUsers() {
-            const table = document.getElementById('user-table');
-            table.innerHTML = users.map(user => `
-                <tr class="hover:bg-slate-50 transition-colors">
-                    <td class="px-6 py-4 font-semibold text-slate-700">${user.username}</td>
-                    <td class="px-6 py-4 text-right font-mono font-bold text-green-600">${user.balance.toLocaleString()}đ</td>
-                    <td class="px-6 py-4 text-slate-400 text-sm">${user.joinDate}</td>
-                </tr>
-            `).join('');
-        }
-
-        function renderOrders() {
-            const table = document.getElementById('order-table');
-            table.innerHTML = orders.map(order => `
-                <tr class="text-sm">
-                    <td class="px-6 py-4 font-bold text-blue-600">#${order.id}</td>
-                    <td class="px-6 py-4 font-medium">${order.username}</td>
-                    <td class="px-6 py-4">${order.service}</td>
-                    <td class="px-6 py-4">
-                        <span class="px-3 py-1 rounded-full text-[10px] font-bold uppercase ${
-                            order.status === 'pending' ? 'bg-orange-100 text-orange-600' : 'bg-green-100 text-green-600'
-                        }">${order.status === 'pending' ? 'Chờ duyệt' : 'Hoàn thành'}</span>
-                    </td>
-                    <td class="px-6 py-4 text-center">
-                        ${order.status === 'pending' ? `
-                            <button onclick="approveOrder('${order.id}')" class="p-2 bg-blue-100 text-blue-600 rounded-lg hover:bg-blue-600 hover:text-white transition-all">
-                                <i data-lucide="check" class="w-4 h-4"></i>
-                            </button>
-                        ` : '<i data-lucide="check-circle" class="w-5 h-5 text-green-500 mx-auto"></i>'}
-                    </td>
-                </tr>
-            `).join('');
-            lucide.createIcons();
-        }
-
-        function renderBank() {
-            const table = document.getElementById('bank-table');
-            table.innerHTML = pendingBank.map(item => `
-                <tr>
-                    <td class="px-6 py-4">
-                        <div class="font-bold text-slate-800">${item.username}</div>
-                        <div class="text-[10px] text-slate-400 uppercase tracking-widest font-bold">Nội dung nạp</div>
-                    </td>
-                    <td class="px-6 py-4 font-mono font-extrabold text-blue-600">+${item.amount.toLocaleString()}đ</td>
-                    <td class="px-6 py-4 text-center">
-                        <button onclick="approveMoney('${item.username}', ${item.amount}, ${item.id})" class="bg-blue-600 text-white px-5 py-2 rounded-xl text-xs font-bold hover:bg-slate-900 transition-all shadow-lg shadow-blue-100">
-                            XÁC NHẬN CỘNG TIỀN
-                        </button>
-                    </td>
-                </tr>
-            `).join('');
-        }
-
-        // LOGIC CHÍNH: CỘNG TIỀN
-        function approveMoney(username, amount, logId) {
-            // 1. Tìm user trong mảng
-            const userIndex = users.findIndex(u => u.username === username);
-            
-            if (userIndex !== -1) {
-                // 2. Thực hiện cộng tiền vào số dư
-                users[userIndex].balance += amount;
-
-                // 3. Xóa giao dịch khỏi danh sách chờ nạp
-                pendingBank = pendingBank.filter(item => item.id !== logId);
-
-                // 4. Thông báo và cập nhật giao diện
-                showToast(`Đã cộng ${amount.toLocaleString()}đ cho ${username}`, 'success');
-                renderAll();
-            } else {
-                showToast("Lỗi: Không tìm thấy tài khoản người dùng!", "error");
-            }
-        }
-
-        function approveOrder(id) {
-            const order = orders.find(o => o.id === id);
-            if(order) {
-                order.status = 'completed';
-                showToast(`Đã duyệt đơn #${id} thành công!`, 'success');
-                renderAll();
-            }
-        }
-
-        function renderAll() {
-            renderUsers();
-            renderOrders();
-            renderBank();
-            
-            // Cập nhật Dashboard
-            document.getElementById('stat-total-users').innerText = users.length;
-            document.getElementById('stat-pending-orders').innerText = orders.filter(o => o.status === 'pending').length;
-            document.getElementById('stat-pending-bank').innerText = pendingBank.length;
-            
-            const totalBal = users.reduce((sum, u) => sum + u.balance, 0);
-            document.getElementById('stat-total-balance').innerText = totalBal.toLocaleString() + 'đ';
-        }
-
-        function showToast(msg, type = 'info') {
-            const toast = document.getElementById('toast');
-            const bg = document.getElementById('toast-bg');
-            document.getElementById('toast-msg').innerText = msg;
-            
-            if(type === 'success') bg.className = "bg-green-600 text-white px-6 py-4 rounded-2xl shadow-2xl flex items-center gap-3 min-w-[300px]";
-            else if(type === 'error') bg.className = "bg-red-600 text-white px-6 py-4 rounded-2xl shadow-2xl flex items-center gap-3 min-w-[300px]";
-            else bg.className = "bg-slate-900 text-white px-6 py-4 rounded-2xl shadow-2xl flex items-center gap-3 min-w-[300px]";
-
-            toast.classList.remove('translate-y-20', 'opacity-0');
-            setTimeout(() => toast.classList.add('translate-y-20', 'opacity-0'), 3500);
-        }
-
-        window.onload = () => {
-            renderAll();
+        // Khởi tạo Auth
+        const initAuth = async () => {
+            try {
+                await signInAnonymously(auth);
+                onAuthStateChanged(auth, (u) => {
+                    user = u;
+                    if (u) startListening();
+                });
+            } catch (err) { console.error("Auth error", err); }
         };
+
+        // Gửi yêu cầu từ khách
+        window.submitDeposit = async () => {
+            const name = document.getElementById('cust-name').value.trim();
+            const amount = document.getElementById('cust-amount').value.trim();
+
+            if (!name || !amount) {
+                alert("Vui lòng điền đủ tên và số tiền!");
+                return;
+            }
+
+            try {
+                await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'transactions'), {
+                    name,
+                    amount: parseInt(amount),
+                    bank_status: 'unverified', // unverified | verified
+                    order_status: 'processing', // processing | completed | cancelled
+                    createdAt: serverTimestamp()
+                });
+                alert("Đã gửi thông báo! Chờ Admin check bank.");
+                document.getElementById('cust-name').value = '';
+                document.getElementById('cust-amount').value = '';
+            } catch (err) { alert("Lỗi: " + err.message); }
+        };
+
+        // Lắng nghe dữ liệu
+        const startListening = () => {
+            const q = collection(db, 'artifacts', appId, 'public', 'data', 'transactions');
+            onSnapshot(q, (snapshot) => {
+                const tbody = document.getElementById('admin-list');
+                tbody.innerHTML = '';
+
+                const docs = snapshot.docs.map(d => ({id: d.id, ...d.data()}))
+                            .sort((a,b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0));
+
+                if (docs.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="5" class="px-6 py-10 text-center text-slate-400">Chưa có giao dịch nào</td></tr>';
+                    return;
+                }
+
+                docs.forEach(item => {
+                    const tr = document.createElement('tr');
+                    tr.className = "hover:bg-slate-50 transition-colors group";
+
+                    // Badge Duyệt Bank
+                    const bankVerified = item.bank_status === 'verified';
+                    const bankBadge = bankVerified 
+                        ? '<span class="flex items-center gap-1 text-green-600 font-bold text-[10px] uppercase"><i class="fas fa-check-double"></i> Đã nhận tiền</span>'
+                        : '<span class="flex items-center gap-1 text-orange-400 font-bold text-[10px] uppercase"><i class="fas fa-clock"></i> Chờ Bank</span>';
+
+                    // Badge Trạng Thái Đơn
+                    let orderBadge = '';
+                    switch(item.order_status) {
+                        case 'completed': 
+                            orderBadge = '<span class="px-3 py-1 bg-green-100 text-green-700 rounded-full text-[10px] font-black uppercase">Hoàn Tất</span>'; 
+                            break;
+                        case 'cancelled': 
+                            orderBadge = '<span class="px-3 py-1 bg-red-100 text-red-700 rounded-full text-[10px] font-black uppercase">Đã Hủy</span>'; 
+                            break;
+                        default: 
+                            orderBadge = '<span class="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-[10px] font-black uppercase">Đang Xử Lý</span>';
+                    }
+
+                    tr.innerHTML = `
+                        <td class="px-6 py-5 font-bold text-slate-700">${item.name}</td>
+                        <td class="px-6 py-5 font-black text-indigo-600">${item.amount.toLocaleString()}đ</td>
+                        <td class="px-6 py-5">${bankBadge}</td>
+                        <td class="px-6 py-5">${orderBadge}</td>
+                        <td class="px-6 py-5 text-right space-x-2">
+                            ${!bankVerified ? `
+                                <button onclick="updateStatus('${item.id}', {bank_status: 'verified'})" title="Duyệt Bank" class="p-2 bg-green-500 text-white rounded-lg hover:bg-green-600 shadow-sm transition-all active:scale-90">
+                                    <i class="fas fa-university"></i>
+                                </button>
+                            ` : ''}
+                            ${item.order_status === 'processing' ? `
+                                <button onclick="updateStatus('${item.id}', {order_status: 'completed'})" title="Hoàn Tất Đơn" class="p-2 bg-indigo-600 text-white rounded-lg hover:bg-slate-900 shadow-sm transition-all active:scale-90">
+                                    <i class="fas fa-check"></i>
+                                </button>
+                                <button onclick="updateStatus('${item.id}', {order_status: 'cancelled'})" title="Hủy Đơn" class="p-2 bg-slate-200 text-slate-500 rounded-lg hover:bg-red-500 hover:text-white transition-all active:scale-90">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                            ` : ''}
+                        </td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            }, (err) => console.error(err));
+        };
+
+        // Cập nhật trạng thái
+        window.updateStatus = async (id, data) => {
+            const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'transactions', id);
+            try {
+                await updateDoc(docRef, data);
+            } catch (err) { alert("Lỗi: " + err.message); }
+        };
+
+        // Switch View
+        window.switchView = (v) => {
+            document.getElementById('view-shop').classList.toggle('hidden', v !== 'shop');
+            document.getElementById('view-admin').classList.toggle('hidden', v !== 'admin');
+            document.getElementById('btn-shop').classList.toggle('active', v === 'shop');
+            document.getElementById('btn-admin').classList.toggle('active', v === 'admin');
+        };
+
+        initAuth();
     </script>
 </body>
 </html>
