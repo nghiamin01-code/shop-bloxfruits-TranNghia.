@@ -3,130 +3,311 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FIREBASE EXPLORER - CẤU CỨU DỮ LIỆU</title>
+    <title>Hệ Thống Quản Trị Shop Game</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&display=swap');
-        body { background-color: #0f172a; color: #e2e8f0; font-family: 'Inter', sans-serif; }
-        .code-font { font-family: 'Fira Code', monospace; }
-        .json-key { color: #f472b6; }
-        .json-value { color: #34d399; }
-        .json-string { color: #fbbf24; }
-        .path-tag { background: #1e293b; border: 1px solid #334155; }
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap');
+        body { font-family: 'Inter', sans-serif; background-color: #f8fafc; }
+        .sidebar-link.active { background-color: #3b82f6; color: white; }
+        .status-pending { background-color: #fef3c7; color: #92400e; }
+        .status-completed { background-color: #dcfce7; color: #166534; }
+        .status-rejected { background-color: #fee2e2; color: #991b1b; }
     </style>
 </head>
-<body class="p-4 md:p-10">
+<body class="flex min-h-screen">
 
-    <div class="max-w-6xl mx-auto">
-        <header class="mb-10 text-center">
-            <h1 class="text-3xl font-black text-white mb-2 uppercase tracking-tighter">Công Cụ Truy Tìm Đơn Hàng</h1>
-            <p class="text-slate-400 italic">Quét toàn bộ Database để tìm dữ liệu bị ẩn hoặc sai đường dẫn</p>
+    <!-- SIDEBAR -->
+    <aside class="w-64 bg-slate-900 text-slate-300 flex-shrink-0 hidden md:flex flex-col">
+        <div class="p-6 text-white font-bold text-xl flex items-center gap-2">
+            <i class="fas fa-shield-alt text-blue-500"></i> ADMIN PANEL
+        </div>
+        <nav class="flex-1 px-4 space-y-2">
+            <button onclick="showTab('dashboard')" class="sidebar-link w-full text-left p-3 rounded-lg flex items-center gap-3 transition-all active">
+                <i class="fas fa-home w-5"></i> Tổng quan
+            </button>
+            <button onclick="showTab('bank')" class="sidebar-link w-full text-left p-3 rounded-lg flex items-center gap-3 transition-all">
+                <i class="fas fa-university w-5"></i> Duyệt Nạp Bank
+            </button>
+            <button onclick="showTab('caythue')" class="sidebar-link w-full text-left p-3 rounded-lg flex items-center gap-3 transition-all">
+                <i class="fas fa-level-up-alt w-5"></i> Đơn Cày Thuê
+            </button>
+            <button onclick="showTab('gamepass')" class="sidebar-link w-full text-left p-3 rounded-lg flex items-center gap-3 transition-all">
+                <i class="fas fa-shopping-cart w-5"></i> Gamepass / Item
+            </button>
+            <button onclick="showTab('users')" class="sidebar-link w-full text-left p-3 rounded-lg flex items-center gap-3 transition-all">
+                <i class="fas fa-users w-5"></i> Thành viên
+            </button>
+        </nav>
+        <div class="p-4 border-t border-slate-800">
+            <button class="w-full bg-red-500/10 text-red-500 p-2 rounded hover:bg-red-500 hover:text-white transition-all">Đăng xuất</button>
+        </div>
+    </aside>
+
+    <!-- MAIN CONTENT -->
+    <main class="flex-1 flex flex-col h-screen overflow-hidden">
+        <!-- Top Nav -->
+        <header class="h-16 bg-white border-b flex items-center justify-between px-8 flex-shrink-0">
+            <h2 id="tab-title" class="font-bold text-lg text-slate-800 uppercase tracking-wide">Tổng Quan</h2>
+            <div class="flex items-center gap-4">
+                <span id="conn-status" class="text-[10px] px-2 py-1 rounded-full bg-red-100 text-red-600 font-bold uppercase">Mất kết nối</span>
+                <div class="w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center text-white text-xs font-bold">AD</div>
+            </div>
         </header>
 
-        <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
-            <!-- Sidebar -->
-            <div class="lg:col-span-1 space-y-4">
-                <div class="bg-slate-800/50 p-6 rounded-3xl border border-white/5">
-                    <h2 class="text-xs font-bold text-slate-500 uppercase mb-4">Trạng thái kết nối</h2>
-                    <div id="status" class="flex items-center gap-2 text-red-500 font-bold uppercase text-[10px]">
-                        <span class="w-3 h-3 rounded-full bg-red-500 animate-pulse"></span>
-                        Đang kiểm tra...
+        <!-- Content Area -->
+        <div class="flex-1 overflow-y-auto p-8">
+            
+            <!-- TAB: DASHBOARD -->
+            <section id="tab-dashboard" class="tab-content">
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+                    <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-100">
+                        <p class="text-slate-500 text-sm">Doanh thu hôm nay</p>
+                        <h3 class="text-2xl font-bold text-slate-800" id="stat-revenue">0đ</h3>
                     </div>
-                    <div class="mt-6">
-                        <p class="text-[10px] text-slate-500 mb-1 uppercase">Database URL:</p>
-                        <p id="db-url-display" class="text-[9px] break-all opacity-50 italic"></p>
+                    <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-100">
+                        <p class="text-slate-500 text-sm">Đơn chờ duyệt</p>
+                        <h3 class="text-2xl font-bold text-orange-500" id="stat-pending">0</h3>
+                    </div>
+                    <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-100">
+                        <p class="text-slate-500 text-sm">Đang cày thuê</p>
+                        <h3 class="text-2xl font-bold text-blue-500" id="stat-processing">0</h3>
+                    </div>
+                    <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-100">
+                        <p class="text-slate-500 text-sm">Thành viên</p>
+                        <h3 class="text-2xl font-bold text-green-500" id="stat-users">0</h3>
                     </div>
                 </div>
+            </section>
 
-                <div class="bg-blue-600/10 p-6 rounded-3xl border border-blue-500/20">
-                    <p class="text-xs text-blue-400 leading-relaxed font-medium">
-                        <i class="fas fa-info-circle mr-1"></i>
-                        Công cụ này sẽ đọc <b>gốc (root)</b> của Database. Nếu có bất kỳ đơn hàng nào, nó sẽ hiện ra ở cột bên phải.
-                    </p>
+            <!-- TAB: BANK (Duyệt nạp tiền) -->
+            <section id="tab-bank" class="tab-content hidden">
+                <div class="bg-white rounded-xl shadow-sm border overflow-hidden">
+                    <table class="w-full text-left border-collapse">
+                        <thead class="bg-slate-50 text-slate-500 text-xs uppercase font-bold border-b">
+                            <tr>
+                                <th class="p-4">Thời gian</th>
+                                <th class="p-4">Tài khoản</th>
+                                <th class="p-4">Nội dung / Mã GD</th>
+                                <th class="p-4 text-right">Số tiền</th>
+                                <th class="p-4 text-center">Trạng thái</th>
+                                <th class="p-4 text-center">Thao tác</th>
+                            </tr>
+                        </thead>
+                        <tbody id="list-bank" class="text-sm divide-y">
+                            <!-- Data injected here -->
+                        </tbody>
+                    </table>
                 </div>
-            </div>
+            </section>
 
-            <!-- Main Content -->
-            <div class="lg:col-span-3">
-                <div class="bg-slate-900 border border-white/10 rounded-3xl overflow-hidden shadow-2xl">
-                    <div class="bg-white/5 p-4 flex justify-between items-center border-b border-white/10">
-                        <span class="text-xs font-bold uppercase tracking-widest text-slate-400">Dữ liệu thô tìm thấy</span>
-                        <button onclick="location.reload()" class="text-[10px] bg-white/10 px-3 py-1 rounded-full hover:bg-white/20 transition-all">LÀM MỚI</button>
-                    </div>
-                    <div id="explorer-content" class="p-6 overflow-auto max-h-[70vh] code-font text-sm leading-relaxed">
-                        <p class="animate-pulse text-slate-500 italic">Đang tải dữ liệu từ gốc...</p>
-                    </div>
+            <!-- TAB: CAYTHUE (Đơn cày thuê) -->
+            <section id="tab-caythue" class="tab-content hidden">
+                <div class="bg-white rounded-xl shadow-sm border overflow-hidden">
+                    <table class="w-full text-left border-collapse">
+                        <thead class="bg-slate-50 text-slate-500 text-xs uppercase font-bold border-b">
+                            <tr>
+                                <th class="p-4">Dịch vụ</th>
+                                <th class="p-4">Tài khoản Game</th>
+                                <th class="p-4">Mật khẩu</th>
+                                <th class="p-4">Lưu ý</th>
+                                <th class="p-4 text-center">Trạng thái</th>
+                                <th class="p-4 text-center">Thao tác</th>
+                            </tr>
+                        </thead>
+                        <tbody id="list-caythue" class="text-sm divide-y">
+                            <!-- Data injected here -->
+                        </tbody>
+                    </table>
                 </div>
-            </div>
+            </section>
+
+            <!-- TAB: GAMEPASS (Duyệt đơn mua vật phẩm) -->
+            <section id="tab-gamepass" class="tab-content hidden">
+                <div class="bg-white rounded-xl shadow-sm border overflow-hidden">
+                    <table class="w-full text-left border-collapse">
+                        <thead class="bg-slate-50 text-slate-500 text-xs uppercase font-bold border-b">
+                            <tr>
+                                <th class="p-4">Sản phẩm</th>
+                                <th class="p-4">Tài khoản nhận</th>
+                                <th class="p-4 text-right">Giá tiền</th>
+                                <th class="p-4 text-center">Trạng thái</th>
+                                <th class="p-4 text-center">Thao tác</th>
+                            </tr>
+                        </thead>
+                        <tbody id="list-gamepass" class="text-sm divide-y">
+                            <!-- Data injected here -->
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
         </div>
-    </div>
+    </main>
 
     <script>
-        // Cấu hình Database của bạn
+        // --- 1. CONFIG FIREBASE ---
         const firebaseConfig = {
             databaseURL: "https://shop-blox-fruit-trannghia-default-rtdb.firebaseio.com/"
         };
-        
-        document.getElementById('db-url-display').innerText = firebaseConfig.databaseURL;
-        
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
-        // Kiểm tra kết nối
-        db.ref('.info/connected').on('value', (snap) => {
-            const statusDiv = document.getElementById('status');
-            if (snap.val() === true) {
-                statusDiv.innerHTML = `<span class="w-3 h-3 rounded-full bg-green-500 shadow-[0_0_8px_green]"></span> KẾT NỐI THÀNH CÔNG`;
-                statusDiv.classList.replace('text-red-500', 'text-green-500');
-            } else {
-                statusDiv.innerHTML = `<span class="w-3 h-3 rounded-full bg-red-500 animate-pulse"></span> KHÔNG THỂ KẾT NỐI`;
-                statusDiv.classList.replace('text-green-500', 'text-red-500');
-            }
-        });
-
-        // Quét toàn bộ Root
-        db.ref('/').on('value', (snapshot) => {
-            const content = document.getElementById('explorer-content');
-            const data = snapshot.val();
-
-            if (!data) {
-                content.innerHTML = `
-                    <div class="text-center py-20">
-                        <p class="text-orange-400 font-bold mb-2 uppercase italic text-lg">Database Trống Rỗng!</p>
-                        <p class="text-slate-500 text-sm">Kết nối thành công nhưng không tìm thấy bảng nào.</p>
-                        <p class="text-slate-500 text-xs mt-4 italic">Gợi ý: Hãy thử đặt 1 đơn hàng trên trang chủ rồi quay lại đây.</p>
-                    </div>
-                `;
-                return;
-            }
-
-            // Hiển thị dữ liệu dưới dạng cây thư mục đẹp mắt
-            content.innerHTML = renderObject(data);
-        });
-
-        function renderObject(obj, indent = 0) {
-            let html = "";
-            const keys = Object.keys(obj);
+        // --- 2. GIAO DIỆN CHUYỂN TAB ---
+        function showTab(tabName) {
+            document.querySelectorAll('.tab-content').forEach(tab => tab.classList.add('hidden'));
+            document.querySelectorAll('.sidebar-link').forEach(link => link.classList.remove('active'));
             
-            keys.forEach((key, index) => {
-                const value = obj[key];
-                const isObject = typeof value === 'object' && value !== null;
-                const padding = " ".repeat(indent * 4);
-                
-                if (isObject) {
-                    html += `<div>${padding}<span class="json-key font-bold">"${key}"</span>: {</div>`;
-                    html += renderObject(value, indent + 1);
-                    html += `<div>${padding}}</div>`;
-                } else {
-                    let valueClass = typeof value === 'string' ? 'json-string' : 'json-value';
-                    let displayValue = typeof value === 'string' ? `"${value}"` : value;
-                    html += `<div>${padding}<span class="json-key">"${key}"</span>: <span class="${valueClass}">${displayValue}</span>${index < keys.length - 1 ? ',' : ''}</div>`;
-                }
-            });
-            return html;
+            document.getElementById('tab-' + tabName).classList.remove('hidden');
+            document.getElementById('tab-title').innerText = tabName.toUpperCase();
+            event.currentTarget.classList.add('active');
         }
+
+        // --- 3. ĐỌC DỮ LIỆU THỜI GIAN THỰC ---
+        
+        // Status kết nối
+        db.ref('.info/connected').on('value', snap => {
+            const status = document.getElementById('conn-status');
+            if (snap.val()) {
+                status.innerText = "Trực tuyến";
+                status.className = "text-[10px] px-2 py-1 rounded-full bg-green-100 text-green-600 font-bold uppercase";
+            }
+        });
+
+        // 3a. Duyệt Nạp Bank (Path: /nap_bank)
+        db.ref('nap_bank').on('value', snapshot => {
+            const list = document.getElementById('list-bank');
+            list.innerHTML = "";
+            let pendingCount = 0;
+
+            snapshot.forEach(child => {
+                const item = child.val();
+                const id = child.key;
+                if(item.status === "pending") pendingCount++;
+
+                list.innerHTML += `
+                    <tr>
+                        <td class="p-4 text-xs text-slate-400">${item.time || 'N/A'}</td>
+                        <td class="p-4 font-bold text-blue-600">${item.username}</td>
+                        <td class="p-4">
+                            <span class="bg-slate-100 px-2 py-1 rounded text-xs font-mono">${item.content || id}</span>
+                        </td>
+                        <td class="p-4 text-right font-bold text-green-600">${Number(item.amount).toLocaleString()}đ</td>
+                        <td class="p-4 text-center">
+                            <span class="px-2 py-1 rounded-full text-[10px] font-bold uppercase status-${item.status}">
+                                ${item.status === 'pending' ? 'Chờ duyệt' : (item.status === 'completed' ? 'Thành công' : 'Từ chối')}
+                            </span>
+                        </td>
+                        <td class="p-4 text-center">
+                            ${item.status === 'pending' ? `
+                                <button onclick="actionBank('${id}', '${item.username}', ${item.amount}, 'completed')" class="text-green-500 hover:text-green-700 mx-1"><i class="fas fa-check-circle"></i> Duyệt</button>
+                                <button onclick="actionBank('${id}', '${item.username}', ${item.amount}, 'rejected')" class="text-red-400 hover:text-red-600 mx-1"><i class="fas fa-times-circle"></i> Hủy</button>
+                            ` : '<span class="text-slate-300 italic">Đã xử lý</span>'}
+                        </td>
+                    </tr>
+                `;
+            });
+            document.getElementById('stat-pending').innerText = pendingCount;
+        });
+
+        // 3b. Duyệt Cày Thuê (Path: /cay_thue)
+        db.ref('cay_thue').on('value', snapshot => {
+            const list = document.getElementById('list-caythue');
+            list.innerHTML = "";
+            let processingCount = 0;
+
+            snapshot.forEach(child => {
+                const item = child.val();
+                const id = child.key;
+                if(item.status === "processing") processingCount++;
+
+                list.innerHTML += `
+                    <tr>
+                        <td class="p-4 font-bold">${item.service_name}</td>
+                        <td class="p-4 text-blue-600 font-mono">${item.game_user}</td>
+                        <td class="p-4 text-red-500 font-mono">${item.game_pass}</td>
+                        <td class="p-4 text-xs italic text-slate-500">${item.note || 'Không có'}</td>
+                        <td class="p-4 text-center">
+                            <span class="px-2 py-1 rounded-full text-[10px] font-bold uppercase status-${item.status}">
+                                ${item.status}
+                            </span>
+                        </td>
+                        <td class="p-4 text-center">
+                            <select onchange="updateStatus('cay_thue', '${id}', this.value)" class="text-xs border rounded p-1">
+                                <option value="pending" ${item.status === 'pending' ? 'selected' : ''}>Chờ duyệt</option>
+                                <option value="processing" ${item.status === 'processing' ? 'selected' : ''}>Đang cày</option>
+                                <option value="completed" ${item.status === 'completed' ? 'selected' : ''}>Hoàn thành</option>
+                            </select>
+                        </td>
+                    </tr>
+                `;
+            });
+            document.getElementById('stat-processing').innerText = processingCount;
+        });
+
+        // 3c. Duyệt Gamepass (Path: /don_gamepass)
+        db.ref('don_gamepass').on('value', snapshot => {
+            const list = document.getElementById('list-gamepass');
+            list.innerHTML = "";
+            snapshot.forEach(child => {
+                const item = child.val();
+                const id = child.key;
+                list.innerHTML += `
+                    <tr>
+                        <td class="p-4 font-bold">${item.item_name}</td>
+                        <td class="p-4 text-blue-600">${item.receiver_name || 'N/A'}</td>
+                        <td class="p-4 text-right font-bold">${Number(item.price).toLocaleString()}đ</td>
+                        <td class="p-4 text-center">
+                            <span class="px-2 py-1 rounded-full text-[10px] font-bold uppercase status-${item.status}">
+                                ${item.status}
+                            </span>
+                        </td>
+                        <td class="p-4 text-center flex justify-center gap-2">
+                            <button onclick="updateStatus('don_gamepass', '${id}', 'completed')" class="bg-green-500 text-white px-2 py-1 rounded text-xs">Xong</button>
+                            <button onclick="updateStatus('don_gamepass', '${id}', 'rejected')" class="bg-red-500 text-white px-2 py-1 rounded text-xs">Hủy</button>
+                        </td>
+                    </tr>
+                `;
+            });
+        });
+
+        // --- 4. HÀM XỬ LÝ LOGIC ---
+
+        // Xử lý nạp tiền (Cộng tiền vào Users)
+        async function actionBank(id, username, amount, status) {
+            if (!confirm(`Xác nhận ${status === 'completed' ? 'Duyệt' : 'Hủy'} đơn nạp ${amount} cho ${username}?`)) return;
+
+            try {
+                // 1. Cập nhật trạng thái đơn nạp
+                await db.ref('nap_bank/' + id).update({ status: status });
+
+                // 2. Nếu duyệt thành công -> Cộng tiền cho user
+                if (status === 'completed') {
+                    const userRef = db.ref('users/' + username);
+                    const userSnap = await userRef.get();
+                    
+                    if (userSnap.exists()) {
+                        let currentBalance = userSnap.val().balance || 0;
+                        await userRef.update({ balance: currentBalance + Number(amount) });
+                        alert("Đã cộng " + amount + "đ cho " + username);
+                    } else {
+                        alert("Không tìm thấy user này trong bảng /users để cộng tiền!");
+                    }
+                }
+            } catch (err) {
+                alert("Lỗi: " + err.message);
+            }
+        }
+
+        // Cập nhật trạng thái chung
+        function updateStatus(path, id, newStatus) {
+            db.ref(path + '/' + id).update({ status: newStatus })
+                .then(() => console.log("Updated " + path))
+                .catch(e => alert(e.message));
+        }
+
     </script>
 </body>
 </html>
