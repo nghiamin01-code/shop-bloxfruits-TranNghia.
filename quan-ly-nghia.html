@@ -3,287 +3,130 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>QUẢN TRỊ VIÊN - DEBUG MODE</title>
+    <title>FIREBASE EXPLORER - CẤU CỨU DỮ LIỆU</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Inter:wght@400;700&display=swap');
-        body { font-family: 'Inter', sans-serif; background-color: #020617; color: #f1f5f9; }
-        .mono { font-family: 'JetBrains Mono', monospace; }
-        .glass-card { background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(255,255,255,0.1); backdrop-filter: blur(10px); }
-        .tab-active { color: #3b82f6; border-bottom: 2px solid #3b82f6; }
+        @import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&display=swap');
+        body { background-color: #0f172a; color: #e2e8f0; font-family: 'Inter', sans-serif; }
+        .code-font { font-family: 'Fira Code', monospace; }
+        .json-key { color: #f472b6; }
+        .json-value { color: #34d399; }
+        .json-string { color: #fbbf24; }
+        .path-tag { background: #1e293b; border: 1px solid #334155; }
     </style>
 </head>
-<body class="min-h-screen pb-10">
+<body class="p-4 md:p-10">
 
-    <!-- Header -->
-    <header class="p-6 bg-slate-900/50 border-b border-white/5 sticky top-0 z-50 backdrop-blur-md">
-        <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
-            <div class="flex items-center gap-4">
-                <div class="p-3 bg-blue-600 rounded-xl shadow-lg shadow-blue-500/20">
-                    <i class="fas fa-database text-white text-2xl"></i>
+    <div class="max-w-6xl mx-auto">
+        <header class="mb-10 text-center">
+            <h1 class="text-3xl font-black text-white mb-2 uppercase tracking-tighter">Công Cụ Truy Tìm Đơn Hàng</h1>
+            <p class="text-slate-400 italic">Quét toàn bộ Database để tìm dữ liệu bị ẩn hoặc sai đường dẫn</p>
+        </header>
+
+        <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+            <!-- Sidebar -->
+            <div class="lg:col-span-1 space-y-4">
+                <div class="bg-slate-800/50 p-6 rounded-3xl border border-white/5">
+                    <h2 class="text-xs font-bold text-slate-500 uppercase mb-4">Trạng thái kết nối</h2>
+                    <div id="status" class="flex items-center gap-2 text-red-500 font-bold uppercase text-[10px]">
+                        <span class="w-3 h-3 rounded-full bg-red-500 animate-pulse"></span>
+                        Đang kiểm tra...
+                    </div>
+                    <div class="mt-6">
+                        <p class="text-[10px] text-slate-500 mb-1 uppercase">Database URL:</p>
+                        <p id="db-url-display" class="text-[9px] break-all opacity-50 italic"></p>
+                    </div>
                 </div>
-                <div>
-                    <h1 class="text-xl font-black uppercase tracking-tighter">Hệ Thống Duyệt Đơn</h1>
-                    <p class="text-[10px] text-slate-400 font-bold italic">REALTIME DEBUGGING ENABLED</p>
+
+                <div class="bg-blue-600/10 p-6 rounded-3xl border border-blue-500/20">
+                    <p class="text-xs text-blue-400 leading-relaxed font-medium">
+                        <i class="fas fa-info-circle mr-1"></i>
+                        Công cụ này sẽ đọc <b>gốc (root)</b> của Database. Nếu có bất kỳ đơn hàng nào, nó sẽ hiện ra ở cột bên phải.
+                    </p>
                 </div>
             </div>
-            
-            <!-- Connection Monitor -->
-            <div id="status-bar" class="px-4 py-2 rounded-full bg-slate-800 border border-white/5 text-[11px] font-bold flex items-center gap-3">
-                <span id="conn-indicator" class="w-2 h-2 rounded-full bg-red-500"></span>
-                <span id="conn-text" class="text-slate-400 uppercase">ĐANG NGẮT KẾT NỐI</span>
-            </div>
-        </div>
-    </header>
 
-    <main class="max-w-7xl mx-auto p-4 md:p-8">
-        <!-- Dashboard Stats -->
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-            <div class="glass-card p-4 rounded-2xl">
-                <p class="text-[10px] text-slate-500 font-bold uppercase">Nạp Bank</p>
-                <h2 id="stat-bank" class="text-2xl font-black text-blue-400">0</h2>
-            </div>
-            <div class="glass-card p-4 rounded-2xl">
-                <p class="text-[10px] text-slate-500 font-bold uppercase">Trái Vĩnh Viễn</p>
-                <h2 id="stat-trai" class="text-2xl font-black text-purple-400">0</h2>
-            </div>
-            <div class="glass-card p-4 rounded-2xl">
-                <p class="text-[10px] text-slate-500 font-bold uppercase">Cày Thuê</p>
-                <h2 id="stat-cay" class="text-2xl font-black text-orange-400">0</h2>
-            </div>
-            <div class="glass-card p-4 rounded-2xl">
-                <p class="text-[10px] text-slate-500 font-bold uppercase">Game Pass</p>
-                <h2 id="stat-pass" class="text-2xl font-black text-emerald-400">0</h2>
-            </div>
-        </div>
-
-        <!-- Navigation -->
-        <div class="flex gap-8 border-b border-white/10 mb-8 overflow-x-auto scrollbar-hide">
-            <button onclick="switchView('bank')" id="nav-bank" class="pb-4 font-bold text-sm tab-active whitespace-nowrap">DUYỆT BANK</button>
-            <button onclick="switchView('trai')" id="nav-trai" class="pb-4 font-bold text-sm text-slate-500 whitespace-nowrap">TRÁI VĨNH VIỄN</button>
-            <button onclick="switchView('cay')" id="nav-cay" class="pb-4 font-bold text-sm text-slate-500 whitespace-nowrap">CÀY THUÊ</button>
-            <button onclick="switchView('pass')" id="nav-pass" class="pb-4 font-bold text-sm text-slate-500 whitespace-nowrap">GAME PASS</button>
-        </div>
-
-        <!-- Data List -->
-        <div id="data-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            <!-- Items injected here -->
-        </div>
-
-        <!-- Empty State -->
-        <div id="empty-state" class="hidden flex flex-col items-center justify-center py-20 text-slate-600">
-            <i class="fas fa-inbox text-5xl mb-4 opacity-20"></i>
-            <p class="font-bold italic uppercase text-xs tracking-widest">Không có dữ liệu nào cần duyệt</p>
-        </div>
-    </main>
-
-    <!-- Modal Duyệt -->
-    <div id="modal" class="fixed inset-0 bg-black/90 backdrop-blur-md hidden items-center justify-center p-4 z-[100]">
-        <div class="glass-card w-full max-w-lg rounded-3xl overflow-hidden shadow-2xl border-blue-500/20">
-            <div class="p-6 border-b border-white/5 flex justify-between items-center bg-blue-500/5">
-                <h3 id="modal-title" class="font-black uppercase text-blue-400 italic">Chi tiết yêu cầu</h3>
-                <button onclick="closeModal()" class="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center text-slate-400 hover:text-white"><i class="fas fa-times"></i></button>
-            </div>
-            <div id="modal-body" class="p-8 space-y-6">
-                <!-- Details here -->
-            </div>
-            <div class="p-6 bg-white/5 flex gap-4">
-                <button onclick="closeModal()" class="flex-1 py-4 rounded-2xl font-black text-[11px] uppercase bg-slate-800 text-slate-400">Hủy</button>
-                <button id="modal-confirm-btn" class="flex-1 py-4 rounded-2xl font-black text-[11px] uppercase bg-blue-600 hover:bg-blue-500 shadow-lg shadow-blue-600/20 transition-all">Xác Nhận Duyệt</button>
+            <!-- Main Content -->
+            <div class="lg:col-span-3">
+                <div class="bg-slate-900 border border-white/10 rounded-3xl overflow-hidden shadow-2xl">
+                    <div class="bg-white/5 p-4 flex justify-between items-center border-b border-white/10">
+                        <span class="text-xs font-bold uppercase tracking-widest text-slate-400">Dữ liệu thô tìm thấy</span>
+                        <button onclick="location.reload()" class="text-[10px] bg-white/10 px-3 py-1 rounded-full hover:bg-white/20 transition-all">LÀM MỚI</button>
+                    </div>
+                    <div id="explorer-content" class="p-6 overflow-auto max-h-[70vh] code-font text-sm leading-relaxed">
+                        <p class="animate-pulse text-slate-500 italic">Đang tải dữ liệu từ gốc...</p>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 
     <script>
-        // --- CẤU HÌNH QUAN TRỌNG ---
-        // Hãy chắc chắn databaseURL này khớp với URL trong Project Firebase của bạn
-        const config = {
-            databaseURL: "https://shop-blox-fruit-trannghia-default-rtdb.firebaseio.com/" 
+        // Cấu hình Database của bạn
+        const firebaseConfig = {
+            databaseURL: "https://shop-blox-fruit-trannghia-default-rtdb.firebaseio.com/"
         };
-        firebase.initializeApp(config);
+        
+        document.getElementById('db-url-display').innerText = firebaseConfig.databaseURL;
+        
+        firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
-        // Cấu trúc đường dẫn (Đổi lại cho đúng với Database của bạn nếu chưa thấy đơn)
-        const PATHS = {
-            bank: "nap_bank",     // Ví dụ: db.ref("nap_bank")
-            trai: "mua_trai_vv",  // Ví dụ: db.ref("mua_trai_vv")
-            cay: "cay_thue",      // Ví dụ: db.ref("cay_thue")
-            pass: "game_pass"     // Ví dụ: db.ref("game_pass")
-        };
-
-        let currentView = 'bank';
-
-        // Monitor Connection
+        // Kiểm tra kết nối
         db.ref('.info/connected').on('value', (snap) => {
-            const indicator = document.getElementById('conn-indicator');
-            const text = document.getElementById('conn-text');
+            const statusDiv = document.getElementById('status');
             if (snap.val() === true) {
-                indicator.className = "w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_8px_#10b981]";
-                text.innerText = "HỆ THỐNG TRỰC TUYẾN (CONNECTED)";
-                text.className = "text-emerald-500 uppercase";
-                loadStats();
-                listenData();
+                statusDiv.innerHTML = `<span class="w-3 h-3 rounded-full bg-green-500 shadow-[0_0_8px_green]"></span> KẾT NỐI THÀNH CÔNG`;
+                statusDiv.classList.replace('text-red-500', 'text-green-500');
             } else {
-                indicator.className = "w-2 h-2 rounded-full bg-red-500 animate-pulse";
-                text.innerText = "MẤT KẾT NỐI DATABASE";
-                text.className = "text-red-500 uppercase";
+                statusDiv.innerHTML = `<span class="w-3 h-3 rounded-full bg-red-500 animate-pulse"></span> KHÔNG THỂ KẾT NỐI`;
+                statusDiv.classList.replace('text-green-500', 'text-red-500');
             }
         });
 
-        function loadStats() {
-            Object.keys(PATHS).forEach(key => {
-                db.ref(PATHS[key]).on('value', s => {
-                    const data = s.val() || {};
-                    const count = Object.values(data).filter(i => i.status === 'pending' || !i.status).length;
-                    document.getElementById('stat-' + key).innerText = count;
-                });
-            });
-        }
+        // Quét toàn bộ Root
+        db.ref('/').on('value', (snapshot) => {
+            const content = document.getElementById('explorer-content');
+            const data = snapshot.val();
 
-        function switchView(view) {
-            currentView = view;
-            document.querySelectorAll('button[id^="nav-"]').forEach(btn => {
-                btn.className = "pb-4 font-bold text-sm text-slate-500 whitespace-nowrap";
-            });
-            document.getElementById('nav-' + view).className = "pb-4 font-bold text-sm tab-active whitespace-nowrap";
-            listenData();
-        }
-
-        function listenData() {
-            const container = document.getElementById('data-container');
-            const empty = document.getElementById('empty-state');
-            
-            container.innerHTML = `<div class="col-span-full py-10 text-center text-slate-500 italic animate-pulse">Đang quét Database: ${PATHS[currentView]}...</div>`;
-
-            db.ref(PATHS[currentView]).on('value', (snapshot) => {
-                const data = snapshot.val();
-                container.innerHTML = "";
-                
-                if (!data) {
-                    empty.classList.remove('hidden');
-                    return;
-                }
-
-                const pendingItems = Object.entries(data).filter(([id, val]) => val.status === 'pending' || !val.status);
-
-                if (pendingItems.length === 0) {
-                    empty.classList.remove('hidden');
-                    return;
-                }
-
-                empty.classList.add('hidden');
-                pendingItems.reverse().forEach(([id, item]) => {
-                    renderCard(id, item, container);
-                });
-            });
-        }
-
-        function renderCard(id, item, container) {
-            const div = document.createElement('div');
-            div.className = "glass-card p-6 rounded-3xl hover:border-blue-500/50 transition-all cursor-pointer group relative overflow-hidden";
-            div.onclick = () => openDetails(id, item);
-
-            let content = "";
-            if (currentView === 'bank') {
-                content = `
-                    <div class="flex justify-between items-start mb-4">
-                        <span class="text-[10px] font-black text-blue-500 uppercase tracking-widest">NẠP NGÂN HÀNG</span>
-                        <span class="px-2 py-1 rounded bg-blue-500/10 text-blue-400 text-[9px] font-bold">WAITING</span>
-                    </div>
-                    <h3 class="text-white font-bold mb-1">${item.username || item.user || 'Unknown'}</h3>
-                    <p class="text-2xl font-black text-white">${Number(item.amount).toLocaleString()}đ</p>
-                    <p class="text-[10px] text-slate-500 mt-2 italic mono">${item.content || 'Không có nội dung'}</p>
-                `;
-            } else {
-                content = `
-                    <div class="flex justify-between items-start mb-4">
-                        <span class="text-[10px] font-black text-orange-500 uppercase tracking-widest">${currentView} order</span>
-                        <span class="px-2 py-1 rounded bg-orange-500/10 text-orange-400 text-[9px] font-bold">CHƯA DUYỆT</span>
-                    </div>
-                    <h3 class="text-white font-bold mb-1">${item.username || item.user}</h3>
-                    <p class="text-sm text-slate-300 font-bold">${item.name || item.itemName || 'Sản phẩm'}</p>
-                    <div class="mt-4 flex gap-2">
-                        <div class="bg-white/5 rounded-lg px-3 py-1 text-[10px] font-bold text-slate-400 italic">Acc: ${item.account || item.gameAcc || '...'}</div>
+            if (!data) {
+                content.innerHTML = `
+                    <div class="text-center py-20">
+                        <p class="text-orange-400 font-bold mb-2 uppercase italic text-lg">Database Trống Rỗng!</p>
+                        <p class="text-slate-500 text-sm">Kết nối thành công nhưng không tìm thấy bảng nào.</p>
+                        <p class="text-slate-500 text-xs mt-4 italic">Gợi ý: Hãy thử đặt 1 đơn hàng trên trang chủ rồi quay lại đây.</p>
                     </div>
                 `;
+                return;
             }
 
-            div.innerHTML = content + `<div class="absolute bottom-0 left-0 h-1 bg-blue-500 w-0 group-hover:w-full transition-all duration-500"></div>`;
-            container.appendChild(div);
-        }
+            // Hiển thị dữ liệu dưới dạng cây thư mục đẹp mắt
+            content.innerHTML = renderObject(data);
+        });
 
-        function openDetails(id, item) {
-            const modal = document.getElementById('modal');
-            const body = document.getElementById('modal-body');
-            const btn = document.getElementById('modal-confirm-btn');
-
+        function renderObject(obj, indent = 0) {
             let html = "";
-            if (currentView === 'bank') {
-                html = `
-                    <div class="space-y-4">
-                        <div class="flex justify-between border-b border-white/5 pb-2"><span class="text-slate-500 text-xs">Khách hàng:</span><span class="font-bold text-white">${item.username || item.user}</span></div>
-                        <div class="flex justify-between border-b border-white/5 pb-2"><span class="text-slate-500 text-xs">Số tiền:</span><span class="font-black text-emerald-400">${Number(item.amount).toLocaleString()}đ</span></div>
-                        <div class="flex justify-between border-b border-white/5 pb-2"><span class="text-slate-500 text-xs">Nội dung:</span><span class="mono text-blue-400">${item.content || 'N/A'}</span></div>
-                    </div>
-                `;
-                btn.onclick = () => approveBank(id, item);
-            } else {
-                html = `
-                    <div class="space-y-4">
-                        <div class="p-4 bg-orange-500/5 rounded-2xl border border-orange-500/10">
-                            <p class="text-[10px] text-orange-500 font-bold uppercase mb-2">Thông tin đăng nhập</p>
-                            <div class="flex justify-between mb-2"><span>TK:</span><b class="text-white select-all">${item.account || item.gameAcc}</b></div>
-                            <div class="flex justify-between"><span>MK:</span><b class="text-white select-all">${item.password || item.gamePass}</b></div>
-                        </div>
-                        <div class="flex justify-between"><span class="text-slate-500">Sản phẩm:</span><span class="text-white font-bold">${item.name || item.itemName}</span></div>
-                        <div class="flex justify-between"><span class="text-slate-500">Giá:</span><span class="text-emerald-400 font-bold">${Number(item.price || 0).toLocaleString()}đ</span></div>
-                    </div>
-                `;
-                btn.onclick = () => approveOrder(id);
-            }
-
-            body.innerHTML = html;
-            modal.classList.replace('hidden', 'flex');
-        }
-
-        async function approveBank(id, item) {
-            const user = item.username || item.user;
-            if(!confirm(`Cộng ${item.amount}đ cho ${user}?`)) return;
+            const keys = Object.keys(obj);
             
-            try {
-                // Tự động tìm user và cộng tiền
-                const userRef = db.ref('users/' + user);
-                const snapshot = await userRef.once('value');
-                const currentData = snapshot.val() || { balance: 0 };
+            keys.forEach((key, index) => {
+                const value = obj[key];
+                const isObject = typeof value === 'object' && value !== null;
+                const padding = " ".repeat(indent * 4);
                 
-                await userRef.update({
-                    balance: (currentData.balance || 0) + Number(item.amount)
-                });
-
-                // Đánh dấu đơn nạp đã xong
-                await db.ref(PATHS.bank + '/' + id).update({ status: 'completed' });
-                
-                alert("Đã duyệt thành công!");
-                closeModal();
-            } catch(e) { alert("Lỗi: " + e.message); }
+                if (isObject) {
+                    html += `<div>${padding}<span class="json-key font-bold">"${key}"</span>: {</div>`;
+                    html += renderObject(value, indent + 1);
+                    html += `<div>${padding}}</div>`;
+                } else {
+                    let valueClass = typeof value === 'string' ? 'json-string' : 'json-value';
+                    let displayValue = typeof value === 'string' ? `"${value}"` : value;
+                    html += `<div>${padding}<span class="json-key">"${key}"</span>: <span class="${valueClass}">${displayValue}</span>${index < keys.length - 1 ? ',' : ''}</div>`;
+                }
+            });
+            return html;
         }
-
-        async function approveOrder(id) {
-            if(!confirm(`Xác nhận đã xử lý xong đơn hàng này?`)) return;
-            try {
-                await db.ref(PATHS[currentView] + '/' + id).update({ status: 'completed' });
-                alert("Đã xong!");
-                closeModal();
-            } catch(e) { alert("Lỗi: " + e.message); }
-        }
-
-        function closeModal() {
-            document.getElementById('modal').classList.replace('flex', 'hidden');
-        }
-
     </script>
 </body>
 </html>
