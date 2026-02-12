@@ -3,253 +3,275 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hệ Thống Quản Lý Nghĩa - Bank & Order</title>
+    <title>Nghĩa Shop - Quản Lý Đơn Hàng</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap');
         body { font-family: 'Inter', sans-serif; }
-        .nav-btn.active { background-color: white; color: #4f46e5; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
-        .glass-card { background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(10px); }
+        .glass { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); }
+        .btn-transition { transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); }
     </style>
 </head>
-<body class="bg-slate-50 min-h-screen">
+<body class="bg-slate-50 text-slate-900 min-h-screen">
 
-    <!-- Thanh điều hướng -->
-    <nav class="bg-white/80 backdrop-blur-md border-b border-slate-200 sticky top-0 z-50 px-6 py-3 flex justify-between items-center">
-        <div class="flex items-center gap-2">
-            <div class="bg-gradient-to-br from-indigo-600 to-blue-500 p-2 rounded-lg text-white">
-                <i class="fas fa-shield-alt"></i>
-            </div>
-            <span class="font-extrabold text-xl tracking-tighter">NGHIA<span class="text-indigo-600">PRO</span></span>
-        </div>
-        
-        <div class="flex bg-slate-100 p-1 rounded-xl border border-slate-200">
-            <button id="btn-shop" onclick="switchView('shop')" class="nav-btn active px-4 py-1.5 rounded-lg text-sm font-bold transition-all">
-                Giao diện Khách
-            </button>
-            <button id="btn-admin" onclick="switchView('admin')" class="nav-btn px-4 py-1.5 rounded-lg text-sm font-bold transition-all">
-                Bảng Quản Trị
-            </button>
-        </div>
-    </nav>
-
-    <div class="max-w-6xl mx-auto p-4 md:p-8">
-        
-        <!-- ================= GIAO DIỆN KHÁCH ================= -->
-        <section id="view-shop" class="space-y-6">
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                <!-- Thông tin chuyển khoản -->
-                <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-200">
-                    <h2 class="text-sm font-black uppercase text-slate-400 mb-4 tracking-widest">Thanh Toán</h2>
-                    <div class="space-y-3">
-                        <div class="p-4 bg-indigo-50 rounded-2xl border border-indigo-100">
-                            <p class="text-[10px] font-bold text-indigo-400 uppercase">Ngân hàng</p>
-                            <p class="font-bold text-slate-800">MB BANK (Quân Đội)</p>
-                        </div>
-                        <div class="p-4 bg-slate-50 rounded-2xl border border-slate-100">
-                            <p class="text-[10px] font-bold text-slate-400 uppercase">Số tài khoản</p>
-                            <p class="font-mono font-bold text-lg text-indigo-600">0987654321</p>
-                        </div>
-                        <div class="p-4 bg-slate-50 rounded-2xl border border-slate-100">
-                            <p class="text-[10px] font-bold text-slate-400 uppercase">Chủ tài khoản</p>
-                            <p class="font-bold text-slate-800 uppercase">NGUYEN VAN NGHIA</p>
-                        </div>
-                    </div>
+    <!-- Header -->
+    <header class="sticky top-0 z-50 border-b border-slate-200 glass px-4 py-3">
+        <div class="max-w-5xl mx-auto flex justify-between items-center">
+            <div class="flex items-center gap-2">
+                <div class="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center text-white shadow-lg shadow-blue-200">
+                    <span class="font-black text-xl">N</span>
                 </div>
+                <h1 class="font-extrabold text-xl tracking-tight hidden sm:block">NGHĨA SHOP</h1>
+            </div>
+            
+            <div class="flex bg-slate-100 p-1 rounded-xl" id="viewToggle">
+                <button onclick="switchView('client')" id="btnClient" class="px-4 py-2 rounded-lg text-sm font-bold btn-transition bg-white shadow-sm text-blue-600">Khách Hàng</button>
+                <button onclick="switchView('admin')" id="btnAdmin" class="px-4 py-2 rounded-lg text-sm font-bold btn-transition text-slate-500">Quản Trị</button>
+            </div>
+        </div>
+    </header>
 
-                <!-- Form Gửi Đơn -->
-                <div class="lg:col-span-2 bg-white p-6 md:p-8 rounded-3xl shadow-sm border border-slate-200">
-                    <h2 class="text-2xl font-extrabold text-slate-800 mb-2">Gửi yêu cầu nạp tiền</h2>
-                    <p class="text-slate-500 text-sm mb-6">Vui lòng chuyển khoản đúng số tiền và điền thông tin dưới đây.</p>
-                    
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-                        <div class="space-y-2">
-                            <label class="text-xs font-bold text-slate-500 ml-1">Tên khách hàng</label>
-                            <input type="text" id="cust-name" placeholder="Nhập tên của bạn..." class="w-full px-5 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-2 focus:ring-indigo-500 outline-none transition-all">
+    <main class="max-w-5xl mx-auto p-4 md:p-8">
+        
+        <!-- View: Khách Hàng -->
+        <section id="clientView" class="block">
+            <div class="max-w-md mx-auto">
+                <div class="bg-white p-6 rounded-[2rem] shadow-sm border border-slate-200 mb-6">
+                    <h2 class="text-2xl font-black mb-6 flex items-center gap-2">
+                        <span class="w-2 h-8 bg-blue-600 rounded-full"></span>
+                        BÁO ĐƠN MỚI
+                    </h2>
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1 ml-1">Tên của bạn</label>
+                            <input type="text" id="custName" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none" placeholder="Nhập tên khách hàng...">
                         </div>
-                        <div class="space-y-2">
-                            <label class="text-xs font-bold text-slate-500 ml-1">Số tiền nạp (VNĐ)</label>
-                            <input type="number" id="cust-amount" placeholder="Ví dụ: 100000" class="w-full px-5 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-2 focus:ring-indigo-500 outline-none transition-all font-mono">
+                        <div>
+                            <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1 ml-1">Số tiền đã bank (VNĐ)</label>
+                            <input type="number" id="custAmount" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none font-bold text-blue-600" placeholder="0">
                         </div>
+                        <div>
+                            <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1 ml-1">Ghi chú công việc</label>
+                            <textarea id="custNote" rows="3" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none" placeholder="Ví dụ: Nạp 100k xu vào ID: 123456"></textarea>
+                        </div>
+                        <button onclick="submitOrder()" class="w-full bg-blue-600 text-white font-black py-4 rounded-2xl shadow-xl shadow-blue-100 hover:bg-blue-700 active:scale-[0.98] btn-transition uppercase tracking-wider">
+                            Gửi yêu cầu tới shop
+                        </button>
                     </div>
-                    
-                    <button onclick="submitDeposit()" class="w-full bg-slate-900 hover:bg-indigo-600 text-white font-bold py-4 rounded-2xl shadow-lg transition-all flex items-center justify-center gap-3 active:scale-95">
-                        <i class="fas fa-check-circle"></i> XÁC NHẬN ĐÃ CHUYỂN TIỀN
-                    </button>
                 </div>
             </div>
         </section>
 
-        <!-- ================= GIAO DIỆN ADMIN ================= -->
-        <section id="view-admin" class="hidden space-y-6">
-            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                <div>
-                    <h2 class="text-3xl font-black text-slate-900 tracking-tighter">Quản Lý Giao Dịch</h2>
-                    <p class="text-slate-500 text-sm">Kiểm tra Bank và Duyệt trạng thái đơn hàng</p>
-                </div>
-                <div class="flex gap-3">
-                    <div class="bg-white px-4 py-2 rounded-xl border border-slate-200 shadow-sm flex items-center gap-3">
-                        <div class="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
-                        <span class="text-xs font-bold text-slate-600 uppercase tracking-widest">Real-time Connected</span>
+        <!-- View: Admin -->
+        <section id="adminView" class="hidden space-y-6">
+            <div class="flex justify-between items-center">
+                <h2 class="text-3xl font-black italic">BẢNG ĐIỀU KHIỂN</h2>
+                <div class="text-right">
+                    <div class="text-[10px] font-black text-slate-400 uppercase">Trạng thái</div>
+                    <div class="text-emerald-500 font-bold flex items-center gap-1 justify-end">
+                        <span class="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></span> Trực tuyến
                     </div>
                 </div>
             </div>
 
-            <!-- Bảng Dữ Liệu -->
-            <div class="bg-white rounded-3xl shadow-xl shadow-slate-200/50 border border-slate-200 overflow-hidden">
-                <div class="overflow-x-auto">
-                    <table class="w-full text-left">
-                        <thead>
-                            <tr class="bg-slate-50 border-b border-slate-100">
-                                <th class="px-6 py-4 text-[10px] font-black uppercase text-slate-400 tracking-widest">Khách hàng</th>
-                                <th class="px-6 py-4 text-[10px] font-black uppercase text-slate-400 tracking-widest">Số tiền</th>
-                                <th class="px-6 py-4 text-[10px] font-black uppercase text-slate-400 tracking-widest">Duyệt Bank</th>
-                                <th class="px-6 py-4 text-[10px] font-black uppercase text-slate-400 tracking-widest">Trạng thái đơn</th>
-                                <th class="px-6 py-4 text-[10px] font-black uppercase text-slate-400 tracking-widest text-right">Thao tác</th>
-                            </tr>
-                        </thead>
-                        <tbody id="admin-list" class="divide-y divide-slate-50">
-                            <tr>
-                                <td colspan="5" class="px-6 py-20 text-center text-slate-400 italic">Đang tải dữ liệu...</td>
-                            </tr>
-                        </tbody>
-                    </table>
+            <div id="orderList" class="grid gap-4">
+                <!-- Đơn hàng sẽ được render ở đây -->
+                <div class="bg-white p-12 text-center rounded-3xl border-2 border-dashed border-slate-200 text-slate-400 font-medium">
+                    Đang tải danh sách đơn hàng...
                 </div>
             </div>
         </section>
-    </div>
 
-    <!-- Firebase Configuration & Logic -->
+    </main>
+
+    <!-- Notification Toast -->
+    <div id="toast" class="fixed bottom-8 left-1/2 -translate-x-1/2 px-6 py-3 rounded-full bg-slate-900 text-white font-bold text-sm shadow-2xl opacity-0 pointer-events-none transition-all duration-300 z-[100]"></div>
+
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, collection, addDoc, onSnapshot, doc, updateDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, onSnapshot, doc, updateDoc, deleteDoc, serverTimestamp, query } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
+        // Cấu hình Firebase
         const firebaseConfig = JSON.parse(__firebase_config);
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'nghia-bank-v2';
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'nghia-shop-manager';
 
-        let user = null;
+        let currentUser = null;
 
         // Khởi tạo Auth
-        const initAuth = async () => {
+        const init = async () => {
             try {
-                await signInAnonymously(auth);
-                onAuthStateChanged(auth, (u) => {
-                    user = u;
-                    if (u) startListening();
-                });
-            } catch (err) { console.error("Auth error", err); }
+                const user = await signInAnonymously(auth);
+                currentUser = user.user;
+                startListener();
+            } catch (error) {
+                console.error("Auth Error", error);
+                showToast("Không thể kết nối máy chủ", "error");
+            }
         };
 
-        // Gửi yêu cầu từ khách
-        window.submitDeposit = async () => {
-            const name = document.getElementById('cust-name').value.trim();
-            const amount = document.getElementById('cust-amount').value.trim();
+        // Lắng nghe dữ liệu
+        const startListener = () => {
+            if (!currentUser) return;
+            const q = collection(db, 'artifacts', appId, 'public', 'data', 'orders');
+            onSnapshot(q, (snapshot) => {
+                const orders = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                // Sắp xếp mới nhất lên đầu
+                orders.sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0));
+                renderOrders(orders);
+            }, (err) => console.error("Snapshot error", err));
+        };
+
+        // Chuyển chế độ xem
+        window.switchView = (view) => {
+            const clientV = document.getElementById('clientView');
+            const adminV = document.getElementById('adminView');
+            const btnC = document.getElementById('btnClient');
+            const btnA = document.getElementById('btnAdmin');
+
+            if (view === 'client') {
+                clientV.classList.remove('hidden');
+                adminV.classList.add('hidden');
+                btnC.className = "px-4 py-2 rounded-lg text-sm font-bold btn-transition bg-white shadow-sm text-blue-600";
+                btnA.className = "px-4 py-2 rounded-lg text-sm font-bold btn-transition text-slate-500";
+            } else {
+                clientV.classList.add('hidden');
+                adminV.classList.remove('hidden');
+                btnA.className = "px-4 py-2 rounded-lg text-sm font-bold btn-transition bg-white shadow-sm text-blue-600";
+                btnC.className = "px-4 py-2 rounded-lg text-sm font-bold btn-transition text-slate-500";
+            }
+        };
+
+        // Gửi đơn (Khách)
+        window.submitOrder = async () => {
+            const name = document.getElementById('custName').value.trim();
+            const amount = document.getElementById('custAmount').value;
+            const note = document.getElementById('custNote').value.trim();
 
             if (!name || !amount) {
-                alert("Vui lòng điền đủ tên và số tiền!");
+                showToast("Thiếu tên hoặc số tiền!", "error");
                 return;
             }
 
             try {
-                await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'transactions'), {
-                    name,
+                await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'orders'), {
+                    customer: name,
                     amount: parseInt(amount),
-                    bank_status: 'unverified', // unverified | verified
-                    order_status: 'processing', // processing | completed | cancelled
+                    note: note,
+                    bankStatus: 'pending',
+                    jobStatus: 'pending',
                     createdAt: serverTimestamp()
                 });
-                alert("Đã gửi thông báo! Chờ Admin check bank.");
-                document.getElementById('cust-name').value = '';
-                document.getElementById('cust-amount').value = '';
-            } catch (err) { alert("Lỗi: " + err.message); }
+                
+                document.getElementById('custName').value = "";
+                document.getElementById('custAmount').value = "";
+                document.getElementById('custNote').value = "";
+                showToast("Gửi đơn thành công! Vui lòng chờ shop duyệt.");
+            } catch (e) {
+                showToast("Lỗi gửi đơn", "error");
+            }
         };
 
-        // Lắng nghe dữ liệu
-        const startListening = () => {
-            const q = collection(db, 'artifacts', appId, 'public', 'data', 'transactions');
-            onSnapshot(q, (snapshot) => {
-                const tbody = document.getElementById('admin-list');
-                tbody.innerHTML = '';
-
-                const docs = snapshot.docs.map(d => ({id: d.id, ...d.data()}))
-                            .sort((a,b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0));
-
-                if (docs.length === 0) {
-                    tbody.innerHTML = '<tr><td colspan="5" class="px-6 py-10 text-center text-slate-400">Chưa có giao dịch nào</td></tr>';
-                    return;
-                }
-
-                docs.forEach(item => {
-                    const tr = document.createElement('tr');
-                    tr.className = "hover:bg-slate-50 transition-colors group";
-
-                    // Badge Duyệt Bank
-                    const bankVerified = item.bank_status === 'verified';
-                    const bankBadge = bankVerified 
-                        ? '<span class="flex items-center gap-1 text-green-600 font-bold text-[10px] uppercase"><i class="fas fa-check-double"></i> Đã nhận tiền</span>'
-                        : '<span class="flex items-center gap-1 text-orange-400 font-bold text-[10px] uppercase"><i class="fas fa-clock"></i> Chờ Bank</span>';
-
-                    // Badge Trạng Thái Đơn
-                    let orderBadge = '';
-                    switch(item.order_status) {
-                        case 'completed': 
-                            orderBadge = '<span class="px-3 py-1 bg-green-100 text-green-700 rounded-full text-[10px] font-black uppercase">Hoàn Tất</span>'; 
-                            break;
-                        case 'cancelled': 
-                            orderBadge = '<span class="px-3 py-1 bg-red-100 text-red-700 rounded-full text-[10px] font-black uppercase">Đã Hủy</span>'; 
-                            break;
-                        default: 
-                            orderBadge = '<span class="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-[10px] font-black uppercase">Đang Xử Lý</span>';
-                    }
-
-                    tr.innerHTML = `
-                        <td class="px-6 py-5 font-bold text-slate-700">${item.name}</td>
-                        <td class="px-6 py-5 font-black text-indigo-600">${item.amount.toLocaleString()}đ</td>
-                        <td class="px-6 py-5">${bankBadge}</td>
-                        <td class="px-6 py-5">${orderBadge}</td>
-                        <td class="px-6 py-5 text-right space-x-2">
-                            ${!bankVerified ? `
-                                <button onclick="updateStatus('${item.id}', {bank_status: 'verified'})" title="Duyệt Bank" class="p-2 bg-green-500 text-white rounded-lg hover:bg-green-600 shadow-sm transition-all active:scale-90">
-                                    <i class="fas fa-university"></i>
-                                </button>
-                            ` : ''}
-                            ${item.order_status === 'processing' ? `
-                                <button onclick="updateStatus('${item.id}', {order_status: 'completed'})" title="Hoàn Tất Đơn" class="p-2 bg-indigo-600 text-white rounded-lg hover:bg-slate-900 shadow-sm transition-all active:scale-90">
-                                    <i class="fas fa-check"></i>
-                                </button>
-                                <button onclick="updateStatus('${item.id}', {order_status: 'cancelled'})" title="Hủy Đơn" class="p-2 bg-slate-200 text-slate-500 rounded-lg hover:bg-red-500 hover:text-white transition-all active:scale-90">
-                                    <i class="fas fa-times"></i>
-                                </button>
-                            ` : ''}
-                        </td>
-                    `;
-                    tbody.appendChild(tr);
-                });
-            }, (err) => console.error(err));
-        };
-
-        // Cập nhật trạng thái
-        window.updateStatus = async (id, data) => {
-            const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'transactions', id);
+        // Cập nhật trạng thái (Admin)
+        window.updateStatus = async (id, field, value) => {
             try {
-                await updateDoc(docRef, data);
-            } catch (err) { alert("Lỗi: " + err.message); }
+                const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'orders', id);
+                await updateDoc(docRef, { [field]: value });
+                showToast("Đã cập nhật trạng thái");
+            } catch (e) {
+                showToast("Lỗi cập nhật", "error");
+            }
         };
 
-        // Switch View
-        window.switchView = (v) => {
-            document.getElementById('view-shop').classList.toggle('hidden', v !== 'shop');
-            document.getElementById('view-admin').classList.toggle('hidden', v !== 'admin');
-            document.getElementById('btn-shop').classList.toggle('active', v === 'shop');
-            document.getElementById('btn-admin').classList.toggle('active', v === 'admin');
+        // Xóa đơn
+        window.deleteOrder = async (id) => {
+            if (!confirm("Xóa đơn này khỏi danh sách?")) return;
+            try {
+                await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'orders', id));
+                showToast("Đã xóa đơn");
+            } catch (e) {
+                showToast("Lỗi xóa đơn", "error");
+            }
         };
 
-        initAuth();
+        // Hiển thị danh sách đơn (Admin)
+        const renderOrders = (orders) => {
+            const container = document.getElementById('orderList');
+            if (orders.length === 0) {
+                container.innerHTML = `<div class="py-20 text-center text-slate-400 font-medium">Hiện tại không có đơn hàng nào.</div>`;
+                return;
+            }
+
+            container.innerHTML = orders.map(order => `
+                <div class="bg-white p-5 rounded-[2rem] border border-slate-200 shadow-sm flex flex-col md:flex-row gap-5 items-center">
+                    <div class="flex-1 w-full">
+                        <div class="flex items-center gap-2 mb-1">
+                            <span class="font-extrabold text-lg">${order.customer}</span>
+                            <span class="text-[10px] bg-slate-100 px-2 py-0.5 rounded text-slate-500 font-bold uppercase">
+                                ${order.createdAt ? new Date(order.createdAt.seconds * 1000).toLocaleTimeString('vi-VN') : 'Đang gửi...'}
+                            </span>
+                        </div>
+                        <div class="text-2xl font-black text-blue-600">${order.amount.toLocaleString()}đ</div>
+                        ${order.note ? `<div class="mt-2 text-sm text-slate-500 bg-slate-50 p-3 rounded-xl border border-slate-100 italic">"${order.note}"</div>` : ''}
+                    </div>
+
+                    <!-- Nút Duyệt Bank -->
+                    <div class="flex flex-col items-center gap-2 min-w-[150px] w-full md:w-auto p-3 bg-slate-50 rounded-2xl">
+                        <span class="text-[9px] font-black text-slate-400 uppercase tracking-widest">1. DUYỆT BANK</span>
+                        ${order.bankStatus === 'pending' ? `
+                            <button onclick="updateStatus('${order.id}', 'bankStatus', 'verified')" class="w-full bg-orange-500 hover:bg-orange-600 text-white py-2 px-4 rounded-xl text-xs font-black shadow-lg shadow-orange-100 btn-transition">
+                                CHƯA NHẬN TIỀN
+                            </button>
+                        ` : `
+                            <div class="flex items-center gap-1 text-emerald-600 font-black text-xs py-2">
+                                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"></path></svg>
+                                ĐÃ NHẬN TIỀN
+                            </div>
+                        `}
+                    </div>
+
+                    <!-- Nút Duyệt Đơn -->
+                    <div class="flex flex-col items-center gap-2 min-w-[150px] w-full md:w-auto p-3 ${order.bankStatus === 'verified' ? 'bg-blue-50' : 'bg-slate-100 opacity-50'} rounded-2xl">
+                        <span class="text-[9px] font-black text-slate-400 uppercase tracking-widest">2. TRẠNG THÁI VIỆC</span>
+                        ${order.jobStatus === 'pending' ? `
+                            <button 
+                                onclick="updateStatus('${order.id}', 'jobStatus', 'completed')" 
+                                ${order.bankStatus === 'pending' ? 'disabled' : ''}
+                                class="w-full ${order.bankStatus === 'verified' ? 'bg-blue-600 hover:bg-blue-700' : 'bg-slate-400 cursor-not-allowed'} text-white py-2 px-4 rounded-xl text-xs font-black shadow-lg shadow-blue-100 btn-transition"
+                            >
+                                CHƯA XONG
+                            </button>
+                        ` : `
+                            <div class="flex items-center gap-1 text-blue-600 font-black text-xs py-2">
+                                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"></path></svg>
+                                ĐÃ HOÀN TẤT
+                            </div>
+                        `}
+                    </div>
+
+                    <!-- Nút Xóa -->
+                    <button onclick="deleteOrder('${order.id}')" class="p-2 text-slate-300 hover:text-red-500 btn-transition">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                    </button>
+                </div>
+            `).join('');
+        };
+
+        const showToast = (msg, type = "success") => {
+            const t = document.getElementById('toast');
+            t.textContent = msg;
+            t.classList.remove('opacity-0', 'translate-y-4');
+            t.classList.add('opacity-100', '-translate-y-4');
+            setTimeout(() => {
+                t.classList.add('opacity-0', 'translate-y-4');
+                t.classList.remove('opacity-100', '-translate-y-4');
+            }, 3000);
+        };
+
+        init();
     </script>
 </body>
 </html>
