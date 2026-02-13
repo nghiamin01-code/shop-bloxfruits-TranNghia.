@@ -3,247 +3,226 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hệ Thống Duyệt Đơn Gọn Gàng</title>
+    <title>Hệ Thống Quản Lý Admin</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap');
-        body { font-family: 'Inter', sans-serif; background-color: #020617; color: #f8fafc; }
-        .card-glass { background: rgba(30, 41, 59, 0.5); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.08); }
-        .input-dark { background: rgba(15, 23, 42, 0.9); border: 1px solid rgba(255, 255, 255, 0.1); color: white; }
-        .btn-action { transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); }
-        .btn-action:active { transform: scale(0.95); }
+        body { font-family: 'Inter', sans-serif; background: #0f172a; color: #f8fafc; }
+        .glass-card { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 1rem; }
+        .tab-active { background: #6366f1; color: white; box-shadow: 0 4px 14px 0 rgba(99, 102, 241, 0.39); }
+        .status-badge { padding: 2px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: bold; text-transform: uppercase; }
+        .pending-badge { background: rgba(234, 179, 8, 0.2); color: #eab308; }
+        .completed-badge { background: rgba(34, 197, 94, 0.2); color: #22c55e; }
     </style>
 </head>
-<body class="min-h-screen pb-10">
-
-    <header class="p-5 border-b border-white/5 flex justify-between items-center sticky top-0 bg-[#020617]/80 backdrop-blur-xl z-50">
-        <div class="flex items-center gap-3">
-            <div class="w-10 h-10 bg-blue-600 rounded-2xl flex items-center justify-center shadow-lg shadow-blue-500/20">
-                <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
-            </div>
+<body class="min-h-screen p-4 md:p-8">
+    <div class="max-w-6xl mx-auto">
+        <!-- Header -->
+        <header class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
             <div>
-                <h1 class="text-lg font-black uppercase tracking-tight">Game Manager</h1>
-                <p class="text-[10px] font-bold text-emerald-500 uppercase">Hệ thống duyệt tự động xóa</p>
+                <h1 class="text-3xl font-extrabold tracking-tight">Hệ Thống Admin</h1>
+                <p class="text-slate-400">Quản lý giao dịch và đơn hàng game</p>
             </div>
-        </div>
-        <div class="flex bg-slate-900 p-1 rounded-xl border border-white/5">
-            <button onclick="changeTab('order')" id="btn-order" class="px-4 py-2 rounded-lg text-[10px] font-black transition-all bg-blue-600 text-white">ĐẶT ĐƠN</button>
-            <button onclick="changeTab('admin')" id="btn-admin" class="px-4 py-2 rounded-lg text-[10px] font-black transition-all text-slate-400">DUYỆT ĐƠN</button>
-        </div>
-    </header>
-
-    <main class="max-w-3xl mx-auto p-4 mt-4">
-
-        <!-- TAB: ĐẶT ĐƠN -->
-        <div id="tab-content-order" class="space-y-4">
-            <div class="card-glass p-6 rounded-[2rem]">
-                <h2 class="text-sm font-black mb-6 flex items-center gap-2 opacity-50 uppercase tracking-widest">
-                    Thông tin khách hàng
-                </h2>
-
-                <div class="grid grid-cols-1 gap-4">
-                    <div class="grid grid-cols-2 gap-4">
-                        <div class="col-span-2">
-                            <label class="block text-[10px] font-bold text-slate-500 mb-2 uppercase">Dịch vụ</label>
-                            <select id="inp-type" class="w-full p-4 rounded-xl input-dark outline-none focus:ring-2 ring-blue-500/50">
-                                <option value="Trái Vĩnh Viễn">Trái Vĩnh Viễn (VV)</option>
-                                <option value="Game Pass">Mua Game Pass</option>
-                                <option value="Cày Thuê">Dịch Vụ Cày Thuê</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label class="block text-[10px] font-bold text-slate-500 mb-2 uppercase">Tên tài khoản</label>
-                            <input type="text" id="inp-user" class="w-full p-4 rounded-xl input-dark outline-none focus:ring-2 ring-blue-500/50" placeholder="Username">
-                        </div>
-                        <div>
-                            <label class="block text-[10px] font-bold text-slate-500 mb-2 uppercase">Mật khẩu</label>
-                            <input type="text" id="inp-pass" class="w-full p-4 rounded-xl input-dark outline-none focus:ring-2 ring-blue-500/50" placeholder="Password">
-                        </div>
-                    </div>
-                    <div>
-                        <label class="block text-[10px] font-bold text-slate-500 mb-2 uppercase">Giá tiền (VNĐ)</label>
-                        <input type="number" id="inp-price" class="w-full p-4 rounded-xl input-dark outline-none focus:ring-2 ring-emerald-500/50 text-emerald-400 font-bold" placeholder="50000">
-                    </div>
-                    <div>
-                        <label class="block text-[10px] font-bold text-slate-500 mb-2 uppercase">Ghi chú chi tiết</label>
-                        <textarea id="inp-note" rows="3" class="w-full p-4 rounded-xl input-dark outline-none focus:ring-2 ring-blue-500/50" placeholder="Tên trái, level hiện tại..."></textarea>
-                    </div>
+            <div class="flex gap-4">
+                <div class="glass-card px-4 py-2 flex items-center gap-2">
+                    <div class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
+                    <span class="text-sm font-medium">Hệ thống trực tuyến</span>
                 </div>
+            </div>
+        </header>
 
-                <button onclick="createOrder()" class="btn-action w-full mt-6 py-4 bg-blue-600 text-white font-black rounded-xl shadow-lg shadow-blue-500/20 uppercase text-xs tracking-widest">
-                    Gửi đơn hệ thống
-                </button>
+        <!-- Tab Navigation -->
+        <div class="flex bg-slate-800/50 p-1 rounded-xl mb-6 max-w-md">
+            <button id="btn-recharge" onclick="switchTab('recharge')" class="flex-1 py-2 rounded-lg text-sm font-bold transition-all tab-active">
+                <i class="fa-solid fa-money-bill-transfer mr-2"></i>Duyệt Nạp
+            </button>
+            <button id="btn-orders" onclick="switchTab('orders')" class="flex-1 py-2 rounded-lg text-sm font-bold transition-all text-slate-400">
+                <i class="fa-solid fa-gamepad mr-2"></i>Đơn Game
+            </button>
+        </div>
+
+        <!-- Section: Duyệt Nạp Tiền -->
+        <div id="sec-recharge" class="space-y-4">
+            <h2 class="text-xl font-bold flex items-center gap-2">
+                <span class="w-2 h-6 bg-indigo-500 rounded-full"></span>
+                Yêu cầu nạp tiền mới
+            </h2>
+            <div id="recharge-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <!-- Data will load here -->
             </div>
         </div>
 
-        <!-- TAB: DUYỆT ĐƠN -->
-        <div id="tab-content-admin" class="hidden space-y-4">
-            <div id="list-orders" class="space-y-4">
-                <div class="text-center py-20 text-slate-500 animate-pulse uppercase font-black text-[10px]">Đang kiểm tra đơn hàng...</div>
+        <!-- Section: Duyệt Đơn Game -->
+        <div id="sec-orders" class="hidden space-y-4">
+            <h2 class="text-xl font-bold flex items-center gap-2">
+                <span class="w-2 h-6 bg-sky-500 rounded-full"></span>
+                Đơn hàng Game đang chờ
+            </h2>
+            <div id="order-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <!-- Data will load here -->
             </div>
         </div>
+    </div>
 
-    </main>
-
-    <div id="toast" class="fixed bottom-10 left-1/2 -translate-x-1/2 px-6 py-3 rounded-xl text-[10px] font-black shadow-2xl opacity-0 transition-all duration-300 z-[100] border card-glass"></div>
+    <!-- Notification Toast -->
+    <div id="toast" class="fixed bottom-5 right-5 glass-card px-6 py-4 translate-y-20 opacity-0 transition-all duration-300 z-50">
+        <p id="toast-msg" class="font-bold"></p>
+    </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, collection, addDoc, onSnapshot, doc, deleteDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getFirestore, doc, updateDoc, getDoc, collection, onSnapshot, serverTimestamp, runTransaction, query, where } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         const firebaseConfig = JSON.parse(__firebase_config);
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'auto-clean-shop';
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'nghia-store-pro';
 
-        let user = null;
+        onAuthStateChanged(auth, (user) => {
+            if (!user) signInAnonymously(auth);
+            else initRealtimeData();
+        });
 
-        const init = async () => {
-            const res = await signInAnonymously(auth);
-            user = res.user;
-            loadData();
-        };
-
-        const loadData = () => {
-            if(!user) return;
-            const ref = collection(db, 'artifacts', appId, 'public', 'data', 'orders');
-            onSnapshot(ref, (snap) => {
-                const data = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-                data.sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0));
-                render(data);
-            });
-        };
-
-        window.createOrder = async () => {
-            const type = document.getElementById('inp-type').value;
-            const username = document.getElementById('inp-user').value.trim();
-            const password = document.getElementById('inp-pass').value.trim();
-            const price = document.getElementById('inp-price').value;
-            const note = document.getElementById('inp-note').value.trim();
-
-            if(!username || !password || !price) return showToast("Thiếu thông tin!", "error");
-
-            try {
-                await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'orders'), {
-                    type, username, password, price: parseInt(price), note,
-                    createdAt: serverTimestamp()
-                });
-                showToast("Đã gửi đơn!");
-                changeTab('admin');
-                document.getElementById('inp-user').value = "";
-                document.getElementById('inp-pass').value = "";
-                document.getElementById('inp-price').value = "";
-                document.getElementById('inp-note').value = "";
-            } catch (e) { showToast("Lỗi", "error"); }
-        };
-
-        // Hàm xử lý DUYỆT XONG LÀ XÓA
-        window.completeOrder = async (id) => {
-            try {
-                // Hiệu ứng xóa đơn ngay lập tức để tránh rối
-                const el = document.getElementById(`order-${id}`);
-                if(el) {
-                    el.style.opacity = '0';
-                    el.style.transform = 'translateX(50px)';
-                    setTimeout(() => el.remove(), 300);
-                }
+        function initRealtimeData() {
+            // Lắng nghe yêu cầu nạp tiền
+            const qRecharges = collection(db, 'artifacts', appId, 'public', 'data', 'recharges');
+            onSnapshot(qRecharges, (snap) => {
+                const container = document.getElementById('recharge-container');
+                const items = snap.docs.map(d => ({id: d.id, ...d.data()})).filter(i => i.status === 'pending');
                 
-                // Xóa khỏi Database
-                await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'orders', id));
-                showToast("Đã duyệt xong & xóa đơn!");
-            } catch (e) {
-                showToast("Lỗi khi xóa đơn", "error");
-            }
-        };
+                if (items.length === 0) {
+                    container.innerHTML = `<div class="col-span-full py-12 text-center text-slate-500">Không có yêu cầu nạp tiền nào.</div>`;
+                    return;
+                }
 
-        const render = (orders) => {
-            const container = document.getElementById('list-orders');
-            if(orders.length === 0) {
-                container.innerHTML = `
-                    <div class="py-20 flex flex-col items-center justify-center opacity-30">
-                        <svg class="w-16 h-16 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"></path></svg>
-                        <p class="text-xs font-black uppercase tracking-[0.2em]">Hết đơn hàng</p>
-                    </div>`;
-                return;
-            }
-
-            container.innerHTML = orders.map(o => `
-                <div id="order-${o.id}" class="card-glass p-5 rounded-3xl flex flex-col gap-4 border-l-4 border-l-blue-500 transition-all duration-300">
-                    <div class="flex justify-between items-start">
-                        <div>
-                            <span class="text-[9px] font-black bg-blue-500/20 text-blue-400 px-2 py-0.5 rounded border border-blue-500/20 uppercase tracking-tighter">${o.type}</span>
-                            <h3 class="text-lg font-black text-emerald-400 mt-1">${o.price.toLocaleString()}đ</h3>
+                container.innerHTML = items.map(item => `
+                    <div class="glass-card p-5 hover:bg-slate-800/80 transition-all group">
+                        <div class="flex justify-between items-start mb-3">
+                            <span class="text-[10px] bg-indigo-500/20 text-indigo-400 px-2 py-1 rounded font-bold uppercase tracking-widest">Nạp ATM/MOMO</span>
+                            <span class="status-badge pending-badge">Chờ duyệt</span>
                         </div>
-                        <button onclick="completeOrder('${o.id}')" class="btn-action bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-3 rounded-xl flex items-center gap-2 shadow-lg shadow-emerald-500/20">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
-                            <span class="text-[10px] font-black uppercase">Duyệt & Xóa</span>
+                        <p class="text-xs text-slate-400">Khách ID: <span class="text-slate-200 font-mono">${item.uid}</span></p>
+                        <div class="text-2xl font-black my-2 text-emerald-400">${item.amount.toLocaleString()}đ</div>
+                        <button onclick="approveRecharge('${item.id}', '${item.uid}', ${item.amount})" 
+                                class="w-full mt-4 bg-emerald-600 hover:bg-emerald-500 py-2 rounded-lg font-extrabold text-sm transition-all shadow-lg shadow-emerald-900/20">
+                            XÁC NHẬN CỘNG TIỀN
                         </button>
                     </div>
+                `).join('');
+            }, (error) => console.error(error));
 
-                    <div class="grid grid-cols-2 gap-3 bg-black/40 p-3 rounded-2xl border border-white/5">
-                        <div onclick="copyText('${o.username}')" class="cursor-pointer active:opacity-50">
-                            <p class="text-[8px] font-bold text-slate-500 uppercase mb-1">Tài khoản (Click để copy)</p>
-                            <p class="text-xs font-mono text-white truncate">${o.username}</p>
+            // Lắng nghe đơn đặt game
+            const qOrders = collection(db, 'artifacts', appId, 'public', 'data', 'orders');
+            onSnapshot(qOrders, (snap) => {
+                const container = document.getElementById('order-container');
+                const items = snap.docs.map(d => ({id: d.id, ...d.data()})).filter(i => i.status === 'pending');
+                
+                if (items.length === 0) {
+                    container.innerHTML = `<div class="col-span-full py-12 text-center text-slate-500">Không có đơn hàng game mới.</div>`;
+                    return;
+                }
+
+                container.innerHTML = items.map(item => `
+                    <div class="glass-card p-5 border-l-4 border-sky-500">
+                        <div class="flex justify-between items-start mb-4">
+                            <div>
+                                <h3 class="font-black text-sky-400 uppercase text-sm">${item.type}</h3>
+                                <p class="text-xl font-bold mt-1">${(item.price || 0).toLocaleString()}đ</p>
+                            </div>
+                            <span class="status-badge pending-badge">Đang xử lý</span>
                         </div>
-                        <div onclick="copyText('${o.password}')" class="cursor-pointer active:opacity-50 text-right">
-                            <p class="text-[8px] font-bold text-slate-500 uppercase mb-1">Mật khẩu</p>
-                            <p class="text-xs font-mono text-white truncate">${o.password}</p>
+                        
+                        <div class="space-y-2 mb-4">
+                            <div class="bg-black/40 p-2 rounded text-xs">
+                                <span class="text-slate-400">User:</span> <span class="text-white font-mono select-all">${item.acc}</span>
+                            </div>
+                            <div class="bg-black/40 p-2 rounded text-xs">
+                                <span class="text-slate-400">Pass:</span> <span class="text-white font-mono select-all">${item.pass}</span>
+                            </div>
                         </div>
+
+                        <button onclick="approveOrder('${item.id}')" 
+                                class="w-full bg-sky-600 hover:bg-sky-500 py-2 rounded-lg font-extrabold text-sm transition-all">
+                            HOÀN THÀNH ĐƠN
+                        </button>
                     </div>
+                `).join('');
+            }, (error) => console.error(error));
+        }
 
-                    ${o.note ? `
-                    <div class="p-3 bg-white/5 rounded-xl border border-white/5">
-                        <p class="text-[8px] font-bold text-slate-500 uppercase mb-1">Yêu cầu khách</p>
-                        <p class="text-[11px] text-slate-300">${o.note}</p>
-                    </div>` : ''}
-                </div>
-            `).join('');
-        };
+        // Xử lý Duyệt Nạp Tiền
+        window.approveRecharge = async (docId, uid, amount) => {
+            try {
+                // Đường dẫn đến ví tiền khách hàng
+                const userRef = doc(db, 'artifacts', appId, 'users', uid, 'profile', 'data');
+                const rechargeRef = doc(db, 'artifacts', appId, 'public', 'data', 'recharges', docId);
 
-        window.copyText = (text) => {
-            const el = document.createElement('textarea');
-            el.value = text;
-            document.body.appendChild(el);
-            el.select();
-            document.execCommand('copy');
-            document.body.removeChild(el);
-            showToast("Đã copy vào bộ nhớ!");
-        };
+                await runTransaction(db, async (transaction) => {
+                    const userSnap = await transaction.get(userRef);
+                    let newBalance = amount;
+                    
+                    if (userSnap.exists()) {
+                        newBalance = (userSnap.data().balance || 0) + amount;
+                    }
 
-        window.changeTab = (tab) => {
-            const btnO = document.getElementById('btn-order');
-            const btnA = document.getElementById('btn-admin');
-            const contO = document.getElementById('tab-content-order');
-            const contA = document.getElementById('tab-content-admin');
+                    // 1. Cập nhật số dư cho khách
+                    transaction.set(userRef, { balance: newBalance }, { merge: true });
+                    
+                    // 2. Cập nhật trạng thái đơn nạp thành hoàn thành
+                    transaction.update(rechargeRef, { 
+                        status: 'completed',
+                        processedAt: serverTimestamp() 
+                    });
+                });
 
-            if(tab === 'order') {
-                btnO.classList.add('bg-blue-600', 'text-white');
-                btnO.classList.remove('text-slate-400');
-                btnA.classList.remove('bg-blue-600', 'text-white');
-                btnA.classList.add('text-slate-400');
-                contO.classList.remove('hidden');
-                contA.classList.add('hidden');
-            } else {
-                btnA.classList.add('bg-blue-600', 'text-white');
-                btnA.classList.remove('text-slate-400');
-                btnO.classList.remove('bg-blue-600', 'text-white');
-                btnO.classList.add('text-slate-400');
-                contA.classList.remove('hidden');
-                contO.classList.add('hidden');
+                showToast("Đã cộng " + amount.toLocaleString() + "đ cho khách!", "success");
+            } catch (err) {
+                console.error(err);
+                showToast("Lỗi khi duyệt nạp: " + err.message, "error");
             }
         };
 
-        function showToast(msg, type = "success") {
-            const t = document.getElementById('toast');
-            t.textContent = msg;
-            t.className = `fixed bottom-10 left-1/2 -translate-x-1/2 px-6 py-3 rounded-xl text-[10px] font-black shadow-2xl transition-all duration-300 z-[100] border ${type === 'success' ? 'bg-emerald-500/20 border-emerald-500/50 text-emerald-400' : 'bg-red-500/20 border-red-500/50 text-red-400'}`;
-            t.classList.add('opacity-100', 'bottom-12');
-            setTimeout(() => t.classList.remove('opacity-100', 'bottom-12'), 2000);
-        }
+        // Xử lý Duyệt Đơn Game
+        window.approveOrder = async (docId) => {
+            try {
+                const orderRef = doc(db, 'artifacts', appId, 'public', 'data', 'orders', docId);
+                await updateDoc(orderRef, {
+                    status: 'completed',
+                    completedAt: serverTimestamp()
+                });
+                showToast("Đã hoàn thành đơn game!", "success");
+            } catch (err) {
+                showToast("Lỗi khi duyệt đơn: " + err.message, "error");
+            }
+        };
 
-        init();
+        // UI Helpers
+        window.switchTab = (type) => {
+            const isRecharge = type === 'recharge';
+            document.getElementById('sec-recharge').classList.toggle('hidden', !isRecharge);
+            document.getElementById('sec-orders').classList.toggle('hidden', isRecharge);
+            
+            document.getElementById('btn-recharge').classList.toggle('tab-active', isRecharge);
+            document.getElementById('btn-recharge').classList.toggle('text-slate-400', !isRecharge);
+            
+            document.getElementById('btn-orders').classList.toggle('tab-active', !isRecharge);
+            document.getElementById('btn-orders').classList.toggle('text-slate-400', isRecharge);
+        };
+
+        function showToast(msg, type) {
+            const toast = document.getElementById('toast');
+            const toastMsg = document.getElementById('toast-msg');
+            toastMsg.textContent = msg;
+            toastMsg.className = type === 'success' ? 'text-emerald-400 font-bold' : 'text-red-400 font-bold';
+            
+            toast.classList.remove('translate-y-20', 'opacity-0');
+            setTimeout(() => {
+                toast.classList.add('translate-y-20', 'opacity-0');
+            }, 3000);
+        }
     </script>
 </body>
 </html>
