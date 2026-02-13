@@ -3,273 +3,245 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nghĩa Shop - Quản Lý Đơn Hàng</title>
+    <title>Hệ Thống Duyệt Đơn Gọn Gàng</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Inter', sans-serif; }
-        .glass { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); }
-        .btn-transition { transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); }
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap');
+        body { font-family: 'Inter', sans-serif; background-color: #020617; color: #f8fafc; }
+        .card-glass { background: rgba(30, 41, 59, 0.5); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.08); }
+        .input-dark { background: rgba(15, 23, 42, 0.9); border: 1px solid rgba(255, 255, 255, 0.1); color: white; }
+        .btn-action { transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); }
+        .btn-action:active { transform: scale(0.95); }
     </style>
 </head>
-<body class="bg-slate-50 text-slate-900 min-h-screen">
+<body class="min-h-screen pb-10">
 
-    <!-- Header -->
-    <header class="sticky top-0 z-50 border-b border-slate-200 glass px-4 py-3">
-        <div class="max-w-5xl mx-auto flex justify-between items-center">
-            <div class="flex items-center gap-2">
-                <div class="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center text-white shadow-lg shadow-blue-200">
-                    <span class="font-black text-xl">N</span>
-                </div>
-                <h1 class="font-extrabold text-xl tracking-tight hidden sm:block">NGHĨA SHOP</h1>
+    <header class="p-5 border-b border-white/5 flex justify-between items-center sticky top-0 bg-[#020617]/80 backdrop-blur-xl z-50">
+        <div class="flex items-center gap-3">
+            <div class="w-10 h-10 bg-blue-600 rounded-2xl flex items-center justify-center shadow-lg shadow-blue-500/20">
+                <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
             </div>
-            
-            <div class="flex bg-slate-100 p-1 rounded-xl" id="viewToggle">
-                <button onclick="switchView('client')" id="btnClient" class="px-4 py-2 rounded-lg text-sm font-bold btn-transition bg-white shadow-sm text-blue-600">Khách Hàng</button>
-                <button onclick="switchView('admin')" id="btnAdmin" class="px-4 py-2 rounded-lg text-sm font-bold btn-transition text-slate-500">Quản Trị</button>
+            <div>
+                <h1 class="text-lg font-black uppercase tracking-tight">Game Manager</h1>
+                <p class="text-[10px] font-bold text-emerald-500 uppercase">Hệ thống duyệt tự động xóa</p>
             </div>
+        </div>
+        <div class="flex bg-slate-900 p-1 rounded-xl border border-white/5">
+            <button onclick="changeTab('order')" id="btn-order" class="px-4 py-2 rounded-lg text-[10px] font-black transition-all bg-blue-600 text-white">ĐẶT ĐƠN</button>
+            <button onclick="changeTab('admin')" id="btn-admin" class="px-4 py-2 rounded-lg text-[10px] font-black transition-all text-slate-400">DUYỆT ĐƠN</button>
         </div>
     </header>
 
-    <main class="max-w-5xl mx-auto p-4 md:p-8">
-        
-        <!-- View: Khách Hàng -->
-        <section id="clientView" class="block">
-            <div class="max-w-md mx-auto">
-                <div class="bg-white p-6 rounded-[2rem] shadow-sm border border-slate-200 mb-6">
-                    <h2 class="text-2xl font-black mb-6 flex items-center gap-2">
-                        <span class="w-2 h-8 bg-blue-600 rounded-full"></span>
-                        BÁO ĐƠN MỚI
-                    </h2>
-                    <div class="space-y-4">
-                        <div>
-                            <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1 ml-1">Tên của bạn</label>
-                            <input type="text" id="custName" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none" placeholder="Nhập tên khách hàng...">
+    <main class="max-w-3xl mx-auto p-4 mt-4">
+
+        <!-- TAB: ĐẶT ĐƠN -->
+        <div id="tab-content-order" class="space-y-4">
+            <div class="card-glass p-6 rounded-[2rem]">
+                <h2 class="text-sm font-black mb-6 flex items-center gap-2 opacity-50 uppercase tracking-widest">
+                    Thông tin khách hàng
+                </h2>
+
+                <div class="grid grid-cols-1 gap-4">
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="col-span-2">
+                            <label class="block text-[10px] font-bold text-slate-500 mb-2 uppercase">Dịch vụ</label>
+                            <select id="inp-type" class="w-full p-4 rounded-xl input-dark outline-none focus:ring-2 ring-blue-500/50">
+                                <option value="Trái Vĩnh Viễn">Trái Vĩnh Viễn (VV)</option>
+                                <option value="Game Pass">Mua Game Pass</option>
+                                <option value="Cày Thuê">Dịch Vụ Cày Thuê</option>
+                            </select>
                         </div>
                         <div>
-                            <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1 ml-1">Số tiền đã bank (VNĐ)</label>
-                            <input type="number" id="custAmount" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none font-bold text-blue-600" placeholder="0">
+                            <label class="block text-[10px] font-bold text-slate-500 mb-2 uppercase">Tên tài khoản</label>
+                            <input type="text" id="inp-user" class="w-full p-4 rounded-xl input-dark outline-none focus:ring-2 ring-blue-500/50" placeholder="Username">
                         </div>
                         <div>
-                            <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1 ml-1">Ghi chú công việc</label>
-                            <textarea id="custNote" rows="3" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none" placeholder="Ví dụ: Nạp 100k xu vào ID: 123456"></textarea>
+                            <label class="block text-[10px] font-bold text-slate-500 mb-2 uppercase">Mật khẩu</label>
+                            <input type="text" id="inp-pass" class="w-full p-4 rounded-xl input-dark outline-none focus:ring-2 ring-blue-500/50" placeholder="Password">
                         </div>
-                        <button onclick="submitOrder()" class="w-full bg-blue-600 text-white font-black py-4 rounded-2xl shadow-xl shadow-blue-100 hover:bg-blue-700 active:scale-[0.98] btn-transition uppercase tracking-wider">
-                            Gửi yêu cầu tới shop
-                        </button>
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-500 mb-2 uppercase">Giá tiền (VNĐ)</label>
+                        <input type="number" id="inp-price" class="w-full p-4 rounded-xl input-dark outline-none focus:ring-2 ring-emerald-500/50 text-emerald-400 font-bold" placeholder="50000">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-500 mb-2 uppercase">Ghi chú chi tiết</label>
+                        <textarea id="inp-note" rows="3" class="w-full p-4 rounded-xl input-dark outline-none focus:ring-2 ring-blue-500/50" placeholder="Tên trái, level hiện tại..."></textarea>
                     </div>
                 </div>
-            </div>
-        </section>
 
-        <!-- View: Admin -->
-        <section id="adminView" class="hidden space-y-6">
-            <div class="flex justify-between items-center">
-                <h2 class="text-3xl font-black italic">BẢNG ĐIỀU KHIỂN</h2>
-                <div class="text-right">
-                    <div class="text-[10px] font-black text-slate-400 uppercase">Trạng thái</div>
-                    <div class="text-emerald-500 font-bold flex items-center gap-1 justify-end">
-                        <span class="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></span> Trực tuyến
-                    </div>
-                </div>
+                <button onclick="createOrder()" class="btn-action w-full mt-6 py-4 bg-blue-600 text-white font-black rounded-xl shadow-lg shadow-blue-500/20 uppercase text-xs tracking-widest">
+                    Gửi đơn hệ thống
+                </button>
             </div>
+        </div>
 
-            <div id="orderList" class="grid gap-4">
-                <!-- Đơn hàng sẽ được render ở đây -->
-                <div class="bg-white p-12 text-center rounded-3xl border-2 border-dashed border-slate-200 text-slate-400 font-medium">
-                    Đang tải danh sách đơn hàng...
-                </div>
+        <!-- TAB: DUYỆT ĐƠN -->
+        <div id="tab-content-admin" class="hidden space-y-4">
+            <div id="list-orders" class="space-y-4">
+                <div class="text-center py-20 text-slate-500 animate-pulse uppercase font-black text-[10px]">Đang kiểm tra đơn hàng...</div>
             </div>
-        </section>
+        </div>
 
     </main>
 
-    <!-- Notification Toast -->
-    <div id="toast" class="fixed bottom-8 left-1/2 -translate-x-1/2 px-6 py-3 rounded-full bg-slate-900 text-white font-bold text-sm shadow-2xl opacity-0 pointer-events-none transition-all duration-300 z-[100]"></div>
+    <div id="toast" class="fixed bottom-10 left-1/2 -translate-x-1/2 px-6 py-3 rounded-xl text-[10px] font-black shadow-2xl opacity-0 transition-all duration-300 z-[100] border card-glass"></div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, collection, addDoc, onSnapshot, doc, updateDoc, deleteDoc, serverTimestamp, query } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, onSnapshot, doc, deleteDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        // Cấu hình Firebase
         const firebaseConfig = JSON.parse(__firebase_config);
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'nghia-shop-manager';
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'auto-clean-shop';
 
-        let currentUser = null;
+        let user = null;
 
-        // Khởi tạo Auth
         const init = async () => {
-            try {
-                const user = await signInAnonymously(auth);
-                currentUser = user.user;
-                startListener();
-            } catch (error) {
-                console.error("Auth Error", error);
-                showToast("Không thể kết nối máy chủ", "error");
-            }
+            const res = await signInAnonymously(auth);
+            user = res.user;
+            loadData();
         };
 
-        // Lắng nghe dữ liệu
-        const startListener = () => {
-            if (!currentUser) return;
-            const q = collection(db, 'artifacts', appId, 'public', 'data', 'orders');
-            onSnapshot(q, (snapshot) => {
-                const orders = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-                // Sắp xếp mới nhất lên đầu
-                orders.sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0));
-                renderOrders(orders);
-            }, (err) => console.error("Snapshot error", err));
+        const loadData = () => {
+            if(!user) return;
+            const ref = collection(db, 'artifacts', appId, 'public', 'data', 'orders');
+            onSnapshot(ref, (snap) => {
+                const data = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+                data.sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0));
+                render(data);
+            });
         };
 
-        // Chuyển chế độ xem
-        window.switchView = (view) => {
-            const clientV = document.getElementById('clientView');
-            const adminV = document.getElementById('adminView');
-            const btnC = document.getElementById('btnClient');
-            const btnA = document.getElementById('btnAdmin');
+        window.createOrder = async () => {
+            const type = document.getElementById('inp-type').value;
+            const username = document.getElementById('inp-user').value.trim();
+            const password = document.getElementById('inp-pass').value.trim();
+            const price = document.getElementById('inp-price').value;
+            const note = document.getElementById('inp-note').value.trim();
 
-            if (view === 'client') {
-                clientV.classList.remove('hidden');
-                adminV.classList.add('hidden');
-                btnC.className = "px-4 py-2 rounded-lg text-sm font-bold btn-transition bg-white shadow-sm text-blue-600";
-                btnA.className = "px-4 py-2 rounded-lg text-sm font-bold btn-transition text-slate-500";
-            } else {
-                clientV.classList.add('hidden');
-                adminV.classList.remove('hidden');
-                btnA.className = "px-4 py-2 rounded-lg text-sm font-bold btn-transition bg-white shadow-sm text-blue-600";
-                btnC.className = "px-4 py-2 rounded-lg text-sm font-bold btn-transition text-slate-500";
-            }
-        };
-
-        // Gửi đơn (Khách)
-        window.submitOrder = async () => {
-            const name = document.getElementById('custName').value.trim();
-            const amount = document.getElementById('custAmount').value;
-            const note = document.getElementById('custNote').value.trim();
-
-            if (!name || !amount) {
-                showToast("Thiếu tên hoặc số tiền!", "error");
-                return;
-            }
+            if(!username || !password || !price) return showToast("Thiếu thông tin!", "error");
 
             try {
                 await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'orders'), {
-                    customer: name,
-                    amount: parseInt(amount),
-                    note: note,
-                    bankStatus: 'pending',
-                    jobStatus: 'pending',
+                    type, username, password, price: parseInt(price), note,
                     createdAt: serverTimestamp()
                 });
+                showToast("Đã gửi đơn!");
+                changeTab('admin');
+                document.getElementById('inp-user').value = "";
+                document.getElementById('inp-pass').value = "";
+                document.getElementById('inp-price').value = "";
+                document.getElementById('inp-note').value = "";
+            } catch (e) { showToast("Lỗi", "error"); }
+        };
+
+        // Hàm xử lý DUYỆT XONG LÀ XÓA
+        window.completeOrder = async (id) => {
+            try {
+                // Hiệu ứng xóa đơn ngay lập tức để tránh rối
+                const el = document.getElementById(`order-${id}`);
+                if(el) {
+                    el.style.opacity = '0';
+                    el.style.transform = 'translateX(50px)';
+                    setTimeout(() => el.remove(), 300);
+                }
                 
-                document.getElementById('custName').value = "";
-                document.getElementById('custAmount').value = "";
-                document.getElementById('custNote').value = "";
-                showToast("Gửi đơn thành công! Vui lòng chờ shop duyệt.");
-            } catch (e) {
-                showToast("Lỗi gửi đơn", "error");
-            }
-        };
-
-        // Cập nhật trạng thái (Admin)
-        window.updateStatus = async (id, field, value) => {
-            try {
-                const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'orders', id);
-                await updateDoc(docRef, { [field]: value });
-                showToast("Đã cập nhật trạng thái");
-            } catch (e) {
-                showToast("Lỗi cập nhật", "error");
-            }
-        };
-
-        // Xóa đơn
-        window.deleteOrder = async (id) => {
-            if (!confirm("Xóa đơn này khỏi danh sách?")) return;
-            try {
+                // Xóa khỏi Database
                 await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'orders', id));
-                showToast("Đã xóa đơn");
+                showToast("Đã duyệt xong & xóa đơn!");
             } catch (e) {
-                showToast("Lỗi xóa đơn", "error");
+                showToast("Lỗi khi xóa đơn", "error");
             }
         };
 
-        // Hiển thị danh sách đơn (Admin)
-        const renderOrders = (orders) => {
-            const container = document.getElementById('orderList');
-            if (orders.length === 0) {
-                container.innerHTML = `<div class="py-20 text-center text-slate-400 font-medium">Hiện tại không có đơn hàng nào.</div>`;
+        const render = (orders) => {
+            const container = document.getElementById('list-orders');
+            if(orders.length === 0) {
+                container.innerHTML = `
+                    <div class="py-20 flex flex-col items-center justify-center opacity-30">
+                        <svg class="w-16 h-16 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"></path></svg>
+                        <p class="text-xs font-black uppercase tracking-[0.2em]">Hết đơn hàng</p>
+                    </div>`;
                 return;
             }
 
-            container.innerHTML = orders.map(order => `
-                <div class="bg-white p-5 rounded-[2rem] border border-slate-200 shadow-sm flex flex-col md:flex-row gap-5 items-center">
-                    <div class="flex-1 w-full">
-                        <div class="flex items-center gap-2 mb-1">
-                            <span class="font-extrabold text-lg">${order.customer}</span>
-                            <span class="text-[10px] bg-slate-100 px-2 py-0.5 rounded text-slate-500 font-bold uppercase">
-                                ${order.createdAt ? new Date(order.createdAt.seconds * 1000).toLocaleTimeString('vi-VN') : 'Đang gửi...'}
-                            </span>
+            container.innerHTML = orders.map(o => `
+                <div id="order-${o.id}" class="card-glass p-5 rounded-3xl flex flex-col gap-4 border-l-4 border-l-blue-500 transition-all duration-300">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <span class="text-[9px] font-black bg-blue-500/20 text-blue-400 px-2 py-0.5 rounded border border-blue-500/20 uppercase tracking-tighter">${o.type}</span>
+                            <h3 class="text-lg font-black text-emerald-400 mt-1">${o.price.toLocaleString()}đ</h3>
                         </div>
-                        <div class="text-2xl font-black text-blue-600">${order.amount.toLocaleString()}đ</div>
-                        ${order.note ? `<div class="mt-2 text-sm text-slate-500 bg-slate-50 p-3 rounded-xl border border-slate-100 italic">"${order.note}"</div>` : ''}
+                        <button onclick="completeOrder('${o.id}')" class="btn-action bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-3 rounded-xl flex items-center gap-2 shadow-lg shadow-emerald-500/20">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                            <span class="text-[10px] font-black uppercase">Duyệt & Xóa</span>
+                        </button>
                     </div>
 
-                    <!-- Nút Duyệt Bank -->
-                    <div class="flex flex-col items-center gap-2 min-w-[150px] w-full md:w-auto p-3 bg-slate-50 rounded-2xl">
-                        <span class="text-[9px] font-black text-slate-400 uppercase tracking-widest">1. DUYỆT BANK</span>
-                        ${order.bankStatus === 'pending' ? `
-                            <button onclick="updateStatus('${order.id}', 'bankStatus', 'verified')" class="w-full bg-orange-500 hover:bg-orange-600 text-white py-2 px-4 rounded-xl text-xs font-black shadow-lg shadow-orange-100 btn-transition">
-                                CHƯA NHẬN TIỀN
-                            </button>
-                        ` : `
-                            <div class="flex items-center gap-1 text-emerald-600 font-black text-xs py-2">
-                                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"></path></svg>
-                                ĐÃ NHẬN TIỀN
-                            </div>
-                        `}
+                    <div class="grid grid-cols-2 gap-3 bg-black/40 p-3 rounded-2xl border border-white/5">
+                        <div onclick="copyText('${o.username}')" class="cursor-pointer active:opacity-50">
+                            <p class="text-[8px] font-bold text-slate-500 uppercase mb-1">Tài khoản (Click để copy)</p>
+                            <p class="text-xs font-mono text-white truncate">${o.username}</p>
+                        </div>
+                        <div onclick="copyText('${o.password}')" class="cursor-pointer active:opacity-50 text-right">
+                            <p class="text-[8px] font-bold text-slate-500 uppercase mb-1">Mật khẩu</p>
+                            <p class="text-xs font-mono text-white truncate">${o.password}</p>
+                        </div>
                     </div>
 
-                    <!-- Nút Duyệt Đơn -->
-                    <div class="flex flex-col items-center gap-2 min-w-[150px] w-full md:w-auto p-3 ${order.bankStatus === 'verified' ? 'bg-blue-50' : 'bg-slate-100 opacity-50'} rounded-2xl">
-                        <span class="text-[9px] font-black text-slate-400 uppercase tracking-widest">2. TRẠNG THÁI VIỆC</span>
-                        ${order.jobStatus === 'pending' ? `
-                            <button 
-                                onclick="updateStatus('${order.id}', 'jobStatus', 'completed')" 
-                                ${order.bankStatus === 'pending' ? 'disabled' : ''}
-                                class="w-full ${order.bankStatus === 'verified' ? 'bg-blue-600 hover:bg-blue-700' : 'bg-slate-400 cursor-not-allowed'} text-white py-2 px-4 rounded-xl text-xs font-black shadow-lg shadow-blue-100 btn-transition"
-                            >
-                                CHƯA XONG
-                            </button>
-                        ` : `
-                            <div class="flex items-center gap-1 text-blue-600 font-black text-xs py-2">
-                                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"></path></svg>
-                                ĐÃ HOÀN TẤT
-                            </div>
-                        `}
-                    </div>
-
-                    <!-- Nút Xóa -->
-                    <button onclick="deleteOrder('${order.id}')" class="p-2 text-slate-300 hover:text-red-500 btn-transition">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
-                    </button>
+                    ${o.note ? `
+                    <div class="p-3 bg-white/5 rounded-xl border border-white/5">
+                        <p class="text-[8px] font-bold text-slate-500 uppercase mb-1">Yêu cầu khách</p>
+                        <p class="text-[11px] text-slate-300">${o.note}</p>
+                    </div>` : ''}
                 </div>
             `).join('');
         };
 
-        const showToast = (msg, type = "success") => {
+        window.copyText = (text) => {
+            const el = document.createElement('textarea');
+            el.value = text;
+            document.body.appendChild(el);
+            el.select();
+            document.execCommand('copy');
+            document.body.removeChild(el);
+            showToast("Đã copy vào bộ nhớ!");
+        };
+
+        window.changeTab = (tab) => {
+            const btnO = document.getElementById('btn-order');
+            const btnA = document.getElementById('btn-admin');
+            const contO = document.getElementById('tab-content-order');
+            const contA = document.getElementById('tab-content-admin');
+
+            if(tab === 'order') {
+                btnO.classList.add('bg-blue-600', 'text-white');
+                btnO.classList.remove('text-slate-400');
+                btnA.classList.remove('bg-blue-600', 'text-white');
+                btnA.classList.add('text-slate-400');
+                contO.classList.remove('hidden');
+                contA.classList.add('hidden');
+            } else {
+                btnA.classList.add('bg-blue-600', 'text-white');
+                btnA.classList.remove('text-slate-400');
+                btnO.classList.remove('bg-blue-600', 'text-white');
+                btnO.classList.add('text-slate-400');
+                contA.classList.remove('hidden');
+                contO.classList.add('hidden');
+            }
+        };
+
+        function showToast(msg, type = "success") {
             const t = document.getElementById('toast');
             t.textContent = msg;
-            t.classList.remove('opacity-0', 'translate-y-4');
-            t.classList.add('opacity-100', '-translate-y-4');
-            setTimeout(() => {
-                t.classList.add('opacity-0', 'translate-y-4');
-                t.classList.remove('opacity-100', '-translate-y-4');
-            }, 3000);
-        };
+            t.className = `fixed bottom-10 left-1/2 -translate-x-1/2 px-6 py-3 rounded-xl text-[10px] font-black shadow-2xl transition-all duration-300 z-[100] border ${type === 'success' ? 'bg-emerald-500/20 border-emerald-500/50 text-emerald-400' : 'bg-red-500/20 border-red-500/50 text-red-400'}`;
+            t.classList.add('opacity-100', 'bottom-12');
+            setTimeout(() => t.classList.remove('opacity-100', 'bottom-12'), 2000);
+        }
 
         init();
     </script>
