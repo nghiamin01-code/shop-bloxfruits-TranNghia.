@@ -195,16 +195,12 @@
             <h2 id="buy-title" class="text-yellow-400 font-black mb-6 uppercase text-center text-xl tracking-tighter"></h2>
             <div class="space-y-4">
                 <div id="field-tk">
-                    <p class="text-[9px] mb-2 font-bold opacity-40 uppercase ml-1">Tài khoản Roblox:</p>
+                    <p class="text-[9px] mb-2 font-bold opacity-40 uppercase ml-1">Tài khoản Roblox (ID/Tên):</p>
                     <input type="text" id="buy-tk" class="w-full p-4 rounded-xl text-sm" placeholder="Nhập ID/Username">
                 </div>
                 <div id="field-mk">
                     <p class="text-[9px] mb-2 font-bold opacity-40 uppercase ml-1">Mật khẩu:</p>
                     <input type="password" id="buy-mk" class="w-full p-4 rounded-xl text-sm" placeholder="Nhập mật khẩu">
-                </div>
-                <div id="field-ingame" class="hidden">
-                    <p class="text-[9px] mb-2 font-bold opacity-40 uppercase ml-1">Tên nhân vật (Display Name):</p>
-                    <input type="text" id="buy-ingame" class="w-full p-4 rounded-xl text-sm" placeholder="Nhập để Admin Gift">
                 </div>
             </div>
             <div class="flex gap-3 mt-8">
@@ -215,7 +211,7 @@
     </div>
 
     <script>
-        const WEBHOOK_URL = "https://discord.com/api/webhooks/1474304515795583007/tP8yJvoHrqIvRf70ZSmNgOJ-02qq1_SnZrAKyYEgjvuQX3QcoejSuHO303AaCOu_DSs0";
+        const WEBHOOK_URL = "https://discord.com/api/webhooks/1474315828412547317/nq5IIALMdDRy0VDy2_heFxlHyGcwOgkdu3Xp3IxzfLbTyfsBkmdvEVcLMaEA015hOV8O";
         const firebaseConfig = { databaseURL: "https://shop-blox-fruit-trannghia-default-rtdb.firebaseio.com/" };
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
@@ -226,7 +222,7 @@
         let currentItem = null;
 
         const items = { 
-fruit: [
+ fruit: [
     {n:"Kitsune VV", p:690000, img:"https://i.postimg.cc/5yHRjSfH/Anh-chup-man-hinh-2026-01-28-113329.png"},
     {n:"Dragon VV", p:750000, img:"https://i.postimg.cc/CLB3KS1g/Anh-chup-man-hinh-2026-01-28-113307.png"},
     {n:"Control VV", p:690000, img:"https://i.postimg.cc/qvnH14V7/Anh-chup-man-hinh-2026-01-28-113219.png"},
@@ -262,7 +258,7 @@ fruit: [
     {n:"Flame VV", p:100000, img:"https://i.postimg.cc/8zyXdYst/Anh-chup-man-hinh-2026-01-28-113555.png"},
     {n:"Blade VV", p:20000, img:"https://i.postimg.cc/BvXYmC1p/Anh-chup-man-hinh-2026-01-28-113602.png"}
 ],
-             gp: [                                                                           
+            gp: [                                                                                                   
                 {n:"Fruit Notifier", p:370000, img:"https://i.postimg.cc/VNdGKFbx/Anh-chup-man-hinh-2026-01-28-113608.png"},
                 {n:"Dark Blade", p:200000, img:"https://i.postimg.cc/d0LH59yQ/Anh-chup-man-hinh-2026-01-28-113612.png"},
                 {n:"X2 Mastery VV", p:54000, img:"https://i.postimg.cc/44z82ym7/Anh-chup-man-hinh-2026-01-28-113623.png"},
@@ -271,8 +267,7 @@ fruit: [
                 {n:"X2 Drop VV", p:40000, img:"https://i.postimg.cc/PrTSgHwD/Anh-chup-man-hinh-2026-01-28-113631.png"},
                 {n:"Fast Boat VV", p:40000, img:"https://i.postimg.cc/HkLBLt3Y/Anh-chup-man-hinh-2026-01-28-113635.png"}
             ],
-
-           ct: [
+            ct: [
                 {n:"Cày Thuê Level 1-2800", p:20000},
                 {n:"Lấy Võ V2 (Tặng Full Chiêu)", p:30000},
                 {n:"Thức Tỉnh Trái V2 (Lửa-Chấn Động)", p:20000},
@@ -342,10 +337,23 @@ fruit: [
             currentItem = { name, price, type };
             document.getElementById('buy-title').innerText = name;
             
-            // Cày thuê, Mua trái VV, Gamepass đều cần TK/MK
-            document.getElementById('field-tk').classList.remove('hidden');
-            document.getElementById('field-mk').classList.remove('hidden');
-            document.getElementById('field-ingame').classList.add('hidden');
+            const mkField = document.getElementById('field-mk');
+            const tkInput = document.getElementById('buy-tk');
+            const mkInput = document.getElementById('buy-mk');
+            
+            // Xóa dữ liệu cũ
+            tkInput.value = "";
+            mkInput.value = "";
+
+            if(type === 'ct') {
+                // Nếu là cày thuê thì hiện mật khẩu
+                mkField.classList.remove('hidden');
+                tkInput.placeholder = "Nhập tài khoản Roblox";
+            } else {
+                // Nếu là Trái VV hoặc Gamepass thì ẩn mật khẩu
+                mkField.classList.add('hidden');
+                tkInput.placeholder = "Nhập tên tài khoản (Ingame)";
+            }
             
             document.getElementById('buy-modal').classList.add('active');
         }
@@ -357,11 +365,15 @@ fruit: [
             const bal = snap.val().balance;
             if(bal < currentItem.price) return alert("Số dư không đủ!");
             
-            const tk = document.getElementById('buy-tk').value;
-            const mk = document.getElementById('buy-mk').value;
-            if(!tk || !mk) return alert("Vui lòng nhập tài khoản và mật khẩu!");
+            const tk = document.getElementById('buy-tk').value.trim();
+            const mk = document.getElementById('buy-mk').value.trim();
+            
+            if(!tk) return alert("Vui lòng nhập tên tài khoản!");
+            if(currentItem.type === 'ct' && !mk) return alert("Dịch vụ cày thuê bắt buộc phải có mật khẩu!");
 
-            const info = `TK: ${tk} | MK: ${mk}`;
+            const finalMk = currentItem.type === 'ct' ? mk : "KONG CAN MK";
+            const info = `Loại: ${currentItem.type.toUpperCase()} | TK: ${tk} | MK: ${finalMk}`;
+
             await db.ref('users/'+currentUser.user).update({ balance: bal - currentItem.price });
             const orderId = Date.now();
             await db.ref('orders/'+orderId).set({
@@ -371,6 +383,24 @@ fruit: [
                 status: 'Chờ xử lý',
                 time: new Date().toLocaleString()
             });
+
+            // Gửi webhook báo đơn hàng
+            fetch(WEBHOOK_URL, {
+                method: "POST",
+                headers: {"Content-Type":"application/json"},
+                body: JSON.stringify({
+                    embeds: [{
+                        title: "🛒 ĐƠN HÀNG MỚI: " + currentItem.name,
+                        color: currentItem.type === 'ct' ? 16711680 : 65280,
+                        fields: [
+                            {name: "Người mua", value: currentUser.user, inline: true},
+                            {name: "Giá", value: currentItem.price.toLocaleString() + "đ", inline: true},
+                            {name: "Thông tin", value: info}
+                        ]
+                    }]
+                })
+            });
+
             alert("Đặt hàng thành công!");
             location.reload();
         }
