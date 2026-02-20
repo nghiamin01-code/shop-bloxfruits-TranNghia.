@@ -1,86 +1,54 @@
 <?php
 /**
- * FILE: api/napthe.php
- * Chức năng: Nhận dữ liệu từ nap_the.html và đẩy lên hệ thống Gạch Thẻ
+ * Tệp xử lý gửi thẻ nạp lên API gạch thẻ
+ * Bạn cần thay đổi PARTNER_ID và PARTNER_KEY theo nhà cung cấp của bạn.
  */
 
-// Cho phép các request từ bên ngoài (CORS)
-header("Access-Control-Allow-Origin: *");
-header("Content-Type: application/json; charset=UTF-8");
-header("Access-Control-Allow-Methods: POST");
-header("Access-Control-Allow-Headers: Content-Type, Access-Control-Allow-Headers, Authorization, X-Requested-With");
+// Cấu hình kết nối API (Thay đổi thông tin này)
+$partner_id = '3953165673'; 
+$partner_key = '9f26460000efd5a619e809a852225b98';
+$api_url = 'https://thesieure.com/chargingws/v2'; // Ví dụ URL API của TheSieuRe
 
-// 1. Cấu hình API của trùm nạp thẻ (Thay thông tin của bạn vào đây)
-$api_url = "https://thesieure.com/chargingws/v2"; // Ví dụ URL API của TheSieuRe
-$partner_id = "9565963734"; // Partner ID của bạn
-$partner_key = "80df3668af04f2a85e1befc277896513"; // Partner Key của bạn
+if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+    $telco = $_POST['telco'];     // Nhà mạng (VIETTEL, VINAPHONE, MOBIFONE...)
+    $amount = $_POST['amount'];   // Mệnh giá (10000, 20000...)
+    $serial = $_POST['serial'];   // Số seri thẻ
+    $pin = $_POST['pin'];         // Mã thẻ
+    $request_id = rand(100000, 999999) . time(); // Mã giao dịch duy nhất
 
-// 2. Nhận dữ liệu JSON từ trang HTML gửi sang
-$data = json_decode(file_get_contents("php://input"));
+    // Tạo chữ ký (Signature) - Cách tạo tùy thuộc vào từng web gạch thẻ
+    $sign = md5($partner_key . $pin . $serial);
 
-if (!$data) {
-    echo json_encode(["status" => 99, "message" => "Không nhận được dữ liệu thẻ"]);
-    exit;
-}
+    $data = array(
+        'telco' => $telco,
+        'code' => $pin,
+        'serial' => $serial,
+        'amount' => $amount,
+        'request_id' => $request_id,
+        'partner_id' => $partner_id,
+        'sign' => $sign,
+        'command' => 'charging'
+    );
 
-// 3. Chuẩn bị các thông số cần thiết
-$type = $data->provider;    // Nhà mạng (VIETTEL, VINAPHONE...)
-$amount = $data->amount;    // Mệnh giá
-$pin = $data->pin;          // Mã thẻ
-$serial = $data->serial;    // Số seri
-$request_id = rand(100000, 999999); // Mã giao dịch ngẫu nhiên
+    // Sử dụng CURL để gửi dữ liệu
+    $ch = curl_init($api_url);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_POST, true);
+    curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($data));
+    $response = curl_exec($ch);
+    curl_close($ch);
 
-// Tạo chữ ký (Signature) - Tùy theo yêu cầu mỗi Web nạp thẻ mà cách tạo MD5 sẽ khác nhau
-// Dưới đây là ví dụ phổ biến: md5(partner_key + pin + serial)
-$sign = md5($partner_key . $pin . $serial);
-
-// 4. Cấu hình mảng dữ liệu gửi lên Web Nạp Thẻ
-$content = [
-    'sign'       => $sign,
-    'telco'      => $type,
-    'code'       => $pin,
-    'serial'     => $serial,
-    'amount'     => $amount,
-    'request_id' => $request_id,
-    'partner_id' => $partner_id,
-    'command'    => 'charging'
-];
-
-// 5. Sử dụng CURL để đẩy dữ liệu lên Web Nạp Thẻ
-$ch = curl_init();
-curl_setopt($ch, CURLOPT_URL, $api_url);
-curl_setopt($ch, CURLOPT_POST, 1);
-curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($content));
-curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-curl_setopt($ch, CURLOPT_TIMEOUT, 30);
-
-$response = curl_exec($ch);
-$httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-curl_close($ch);
-
-// 6. Xử lý phản hồi và trả về cho người dùng
-if ($httpCode == 200) {
     $result = json_decode($response, true);
-    
-    // Lưu ý: Cần tùy chỉnh theo cấu trúc JSON mà Web nạp thẻ trả về
+
     if (isset($result['status'])) {
-        if ($result['status'] == 1 || $result['status'] == 99) {
-            echo json_encode([
-                "status" => 1, 
-                "message" => "Gửi thẻ thành công! Vui lòng đợi hệ thống duyệt.",
-                "request_id" => $request_id
-            ]);
+        if ($result['status'] == 99) {
+            echo json_encode(['status' => 'success', 'message' => 'Gửi thẻ thành công, vui lòng đợi duyệt.']);
+            // Lưu giao dịch vào Database với trạng thái 'pending' tại đây
         } else {
-            echo json_encode([
-                "status" => 0, 
-                "message" => "Lỗi: " . ($result['message'] ?? "Thông tin thẻ không hợp lệ")
-            ]);
+            echo json_encode(['status' => 'error', 'message' => $result['message']]);
         }
     } else {
-        echo json_encode(["status" => 0, "message" => "Phản hồi từ server không đúng định dạng"]);
+        echo json_encode(['status' => 'error', 'message' => 'Không thể kết nối tới máy chủ gạch thẻ.']);
     }
-} else {
-    echo json_encode(["status" => 0, "message" => "Không thể kết nối tới server nạp thẻ (Mã lỗi: $httpCode)"]);
 }
 ?>
