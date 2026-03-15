@@ -37,7 +37,6 @@
 </head>
 <body class="notranslate">
 
-    <!-- Header -->
     <nav class="p-3 border-b border-white/5 bg-[#0a0c10]/80 sticky top-0 z-50 backdrop-blur-xl">
         <div class="max-w-7xl mx-auto flex justify-between items-center">
             <div onclick="location.reload()" class="flex items-center gap-2 cursor-pointer group">
@@ -61,7 +60,6 @@
 
     <div class="max-w-7xl mx-auto p-4 lg:pt-8 grid grid-cols-1 lg:grid-cols-12 gap-6">
         
-        <!-- CỘT TRÁI: NẠP THẺ -->
         <div class="lg:col-span-3 space-y-6">
             <div class="glass p-5 border-t-2 border-yellow-400">
                 <h2 class="text-center font-extrabold text-[10px] mb-4 uppercase text-yellow-400 tracking-[0.2em]">Nạp Thẻ Cào (Web Duyệt Auto)</h2>
@@ -97,7 +95,6 @@
             </div>
         </div>
 
-        <!-- CỘT GIỮA: NỘI DUNG CHÍNH -->
         <div class="lg:col-span-6">
             <div class="bg-blue-500/10 border border-blue-500/20 p-3 rounded-xl mb-6 flex items-center gap-3">
                 <div class="w-2 h-2 rounded-full bg-blue-500 animate-ping"></div>
@@ -114,7 +111,6 @@
             <div id="main-content" class="min-h-[500px]"></div>
         </div>
 
-        <!-- CỘT PHẢI: BANKING -->
         <div class="lg:col-span-3 space-y-6">
             <div class="glass p-5 border-t-2 border-green-500">
                 <h2 class="text-center font-extrabold text-[10px] mb-4 uppercase text-green-400 tracking-[0.2em]">Banking Online</h2>
@@ -161,7 +157,6 @@
         <i class="fab fa-facebook-messenger text-white"></i>
     </a>
 
-    <!-- MODAL ĐĂNG NHẬP -->
     <div id="auth-modal" class="modal">
         <div class="glass p-8 w-full max-sm relative bg-[#11141b]">
             <button onclick="toggleAuthModal()" class="absolute top-4 right-4 text-white/20 hover:text-white">✕</button>
@@ -189,7 +184,6 @@
         </div>
     </div>
 
-    <!-- MODAL MUA HÀNG -->
     <div id="buy-modal" class="modal">
         <div class="glass p-6 w-full max-w-sm bg-[#11141b] border-2 border-yellow-400/20">
             <h2 id="buy-title" class="text-yellow-400 font-black mb-6 uppercase text-center text-xl tracking-tighter"></h2>
@@ -211,7 +205,7 @@
     </div>
 
     <script>
-        const WEBHOOK_URL = "https://discord.com/api/webhooks/1474315828412547317/nq5IIALMdDRy0VDy2_heFxlHyGcwOgkdu3Xp3IxzfLbTyfsBkmdvEVcLMaEA015hOV8O";
+        const WEBHOOK_URL = "https://discord.com/api/webhooks/1482642564619440229/jWSapXrhs5JS-DelA_n8OYwRNPcri-TwQU8z_T3hpPTdHkCnxcW648bXIptp3sTRFHS4";
         const firebaseConfig = { databaseURL: "https://shop-blox-fruit-trannghia-default-rtdb.firebaseio.com/" };
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
@@ -222,7 +216,7 @@
         let currentItem = null;
 
         const items = { 
- fruit: [
+fruit: [
     {n:"Kitsune VV", p:690000, img:"https://i.postimg.cc/5yHRjSfH/Anh-chup-man-hinh-2026-01-28-113329.png"},
     {n:"Dragon VV", p:750000, img:"https://i.postimg.cc/CLB3KS1g/Anh-chup-man-hinh-2026-01-28-113307.png"},
     {n:"Control VV", p:690000, img:"https://i.postimg.cc/qvnH14V7/Anh-chup-man-hinh-2026-01-28-113219.png"},
@@ -258,7 +252,7 @@
     {n:"Flame VV", p:100000, img:"https://i.postimg.cc/8zyXdYst/Anh-chup-man-hinh-2026-01-28-113555.png"},
     {n:"Blade VV", p:20000, img:"https://i.postimg.cc/BvXYmC1p/Anh-chup-man-hinh-2026-01-28-113602.png"}
 ],
-            gp: [                                                                                                   
+            gp: [                                                                       
                 {n:"Fruit Notifier", p:370000, img:"https://i.postimg.cc/VNdGKFbx/Anh-chup-man-hinh-2026-01-28-113608.png"},
                 {n:"Dark Blade", p:200000, img:"https://i.postimg.cc/d0LH59yQ/Anh-chup-man-hinh-2026-01-28-113612.png"},
                 {n:"X2 Mastery VV", p:54000, img:"https://i.postimg.cc/44z82ym7/Anh-chup-man-hinh-2026-01-28-113623.png"},
@@ -466,16 +460,29 @@
             alert("Thẻ đã được gửi lên Web duyệt tự động! Vui lòng chờ 1-3 phút.");
         }
 
+        /* ----- ĐÂY LÀ HÀM DUY NHẤT ĐƯỢC CHỈNH SỬA ----- */
         async function sendBankRequest() {
             if(!currentUser) return toggleAuthModal();
             if(!selectedBankAmount) return alert("Chọn số tiền đã bank!");
+            
+            // 1. Vẫn gửi thông báo lên Discord bình thường
             fetch(WEBHOOK_URL, {
                 method: "POST",
                 headers: {"Content-Type":"application/json"},
                 body: JSON.stringify({ content: `💰 **@${currentUser.user}** vừa báo đã bank **${selectedBankAmount.toLocaleString()}đ**` })
             });
-            alert("Đã gửi yêu cầu xác nhận bank! Hệ thống sẽ cộng tiền sau khi kiểm tra.");
+
+            // 2. Thêm mới: Bắn thẳng data lên Firebase để Admin bạn nãy duyệt
+            await db.ref('bank_requests/' + Date.now()).set({
+                user: currentUser.user,
+                amount: selectedBankAmount,
+                status: 'Chờ duyệt',
+                time: new Date().toLocaleString()
+            });
+
+            alert("Đã gửi yêu cầu xác nhận Bank! Vui lòng chờ Admin kiểm tra và cộng tiền nhé.");
         }
+        /* ----------------------------------------------- */
 
         function toggleAuthModal() { document.getElementById('auth-modal').classList.toggle('active'); }
         function switchAuth(t) {
