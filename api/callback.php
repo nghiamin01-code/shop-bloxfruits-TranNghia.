@@ -1,46 +1,39 @@
 <?php
-/**
- * Tệp xử lý kết quả trả về (Callback) từ nhà mạng
- * Hệ thống gạch thẻ sẽ gọi tệp này sau khi thẻ được duyệt thành công hoặc thất bại.
- */
+// --- CẤU HÌNH FIREBASE ---
+$firebase_url = "https://shop-blox-fruit-trannghia-default-rtdb.firebaseio.com/"; // Link Firebase của Shop
 
-// Cấu hình (Phải trùng với napthe.php)
-$partner_key = '9f26460000efd5a619e809a852225b98';
+// Nhận dữ liệu từ thegiatot.vn trả về qua phương thức GET (theo ảnh bạn gửi)
+if (isset($_GET['status'])) {
+    $status = $_GET['status'];
+    $request_id = $_GET['request_id'];
+    $amount_real = $_GET['amount']; // Mệnh giá thực nhận
 
-// Nhận dữ liệu từ nhà mạng gửi về (GET hoặc POST tùy nhà mạng)
-$content = $_REQUEST;
+    // Tách lấy username từ request_id (username_time)
+    $parts = explode('_', $request_id);
+    $username = $parts[0];
 
-if (isset($content['status']) && isset($content['request_id'])) {
-    
-    $status = $content['status'];         // 1: Thành công, 2: Sai mệnh giá, 3: Thẻ lỗi, 4: Bảo trì
-    $request_id = $content['request_id']; // Mã giao dịch đã gửi đi
-    $declared_value = $content['declared_value']; // Mệnh giá gửi lên
-    $real_value = $content['value'];      // Mệnh giá thực tế của thẻ
-    $amount = $content['amount'];         // Số tiền thực nhận sau khi trừ chiết khấu
-    $callback_sign = $content['sign'];    // Chữ ký để xác thực bảo mật
-
-    // Kiểm tra chữ ký để đảm bảo dữ liệu gửi từ nhà mạng thật, tránh bị hack nạp ảo
-    $check_sign = md5($partner_key . $content['code'] . $content['serial']);
-
-    if ($callback_sign == $check_sign) {
-        // Kết nối Database của bạn tại đây
-        // $conn = mysqli_connect("localhost", "user", "pass", "db_name");
-
-        if ($status == 1) {
-            // THÀNH CÔNG: Cộng tiền cho người dùng trong Database
-            // Cập nhật trạng thái đơn hàng thành 'completed'
-            // file_put_contents('log_naptietsuccess.txt', "Thanh cong: $request_id | $amount");
-        } else {
-            // THẤT BẠI: Cập nhật trạng thái đơn hàng thành 'failed'
-            // file_put_contents('log_naptieterror.txt', "Loi: $request_id | Status: $status");
-        }
+    // Status = 1 thường là thẻ đúng (Bạn nên check lại tài liệu bên thegiatot để chắc chắn)
+    if ($status == '1') {
         
-        // Trả về thông báo cho server gạch thẻ biết đã nhận được dữ liệu
-        echo "OK"; 
-    } else {
-        echo "Invalid Signature";
+        // 1. Lấy tiền hiện tại của user từ Firebase
+        $fb_user_path = $firebase_url . "/users/" . $username . "/balance.json";
+        $current_money = json_decode(file_get_contents($fb_user_path));
+        if (!$current_money) $current_money = 0;
+
+        // 2. Cộng tiền mới
+        $new_money = $current_money + intval($amount_real);
+
+        // 3. Cập nhật lên Firebase
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_URL, $fb_user_path);
+        curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "PUT");
+        curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($new_money));
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_exec($ch);
+        curl_close($ch);
+        
+        // Ghi log đơn nạp thành công
+        file_put_contents('log_nap_the.txt', "User: $username - Nap: $amount_real - Thanh cong\n", FILE_APPEND);
     }
-} else {
-    echo "No Data Received";
 }
 ?>
