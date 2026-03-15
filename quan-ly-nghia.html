@@ -3,223 +3,169 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin - Duyệt Đơn & Bank</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
+    <title>Quản Lý Admin - Shop</title>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+    
     <style>
-        body { background-color: #0a0c10; color: #fff; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-        .card { background: #151921; border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 12px; }
-        .btn { padding: 8px 16px; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 12px; text-transform: uppercase; transition: 0.2s; }
-        .btn:hover { opacity: 0.8; }
-        .btn-green { background: #22c55e; color: black; }
-        .btn-red { background: #ef4444; color: white; }
-        .btn-blue { background: #3b82f6; color: white; }
-        .tab-btn { padding: 12px 24px; cursor: pointer; border-bottom: 2px solid transparent; opacity: 0.5; font-weight: bold; }
-        .tab-btn.active { opacity: 1; border-color: #facc15; color: #facc15; }
+        :root { --primary: #2563eb; --success: #16a34a; --danger: #dc2626; --bg: #f8fafc; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: var(--bg); margin: 0; padding: 20px; }
+        .container { max-width: 1000px; margin: auto; background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1); }
+        
+        /* Tab System */
+        .tabs { display: flex; gap: 10px; margin-bottom: 20px; border-bottom: 2px solid #e2e8f0; padding-bottom: 10px; }
+        .tab-btn { padding: 10px 20px; border: none; background: none; cursor: pointer; font-weight: bold; color: #64748b; border-radius: 6px; }
+        .tab-btn.active { background: var(--primary); color: white; }
         .tab-content { display: none; }
-        .tab-content.active { display: block; animation: fadeIn 0.3s; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+        .tab-content.active { display: block; }
+
+        /* Table Style */
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        th, td { padding: 12px; text-align: left; border-bottom: 1px solid #e2e8f0; }
+        th { background: #f1f5f9; color: #475569; }
+        tr:hover { background: #f8fafc; }
+
+        /* Buttons */
+        .btn { padding: 6px 12px; border: none; border-radius: 4px; cursor: pointer; font-size: 13px; font-weight: 500; }
+        .btn-approve { background: var(--success); color: white; margin-right: 5px; }
+        .btn-reject { background: var(--danger); color: white; }
+        .badge { padding: 4px 8px; border-radius: 12px; font-size: 11px; font-weight: bold; background: #fef3c7; color: #92400e; }
     </style>
 </head>
 <body>
-    <div id="login-screen" class="fixed inset-0 bg-[#0a0c10] z-50 flex items-center justify-center">
-        <div class="card p-8 text-center max-w-sm w-full border-t-4 border-yellow-400">
-            <h2 class="text-2xl font-black text-yellow-400 mb-6 tracking-wider">ADMIN PANEL</h2>
-            <input type="password" id="admin-pass" placeholder="Nhập mật khẩu Admin..." class="w-full p-4 bg-black/50 border border-white/10 rounded-xl mb-4 text-white outline-none focus:border-yellow-400 transition">
-            <button onclick="checkAdmin()" class="btn btn-blue w-full py-4 text-sm rounded-xl">Đăng Nhập Quản Trị</button>
-        </div>
+
+<div class="container">
+    <h2>⚙️ Hệ Thống Quản Trị</h2>
+    
+    <div class="tabs">
+        <button class="tab-btn active" onclick="openTab('bank-tab')">🏦 Duyệt Bank</button>
+        <button class="tab-btn" onclick="openTab('shop-tab')">🛒 Duyệt Đơn Hàng</button>
     </div>
 
-    <div id="admin-panel" class="hidden min-h-screen">
-        <div class="bg-[#151921] border-b border-white/10 p-4 sticky top-0 z-40 flex justify-between items-center shadow-lg">
-            <h1 class="text-xl font-bold text-yellow-400"><i class="fa-solid fa-bolt text-yellow-500"></i> HỆ THỐNG QUẢN LÝ SHOP</h1>
-            <button onclick="location.reload()" class="text-red-400 hover:text-red-300 text-sm font-bold bg-red-400/10 px-4 py-2 rounded-lg"><i class="fa-solid fa-power-off"></i> Thoát</button>
-        </div>
-
-        <div class="max-w-6xl mx-auto p-4 md:p-6">
-            <div class="flex gap-2 border-b border-white/10 mb-6 overflow-x-auto">
-                <div class="tab-btn active whitespace-nowrap" onclick="switchTab('orders')">
-                    <i class="fa-solid fa-gamepad text-blue-400"></i> ĐƠN MUA & CÀY THUÊ
-                </div>
-                <div class="tab-btn whitespace-nowrap" onclick="switchTab('bank')">
-                    <i class="fa-solid fa-building-columns text-green-400"></i> DUYỆT NẠP BANK
-                </div>
-            </div>
-
-            <div id="tab-orders" class="tab-content active space-y-4">
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" id="orders-list">
-                    <div class="text-center col-span-full py-10 text-gray-500"><i class="fa-solid fa-circle-notch fa-spin"></i> Đang tải dữ liệu đơn hàng...</div>
-                </div>
-            </div>
-
-            <div id="tab-bank" class="tab-content space-y-4">
-                <div class="card p-4 overflow-x-auto">
-                    <table class="w-full text-left text-sm min-w-[600px]">
-                        <thead class="text-gray-400 border-b border-white/10">
-                            <tr>
-                                <th class="pb-3 px-2">Người nạp</th>
-                                <th class="pb-3 px-2">Số tiền</th>
-                                <th class="pb-3 px-2">Thời gian báo cáo</th>
-                                <th class="pb-3 px-2">Trạng thái</th>
-                                <th class="pb-3 px-2 text-right">Hành động</th>
-                            </tr>
-                        </thead>
-                        <tbody id="bank-list">
-                            </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
+    <div id="bank-tab" class="tab-content active">
+        <h3>Danh sách yêu cầu nạp Bank</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>Khách hàng</th>
+                    <th>Số tiền</th>
+                    <th>Nội dung</th>
+                    <th>Thời gian</th>
+                    <th>Hành động</th>
+                </tr>
+            </thead>
+            <tbody id="bank-list">
+                </tbody>
+        </table>
     </div>
 
-    <script>
-        // MẬT KHẨU ADMIN BẠN CÓ THỂ ĐỔI Ở ĐÂY
-        function checkAdmin() {
-            if(document.getElementById('admin-pass').value === '123') { // Pass mặc định: 123
-                document.getElementById('login-screen').classList.add('hidden');
-                document.getElementById('admin-panel').classList.remove('hidden');
-                initAdmin();
-            } else {
-                alert("Sai mật khẩu!");
+    <div id="shop-tab" class="tab-content">
+        <h3>Danh sách đơn hàng từ Shop</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>Khách hàng</th>
+                    <th>Sản phẩm</th>
+                    <th>Giá trị</th>
+                    <th>Thời gian</th>
+                    <th>Hành động</th>
+                </tr>
+            </thead>
+            <tbody id="shop-list">
+                </tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+    // 1. CẤU HÌNH FIREBASE (Thay bằng thông tin của bạn)
+    const firebaseConfig = {
+        apiKey: "AIza...",
+        authDomain: "your-app.firebaseapp.com",
+        databaseURL: "https://your-app-default-rtdb.firebaseio.com",
+        projectId: "your-app",
+        storageBucket: "your-app.appspot.com",
+        messagingSenderId: "...",
+        appId: "..."
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
+    // 2. CHUYỂN ĐỔI TAB
+    function openTab(tabId) {
+        document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.getElementById(tabId).classList.add('active');
+        event.currentTarget.classList.add('active');
+    }
+
+    // 3. XỬ LÝ DỮ LIỆU BANK
+    db.ref('bank_requests').on('value', (snapshot) => {
+        const list = document.getElementById('bank-list');
+        list.innerHTML = "";
+        snapshot.forEach((child) => {
+            const item = child.val();
+            if(item.status === "pending") {
+                list.innerHTML += `
+                    <tr>
+                        <td><b>${item.username}</b></td>
+                        <td style="color:green">+${item.amount.toLocaleString()}đ</td>
+                        <td><i>${item.content}</i></td>
+                        <td>${item.time}</td>
+                        <td>
+                            <button class="btn btn-approve" onclick="approveBank('${child.key}', '${item.username}', ${item.amount})">Duyệt ✅</button>
+                            <button class="btn btn-reject" onclick="deleteRequest('bank_requests', '${child.key}')">Xóa</button>
+                        </td>
+                    </tr>`;
             }
-        }
+        });
+    });
 
-        function switchTab(tabId) {
-            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-            event.currentTarget.classList.add('active');
-            document.getElementById('tab-' + tabId).classList.add('active');
-        }
+    async function approveBank(id, username, amount) {
+        if(!confirm(`Cộng ${amount}đ cho ${username}?`)) return;
+        // Cộng tiền vào user
+        const userRef = db.ref('users/' + username + '/balance');
+        const snap = await userRef.get();
+        let currentBalance = snap.val() || 0;
+        await userRef.set(currentBalance + amount);
+        // Đổi trạng thái yêu cầu
+        await db.ref('bank_requests/' + id).update({ status: "success" });
+        alert("Thành công!");
+    }
 
-        // --- CẤU HÌNH FIREBASE (GIỐNG HỆT BÊN SHOP) ---
-        const firebaseConfig = { databaseURL: "https://shop-blox-fruit-trannghia-default-rtdb.firebaseio.com/" };
-        firebase.initializeApp(firebaseConfig);
-        const db = firebase.database();
-
-        function initAdmin() {
-            // 1. TẢI DỮ LIỆU ĐƠN HÀNG (REALTIME)
-            db.ref('orders').on('value', snap => {
-                let html = '';
-                if(snap.exists()) {
-                    let orders = [];
-                    snap.forEach(s => { orders.push({id: s.key, ...s.val()}) });
-                    orders.reverse().forEach(o => {
-                        // Màu trạng thái
-                        let statusColor = 'text-yellow-400 bg-yellow-400/10';
-                        if(o.status === 'Đã hoàn thành') statusColor = 'text-green-400 bg-green-400/10';
-                        if(o.status === 'Đã hủy' || o.status === 'Từ chối') statusColor = 'text-red-400 bg-red-400/10';
-
-                        // Check nếu là đơn Cày Thuê để bôi màu khác
-                        let isCayThue = o.info.includes('Loại: CT');
-                        let borderStyle = isCayThue ? 'border-l-4 border-l-purple-500' : 'border border-white/5';
-
-                        html += `
-                            <div class="card p-4 relative ${borderStyle} hover:bg-white/5 transition">
-                                <span class="absolute top-4 right-4 text-[10px] ${statusColor} font-bold px-2 py-1 rounded uppercase tracking-wider">${o.status}</span>
-                                <h3 class="font-black text-white text-md mb-1 w-[70%] truncate text-yellow-400">${o.item}</h3>
-                                <p class="text-[11px] text-gray-400 mb-2">Người đặt: <b class="text-white text-sm">@${o.user}</b></p>
-                                
-                                <div class="bg-black/40 border border-white/5 p-3 rounded-lg text-[11px] font-mono mb-3 text-blue-200 leading-relaxed">
-                                    ${o.info.replace(/\|/g, '<br>•')}
-                                </div>
-                                <p class="text-[10px] text-gray-500 mb-4"><i class="fa-regular fa-clock"></i> ${o.time}</p>
-                                
-                                <div class="flex gap-2">
-                                    ${o.status === 'Chờ xử lý' ? `
-                                        <button onclick="updateOrderStatus('${o.id}', 'Đã hoàn thành')" class="btn btn-green flex-1">Xong</button>
-                                        <button onclick="updateOrderStatus('${o.id}', 'Đã hủy')" class="btn btn-red flex-1">Hủy</button>
-                                    ` : `
-                                        <button onclick="deleteOrder('${o.id}')" class="btn bg-white/10 text-white w-full hover:bg-red-500/20 hover:text-red-400">Xóa Đơn Này</button>
-                                    `}
-                                </div>
-                            </div>
-                        `;
-                    });
-                } else {
-                    html = '<div class="col-span-full text-center py-10 bg-white/5 rounded-xl border border-dashed border-white/20"><p class="text-gray-400 italic">Hiện tại chưa có đơn hàng nào.</p></div>';
-                }
-                document.getElementById('orders-list').innerHTML = html;
-            });
-
-            // 2. TẢI DỮ LIỆU NẠP BANK (REALTIME)
-            db.ref('bank_requests').on('value', snap => {
-                let html = '';
-                if(snap.exists()) {
-                    let banks = [];
-                    snap.forEach(s => { banks.push({id: s.key, ...s.val()}) });
-                    banks.reverse().forEach(b => {
-                        let statusHTML = '';
-                        if(b.status === 'Chờ duyệt') statusHTML = '<span class="text-yellow-400 bg-yellow-400/10 px-2 py-1 rounded text-xs font-bold"><i class="fa-solid fa-spinner fa-spin"></i> Đang chờ</span>';
-                        else if(b.status === 'Đã duyệt') statusHTML = '<span class="text-green-400 bg-green-400/10 px-2 py-1 rounded text-xs font-bold"><i class="fa-solid fa-check"></i> Đã cộng tiền</span>';
-                        else statusHTML = '<span class="text-red-400 bg-red-400/10 px-2 py-1 rounded text-xs font-bold"><i class="fa-solid fa-xmark"></i> Đã hủy</span>';
-
-                        html += `
-                            <tr class="border-b border-white/5 hover:bg-white/5 transition">
-                                <td class="py-4 px-2 font-bold text-blue-400 text-base">@${b.user}</td>
-                                <td class="py-4 px-2"><b class="text-green-400 text-lg">${b.amount.toLocaleString()}đ</b></td>
-                                <td class="py-4 px-2 text-xs text-gray-400">${b.time}</td>
-                                <td class="py-4 px-2">${statusHTML}</td>
-                                <td class="py-4 px-2 text-right">
-                                    ${b.status === 'Chờ duyệt' ? `
-                                        <button onclick="approveBank('${b.id}', '${b.user}', ${b.amount})" class="btn btn-green mr-1 shadow-lg shadow-green-500/20">Duyệt & Cộng</button>
-                                        <button onclick="rejectBank('${b.id}')" class="btn btn-red">Hủy</button>
-                                    ` : `
-                                        <button onclick="deleteBank('${b.id}')" class="btn bg-gray-700 text-gray-300">Xóa</button>
-                                    `}
-                                </td>
-                            </tr>
-                        `;
-                    });
-                } else {
-                    html = '<tr><td colspan="5" class="text-center py-8 text-gray-500 italic bg-black/20 rounded-xl">Chưa có ai báo nạp Bank hôm nay.</td></tr>';
-                }
-                document.getElementById('bank-list').innerHTML = html;
-            });
-        }
-
-        // --- CÁC HÀM XỬ LÝ (CHẠY THỰC TẾ LÊN DATA SHOP) ---
-
-        function updateOrderStatus(id, status) {
-            if(confirm(`Xác nhận chuyển trạng thái đơn này thành: [${status}] ?`)) {
-                db.ref('orders/' + id).update({ status: status });
+    // 4. XỬ LÝ DỮ LIỆU ĐƠN HÀNG
+    db.ref('shop_orders').on('value', (snapshot) => {
+        const list = document.getElementById('shop-list');
+        list.innerHTML = "";
+        snapshot.forEach((child) => {
+            const order = child.val();
+            if(order.status === "pending") {
+                list.innerHTML += `
+                    <tr>
+                        <td><b>${order.username}</b></td>
+                        <td><span class="badge">${order.item}</span></td>
+                        <td>${order.price.toLocaleString()}đ</td>
+                        <td>${order.time}</td>
+                        <td>
+                            <button class="btn btn-approve" onclick="completeOrder('${child.key}')">Xong 📦</button>
+                            <button class="btn btn-reject" onclick="deleteRequest('shop_orders', '${child.key}')">Hủy</button>
+                        </td>
+                    </tr>`;
             }
-        }
+        });
+    });
 
-        function deleteOrder(id) {
-            if(confirm('Bạn có chắc chắn muốn xóa vĩnh viễn đơn này?')) {
-                db.ref('orders/' + id).remove();
-            }
-        }
+    function completeOrder(id) {
+        db.ref('shop_orders/' + id).update({ status: "completed" });
+    }
 
-        // Xử lý Bank
-        async function approveBank(reqId, username, amount) {
-            if(confirm(`Bạn đã nhận được ${amount.toLocaleString()}đ trong tài khoản ngân hàng chưa?\n\nBấm OK hệ thống sẽ tự động cộng ${amount.toLocaleString()}đ vào nick @${username}.`)) {
-                // 1. Chuyển trạng thái Bank thành Đã Duyệt
-                await db.ref('bank_requests/' + reqId).update({ status: 'Đã duyệt' });
-                
-                // 2. Lấy số dư hiện tại của User và cộng thêm
-                let snap = await db.ref('users/' + username).get();
-                if(snap.exists()) {
-                    let currentBal = snap.val().balance || 0;
-                    await db.ref('users/' + username).update({ balance: currentBal + parseInt(amount) });
-                    alert(`✅ Đã cộng thành công ${amount.toLocaleString()}đ cho tài khoản @${username}!`);
-                } else {
-                    alert(`Lỗi: Không tìm thấy tài khoản @${username} trong hệ thống!`);
-                }
-            }
+    // Hàm xóa chung
+    function deleteRequest(path, id) {
+        if(confirm("Bạn muốn xóa yêu cầu này?")) {
+            db.ref(path + '/' + id).remove();
         }
+    }
+</script>
 
-        function rejectBank(id) {
-            if(confirm('Từ chối yêu cầu nạp tiền này? (Khách sẽ không được cộng tiền)')) {
-                db.ref('bank_requests/' + id).update({ status: 'Từ chối' });
-            }
-        }
-
-        function deleteBank(id) {
-            db.ref('bank_requests/' + id).remove();
-        }
-    </script>
 </body>
 </html>
