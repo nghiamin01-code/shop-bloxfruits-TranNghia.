@@ -2,170 +2,141 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Quản Lý Admin - Shop</title>
+    <title>Quản Lý Admin - Nghĩa</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
-    
     <style>
-        :root { --primary: #2563eb; --success: #16a34a; --danger: #dc2626; --bg: #f8fafc; }
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: var(--bg); margin: 0; padding: 20px; }
-        .container { max-width: 1000px; margin: auto; background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1); }
-        
-        /* Tab System */
-        .tabs { display: flex; gap: 10px; margin-bottom: 20px; border-bottom: 2px solid #e2e8f0; padding-bottom: 10px; }
-        .tab-btn { padding: 10px 20px; border: none; background: none; cursor: pointer; font-weight: bold; color: #64748b; border-radius: 6px; }
+        :root { --primary: #2563eb; --bg: #f3f4f6; }
+        body { font-family: Arial, sans-serif; background: var(--bg); padding: 20px; }
+        .container { max-width: 1000px; margin: auto; background: white; padding: 20px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        .tabs { display: flex; gap: 10px; border-bottom: 2px solid #ddd; padding-bottom: 10px; margin-bottom: 20px; }
+        .tab-btn { padding: 10px 20px; border: none; background: #eee; cursor: pointer; border-radius: 5px; font-weight: bold; }
         .tab-btn.active { background: var(--primary); color: white; }
         .tab-content { display: none; }
         .tab-content.active { display: block; }
-
-        /* Table Style */
-        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-        th, td { padding: 12px; text-align: left; border-bottom: 1px solid #e2e8f0; }
-        th { background: #f1f5f9; color: #475569; }
-        tr:hover { background: #f8fafc; }
-
-        /* Buttons */
-        .btn { padding: 6px 12px; border: none; border-radius: 4px; cursor: pointer; font-size: 13px; font-weight: 500; }
-        .btn-approve { background: var(--success); color: white; margin-right: 5px; }
-        .btn-reject { background: var(--danger); color: white; }
-        .badge { padding: 4px 8px; border-radius: 12px; font-size: 11px; font-weight: bold; background: #fef3c7; color: #92400e; }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { padding: 10px; border-bottom: 1px solid #ddd; text-align: left; }
+        th { background: #f8f9fa; }
+        .btn { padding: 5px 10px; border: none; border-radius: 4px; cursor: pointer; color: white; font-weight: bold; }
+        .btn-ok { background: #16a34a; }
+        .btn-del { background: #dc2626; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h2>⚙️ Hệ Thống Quản Trị</h2>
+    <h2>⚙️ Bảng Điều Khiển Admin - Nghĩa</h2>
     
     <div class="tabs">
-        <button class="tab-btn active" onclick="openTab('bank-tab')">🏦 Duyệt Bank</button>
-        <button class="tab-btn" onclick="openTab('shop-tab')">🛒 Duyệt Đơn Hàng</button>
+        <button class="tab-btn active" onclick="openTab('bank')">💰 Yêu cầu Bank</button>
+        <button class="tab-btn" onclick="openTab('shop')">🛒 Đơn hàng Shop</button>
+        <button class="tab-btn" onclick="openTab('cards')">🎫 Lịch sử Thẻ Cào</button>
     </div>
 
-    <div id="bank-tab" class="tab-content active">
-        <h3>Danh sách yêu cầu nạp Bank</h3>
+    <div id="bank" class="tab-content active">
         <table>
-            <thead>
-                <tr>
-                    <th>Khách hàng</th>
-                    <th>Số tiền</th>
-                    <th>Nội dung</th>
-                    <th>Thời gian</th>
-                    <th>Hành động</th>
-                </tr>
-            </thead>
-            <tbody id="bank-list">
-                </tbody>
+            <tr><th>Khách</th><th>Số tiền</th><th>Nội dung</th><th>Hành động</th></tr>
+            <tbody id="list-bank"></tbody>
         </table>
     </div>
 
-    <div id="shop-tab" class="tab-content">
-        <h3>Danh sách đơn hàng từ Shop</h3>
+    <div id="shop" class="tab-content">
         <table>
-            <thead>
-                <tr>
-                    <th>Khách hàng</th>
-                    <th>Sản phẩm</th>
-                    <th>Giá trị</th>
-                    <th>Thời gian</th>
-                    <th>Hành động</th>
-                </tr>
-            </thead>
-            <tbody id="shop-list">
-                </tbody>
+            <tr><th>Khách</th><th>Sản phẩm</th><th>Giá</th><th>Hành động</th></tr>
+            <tbody id="list-shop"></tbody>
+        </table>
+    </div>
+
+    <div id="cards" class="tab-content">
+        <table>
+            <tr><th>Khách</th><th>Mệnh giá</th><th>Trạng thái</th><th>Thời gian</th></tr>
+            <tbody id="list-cards"></tbody>
         </table>
     </div>
 </div>
 
 <script>
-    // 1. CẤU HÌNH FIREBASE (Thay bằng thông tin của bạn)
+    // ⚠️ BƯỚC 1: BẮT BUỘC THAY ĐOẠN NÀY BẰNG CONFIG CỦA BẠN
     const firebaseConfig = {
-        apiKey: "AIza...",
-        authDomain: "your-app.firebaseapp.com",
-        databaseURL: "https://your-app-default-rtdb.firebaseio.com",
-        projectId: "your-app",
-        storageBucket: "your-app.appspot.com",
-        messagingSenderId: "...",
-        appId: "..."
+        apiKey: "AIzaSy...", 
+        authDomain: "ten-du-an.firebaseapp.com",
+        databaseURL: "https://ten-du-an-default-rtdb.firebaseio.com",
+        projectId: "ten-du-an",
+        storageBucket: "ten-du-an.appspot.com",
+        messagingSenderId: "123456789",
+        appId: "1:123456789:web:abcdef"
     };
-    firebase.initializeApp(firebaseConfig);
+    if (!firebase.apps.length) {
+        firebase.initializeApp(firebaseConfig);
+    }
     const db = firebase.database();
 
-    // 2. CHUYỂN ĐỔI TAB
-    function openTab(tabId) {
-        document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+    function openTab(id) {
+        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
         document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-        document.getElementById(tabId).classList.add('active');
+        document.getElementById(id).classList.add('active');
         event.currentTarget.classList.add('active');
     }
 
-    // 3. XỬ LÝ DỮ LIỆU BANK
-    db.ref('bank_requests').on('value', (snapshot) => {
-        const list = document.getElementById('bank-list');
-        list.innerHTML = "";
-        snapshot.forEach((child) => {
-            const item = child.val();
-            if(item.status === "pending") {
-                list.innerHTML += `
-                    <tr>
-                        <td><b>${item.username}</b></td>
-                        <td style="color:green">+${item.amount.toLocaleString()}đ</td>
-                        <td><i>${item.content}</i></td>
-                        <td>${item.time}</td>
-                        <td>
-                            <button class="btn btn-approve" onclick="approveBank('${child.key}', '${item.username}', ${item.amount})">Duyệt ✅</button>
-                            <button class="btn btn-reject" onclick="deleteRequest('bank_requests', '${child.key}')">Xóa</button>
-                        </td>
-                    </tr>`;
+    // ⚠️ BƯỚC 2: KIỂM TRA TÊN NHÁNH DỮ LIỆU BÊN DƯỚI
+    
+    // --- LẮNG NGHE BANK ---
+    // Chữ 'bank_requests' phải GIỐNG HỆT lúc bạn push data ở trang Shop
+    db.ref('bank_requests').on('value', snap => {
+        let html = '';
+        snap.forEach(child => {
+            let data = child.val();
+            if(data.status === 'pending') {
+                html += `<tr>
+                    <td>${data.username}</td><td>+${data.amount}đ</td><td>${data.content}</td>
+                    <td>
+                        <button class="btn btn-ok" onclick="duyetBank('${child.key}', '${data.username}', ${data.amount})">Duyệt ✅</button>
+                        <button class="btn btn-del" onclick="db.ref('bank_requests/${child.key}').remove()">Xóa</button>
+                    </td>
+                </tr>`;
             }
         });
+        document.getElementById('list-bank').innerHTML = html;
     });
 
-    async function approveBank(id, username, amount) {
-        if(!confirm(`Cộng ${amount}đ cho ${username}?`)) return;
-        // Cộng tiền vào user
-        const userRef = db.ref('users/' + username + '/balance');
-        const snap = await userRef.get();
-        let currentBalance = snap.val() || 0;
-        await userRef.set(currentBalance + amount);
-        // Đổi trạng thái yêu cầu
-        await db.ref('bank_requests/' + id).update({ status: "success" });
-        alert("Thành công!");
+    async function duyetBank(id, user, money) {
+        let uRef = db.ref('users/' + user + '/balance');
+        let s = await uRef.get();
+        await uRef.set((s.val() || 0) + Number(money));
+        await db.ref('bank_requests/' + id).update({status: "done"});
     }
 
-    // 4. XỬ LÝ DỮ LIỆU ĐƠN HÀNG
-    db.ref('shop_orders').on('value', (snapshot) => {
-        const list = document.getElementById('shop-list');
-        list.innerHTML = "";
-        snapshot.forEach((child) => {
-            const order = child.val();
-            if(order.status === "pending") {
-                list.innerHTML += `
-                    <tr>
-                        <td><b>${order.username}</b></td>
-                        <td><span class="badge">${order.item}</span></td>
-                        <td>${order.price.toLocaleString()}đ</td>
-                        <td>${order.time}</td>
-                        <td>
-                            <button class="btn btn-approve" onclick="completeOrder('${child.key}')">Xong 📦</button>
-                            <button class="btn btn-reject" onclick="deleteRequest('shop_orders', '${child.key}')">Hủy</button>
-                        </td>
-                    </tr>`;
+    // --- LẮNG NGHE ĐƠN HÀNG ---
+    // Chữ 'shop_orders' phải GIỐNG HỆT lúc khách bấm Mua ở trang Shop
+    db.ref('shop_orders').on('value', snap => {
+        let html = '';
+        snap.forEach(child => {
+            let data = child.val();
+            if(data.status === 'pending') {
+                html += `<tr>
+                    <td>${data.username}</td><td>${data.item}</td><td>${data.price}đ</td>
+                    <td><button class="btn btn-ok" onclick="db.ref('shop_orders/${child.key}').update({status: 'done'})">Xong 📦</button></td>
+                </tr>`;
             }
         });
+        document.getElementById('list-shop').innerHTML = html;
     });
 
-    function completeOrder(id) {
-        db.ref('shop_orders/' + id).update({ status: "completed" });
-    }
-
-    // Hàm xóa chung
-    function deleteRequest(path, id) {
-        if(confirm("Bạn muốn xóa yêu cầu này?")) {
-            db.ref(path + '/' + id).remove();
-        }
-    }
+    // --- LẮNG NGHE LỊCH SỬ THẺ CÀO (Từ callback.php) ---
+    db.ref('card_history').on('value', snap => {
+        let html = '';
+        snap.forEach(child => {
+            let data = child.val();
+            let color = data.status === 'Thành công' ? 'green' : 'red';
+            html = `<tr>
+                <td>${data.username}</td>
+                <td>${data.amount}đ</td>
+                <td style="color:${color}; font-weight:bold;">${data.status}</td>
+                <td>${data.time}</td>
+            </tr>` + html; 
+        });
+        document.getElementById('list-cards').innerHTML = html;
+    });
 </script>
-
 </body>
 </html>
