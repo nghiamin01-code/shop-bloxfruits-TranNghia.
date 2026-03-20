@@ -2,141 +2,227 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <title>Quản Lý Admin - Nghĩa</title>
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ADMIN PANEL - SHOP BẮP (Lite)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
     <style>
-        :root { --primary: #2563eb; --bg: #f3f4f6; }
-        body { font-family: Arial, sans-serif; background: var(--bg); padding: 20px; }
-        .container { max-width: 1000px; margin: auto; background: white; padding: 20px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
-        .tabs { display: flex; gap: 10px; border-bottom: 2px solid #ddd; padding-bottom: 10px; margin-bottom: 20px; }
-        .tab-btn { padding: 10px 20px; border: none; background: #eee; cursor: pointer; border-radius: 5px; font-weight: bold; }
-        .tab-btn.active { background: var(--primary); color: white; }
-        .tab-content { display: none; }
-        .tab-content.active { display: block; }
-        table { width: 100%; border-collapse: collapse; }
-        th, td { padding: 10px; border-bottom: 1px solid #ddd; text-align: left; }
-        th { background: #f8f9fa; }
-        .btn { padding: 5px 10px; border: none; border-radius: 4px; cursor: pointer; color: white; font-weight: bold; }
-        .btn-ok { background: #16a34a; }
-        .btn-del { background: #dc2626; }
+        body { background: #0f172a; color: white; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        .card { background: #1e293b; border: 1px solid #334155; border-radius: 12px; padding: 20px; }
+        .btn { padding: 8px 16px; border-radius: 6px; font-weight: bold; transition: 0.3s; cursor: pointer; }
+        .btn-green { background: #22c55e; color: white; }
+        .btn-red { background: #ef4444; color: white; }
+        .btn-blue { background: #3b82f6; color: white; }
+        input { background: #0f172a; border: 1px solid #334155; padding: 8px; border-radius: 6px; color: white; outline: none; }
+        input:focus { border-color: #3b82f6; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        th, td { padding: 12px; text-align: left; border-bottom: 1px solid #334155; font-size: 13px; }
+        .tab-active { border-bottom: 3px solid #facc15; color: #facc15; }
+        .hidden { display: none; }
     </style>
 </head>
-<body>
+<body class="p-4 md:p-8">
 
-<div class="container">
-    <h2>⚙️ Bảng Điều Khiển Admin - Nghĩa</h2>
-    
-    <div class="tabs">
-        <button class="tab-btn active" onclick="openTab('bank')">💰 Yêu cầu Bank</button>
-        <button class="tab-btn" onclick="openTab('shop')">🛒 Đơn hàng Shop</button>
-        <button class="tab-btn" onclick="openTab('cards')">🎫 Lịch sử Thẻ Cào</button>
+    <div class="max-w-5xl mx-auto">
+        <header class="flex justify-between items-center mb-8 border-b border-white/5 pb-4">
+            <div>
+                <h1 class="text-2xl font-black text-yellow-400">QUẢN TRỊ VIÊN</h1>
+                <p class="text-xs opacity-50 uppercase tracking-tighter">Hệ thống xử lý Shop Bắp</p>
+            </div>
+            <div class="text-right">
+                <div id="status-dot" class="inline-block w-2 h-2 bg-green-500 rounded-full mr-1"></div>
+                <span class="text-[10px] opacity-70">REALTIME CONNECTED</span>
+            </div>
+        </header>
+
+        <div class="flex gap-8 mb-8">
+            <button onclick="showTab('tab-bank')" id="btn-bank" class="pb-2 font-bold uppercase text-xs tracking-widest tab-active">Duyệt Banking</button>
+            <button onclick="showTab('tab-order')" id="btn-order" class="pb-2 font-bold uppercase text-xs tracking-widest">Đơn Hàng Mới</button>
+            <button onclick="showTab('tab-price')" id="btn-price" class="pb-2 font-bold uppercase text-xs tracking-widest">Chỉnh Giá Shop</button>
+        </div>
+
+        <div id="tab-bank" class="tab-content">
+            <div class="card">
+                <h2 class="text-lg font-bold mb-4 text-green-400">Yêu cầu Banking</h2>
+                <div class="overflow-x-auto">
+                    <table>
+                        <thead class="bg-black/20 text-gray-400">
+                            <tr>
+                                <th>Tên Khách</th>
+                                <th>Số tiền</th>
+                                <th>Thời gian</th>
+                                <th>Thao tác</th>
+                            </tr>
+                        </thead>
+                        <tbody id="list-bank"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div id="tab-order" class="tab-content hidden">
+            <div class="card">
+                <h2 class="text-lg font-bold mb-4 text-yellow-400 font-mono">ĐƠN HÀNG ĐANG CHỜ</h2>
+                <div class="overflow-x-auto">
+                    <table>
+                        <thead class="bg-black/20 text-gray-400">
+                            <tr>
+                                <th>Khách</th>
+                                <th>Vật phẩm</th>
+                                <th>Thông tin (TK/MK)</th>
+                                <th>Thao tác</th>
+                            </tr>
+                        </thead>
+                        <tbody id="list-order"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div id="tab-price" class="tab-content hidden">
+            <div class="card">
+                <h2 class="text-lg font-bold mb-6 text-purple-400">Cập nhật giá vật phẩm</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div class="flex flex-col gap-4">
+                        <div class="flex flex-col gap-1">
+                            <label class="text-[10px] uppercase opacity-50">Tên vật phẩm cần sửa</label>
+                            <input type="text" id="price-name" placeholder="Ví dụ: Kitsune VV">
+                        </div>
+                        <div class="flex flex-col gap-1">
+                            <label class="text-[10px] uppercase opacity-50">Giá tiền mới (VNĐ)</label>
+                            <input type="number" id="price-val" placeholder="Ví dụ: 500000">
+                        </div>
+                        <button onclick="updatePrice()" class="btn btn-blue w-full mt-2">XÁC NHẬN ĐỔI GIÁ</button>
+                    </div>
+                    
+                    <div class="bg-black/30 p-4 rounded-xl border border-white/5">
+                        <h3 class="text-sm font-bold mb-3 uppercase text-gray-400">Giá đang hiển thị trên Web:</h3>
+                        <div id="current-prices" class="text-xs space-y-2 max-h-[300px] overflow-y-auto pr-2">
+                            </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
     </div>
 
-    <div id="bank" class="tab-content active">
-        <table>
-            <tr><th>Khách</th><th>Số tiền</th><th>Nội dung</th><th>Hành động</th></tr>
-            <tbody id="list-bank"></tbody>
-        </table>
-    </div>
-
-    <div id="shop" class="tab-content">
-        <table>
-            <tr><th>Khách</th><th>Sản phẩm</th><th>Giá</th><th>Hành động</th></tr>
-            <tbody id="list-shop"></tbody>
-        </table>
-    </div>
-
-    <div id="cards" class="tab-content">
-        <table>
-            <tr><th>Khách</th><th>Mệnh giá</th><th>Trạng thái</th><th>Thời gian</th></tr>
-            <tbody id="list-cards"></tbody>
-        </table>
-    </div>
-</div>
-
-<script>
-    // ⚠️ BƯỚC 1: BẮT BUỘC THAY ĐOẠN NÀY BẰNG CONFIG CỦA BẠN
-    const firebaseConfig = {
-        apiKey: "AIzaSy...", 
-        authDomain: "ten-du-an.firebaseapp.com",
-        databaseURL: "https://ten-du-an-default-rtdb.firebaseio.com",
-        projectId: "ten-du-an",
-        storageBucket: "ten-du-an.appspot.com",
-        messagingSenderId: "123456789",
-        appId: "1:123456789:web:abcdef"
-    };
-    if (!firebase.apps.length) {
+    <script>
+        // Cấu hình Firebase của bạn
+        const firebaseConfig = { databaseURL: "https://shop-blox-fruit-trannghia-default-rtdb.firebaseio.com/" };
         firebase.initializeApp(firebaseConfig);
-    }
-    const db = firebase.database();
+        const db = firebase.database();
 
-    function openTab(id) {
-        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-        document.getElementById(id).classList.add('active');
-        event.currentTarget.classList.add('active');
-    }
+        // Chuyển Tab
+        function showTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(t => t.classList.add('hidden'));
+            document.querySelectorAll('button[id^="btn-"]').forEach(b => b.classList.remove('tab-active'));
+            document.getElementById(tabId).classList.remove('hidden');
+            document.getElementById('btn-' + tabId.split('-')[1]).classList.add('tab-active');
+        }
 
-    // ⚠️ BƯỚC 2: KIỂM TRA TÊN NHÁNH DỮ LIỆU BÊN DƯỚI
-    
-    // --- LẮNG NGHE BANK ---
-    // Chữ 'bank_requests' phải GIỐNG HỆT lúc bạn push data ở trang Shop
-    db.ref('bank_requests').on('value', snap => {
-        let html = '';
-        snap.forEach(child => {
-            let data = child.val();
-            if(data.status === 'pending') {
-                html += `<tr>
-                    <td>${data.username}</td><td>+${data.amount}đ</td><td>${data.content}</td>
-                    <td>
-                        <button class="btn btn-ok" onclick="duyetBank('${child.key}', '${data.username}', ${data.amount})">Duyệt ✅</button>
-                        <button class="btn btn-del" onclick="db.ref('bank_requests/${child.key}').remove()">Xóa</button>
-                    </td>
-                </tr>`;
+        // --- 1. XỬ LÝ BANKING ---
+        db.ref('bank_requests').on('value', snap => {
+            let html = '';
+            snap.forEach(s => {
+                const data = s.val();
+                if(data.status === 'Chờ duyệt') {
+                    html += `<tr>
+                        <td class="font-bold">${data.user}</td>
+                        <td class="text-green-400 font-bold">${data.amount.toLocaleString()}đ</td>
+                        <td class="opacity-50 text-[11px]">${data.time}</td>
+                        <td>
+                            <div class="flex gap-2">
+                                <button onclick="approveBank('${s.key}', '${data.user}', ${data.amount})" class="btn btn-green text-[10px] py-1">DUYỆT</button>
+                                <button onclick="rejectAction('bank_requests', '${s.key}')" class="btn btn-red text-[10px] py-1">HỦY</button>
+                            </div>
+                        </td>
+                    </tr>`;
+                }
+            });
+            document.getElementById('list-bank').innerHTML = html || '<tr><td colspan="4" class="text-center opacity-30 py-10 text-xs italic">Hiện không có yêu cầu nạp tiền nào mới.</td></tr>';
+        });
+
+        async function approveBank(id, user, amount) {
+            if(!confirm(`Cộng ${amount.toLocaleString()}đ cho ${user}?`)) return;
+            const userRef = db.ref('users/' + user.toLowerCase());
+            const userSnap = await userRef.get();
+            if(userSnap.exists()) {
+                const newBal = (userSnap.val().balance || 0) + amount;
+                await userRef.update({ balance: newBal });
+                await db.ref('bank_requests/' + id).update({ status: 'Thành công' });
+                alert("Thành công: Đã cộng tiền cho " + user);
+            } else {
+                alert("Lỗi: Không tìm thấy tài khoản người dùng này!");
             }
+        }
+
+        // --- 2. XỬ LÝ ĐƠN HÀNG ---
+        db.ref('orders').on('value', snap => {
+            let html = '';
+            snap.forEach(s => {
+                const data = s.val();
+                if(data.status === 'Chờ xử lý') {
+                    html += `<tr>
+                        <td class="font-bold text-blue-400">${data.user}</td>
+                        <td class="text-yellow-400 font-bold">${data.item}</td>
+                        <td class="text-[11px] font-mono bg-black/40 p-2 rounded">${data.info}</td>
+                        <td>
+                            <div class="flex flex-col gap-1">
+                                <button onclick="updateOrderStatus('${s.key}', 'Thành công')" class="btn btn-green text-[10px] py-1">HOÀN TẤT</button>
+                                <button onclick="updateOrderStatus('${s.key}', 'Hủy')" class="btn btn-red text-[10px] py-1">HỦY ĐƠN</button>
+                            </div>
+                        </td>
+                    </tr>`;
+                }
+            });
+            document.getElementById('list-order').innerHTML = html || '<tr><td colspan="4" class="text-center opacity-30 py-10 text-xs italic">Tất cả đơn hàng đã được xử lý xong!</td></tr>';
         });
-        document.getElementById('list-bank').innerHTML = html;
-    });
 
-    async function duyetBank(id, user, money) {
-        let uRef = db.ref('users/' + user + '/balance');
-        let s = await uRef.get();
-        await uRef.set((s.val() || 0) + Number(money));
-        await db.ref('bank_requests/' + id).update({status: "done"});
-    }
+        async function updateOrderStatus(id, status) {
+            await db.ref('orders/' + id).update({ status: status });
+            alert("Trạng thái đơn: " + status);
+        }
 
-    // --- LẮNG NGHE ĐƠN HÀNG ---
-    // Chữ 'shop_orders' phải GIỐNG HỆT lúc khách bấm Mua ở trang Shop
-    db.ref('shop_orders').on('value', snap => {
-        let html = '';
-        snap.forEach(child => {
-            let data = child.val();
-            if(data.status === 'pending') {
-                html += `<tr>
-                    <td>${data.username}</td><td>${data.item}</td><td>${data.price}đ</td>
-                    <td><button class="btn btn-ok" onclick="db.ref('shop_orders/${child.key}').update({status: 'done'})">Xong 📦</button></td>
-                </tr>`;
+        // --- 3. CHỈNH GIÁ ---
+        async function updatePrice() {
+            const name = document.getElementById('price-name').value.trim();
+            const val = parseInt(document.getElementById('price-val').value);
+            if(!name || isNaN(val)) return alert("Vui lòng nhập tên vật phẩm và số tiền hợp lệ!");
+            
+            await db.ref('settings/prices/' + name).set(val);
+            alert(`Đã đổi giá ${name} thành ${val.toLocaleString()}đ`);
+            document.getElementById('price-name').value = "";
+            document.getElementById('price-val').value = "";
+        }
+
+        db.ref('settings/prices').on('value', snap => {
+            let html = '';
+            if(snap.exists()) {
+                snap.forEach(s => {
+                    html += `<div class="flex justify-between items-center border-b border-white/5 py-2">
+                        <span class="opacity-80">${s.key}</span>
+                        <div class="flex items-center gap-3">
+                            <b class="text-yellow-400">${s.val().toLocaleString()}đ</b>
+                            <button onclick="deletePrice('${s.key}')" class="text-red-500 font-bold text-xs hover:underline">Xóa</button>
+                        </div>
+                    </div>`;
+                });
             }
+            document.getElementById('current-prices').innerHTML = html || 'Chưa có giá tùy chỉnh nào.';
         });
-        document.getElementById('list-shop').innerHTML = html;
-    });
 
-    // --- LẮNG NGHE LỊCH SỬ THẺ CÀO (Từ callback.php) ---
-    db.ref('card_history').on('value', snap => {
-        let html = '';
-        snap.forEach(child => {
-            let data = child.val();
-            let color = data.status === 'Thành công' ? 'green' : 'red';
-            html = `<tr>
-                <td>${data.username}</td>
-                <td>${data.amount}đ</td>
-                <td style="color:${color}; font-weight:bold;">${data.status}</td>
-                <td>${data.time}</td>
-            </tr>` + html; 
-        });
-        document.getElementById('list-cards').innerHTML = html;
-    });
-</script>
+        async function deletePrice(name) {
+            if(confirm(`Xóa giá tùy chỉnh của ${name}?`)) {
+                await db.ref('settings/prices/' + name).remove();
+            }
+        }
+
+        async function rejectAction(path, id) {
+            if(confirm("Hủy yêu cầu này?")) {
+                await db.ref(path + '/' + id).update({ status: 'Hủy' });
+            }
+        }
+    </script>
 </body>
 </html>
