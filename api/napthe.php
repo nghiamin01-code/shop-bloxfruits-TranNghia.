@@ -1,18 +1,17 @@
 <?php
-// Cấu hình kết nối với API trùm thẻ/gạch thẻ
-$partner_id = '4005762189'; // Lấy từ trang web đổi thẻ
-$partner_key = '3b8e050ac8e3cd86c5d5fdf67c80bbd4'; // Lấy từ trang web đổi thẻ
+// Cấu hình thông tin từ THEGIATOT.VN
+$partner_id = '4005762189'; // Lấy tại mục Tích hợp API trên web thegiatot
+$partner_key = '3b8e050ac8e3cd86c5d5fdf67c80bbd4'; // Lấy tại mục Tích hợp API trên web thegiatot
 
-if (isset($_POST['submit'])) {
-    $username = $_POST['username']; // Tên tài khoản shop
-    $loaithe = $_POST['type'];      // Viettel, Vinaphone...
-    $menhgia = $_POST['amount'];    // 10000, 20000...
+if (isset($_POST['napthe'])) {
+    $username = $_POST['username'];
+    $loaithe = $_POST['type'];
+    $menhgia = $_POST['amount'];
     $seri = $_POST['serial'];
     $pin = $_POST['pin'];
-    
-    $request_id = rand(100000, 999999); // Mã giao dịch ngẫu nhiên
+    $request_id = rand(100000, 999999); // Mã đơn hàng ngẫu nhiên
 
-    // Tạo chữ ký bảo mật (Tùy theo yêu cầu của từng API, dưới đây là dạng phổ biến)
+    // Tạo chữ ký bảo mật theo yêu cầu của Thegiatot
     $sign = md5($partner_key . $pin . $seri);
 
     $data = array(
@@ -26,8 +25,8 @@ if (isset($_POST['submit'])) {
         'command' => 'charging'
     );
 
-    // Gửi dữ liệu bằng CURL
-    $ch = curl_init('https://api_ben_doi_the.com/chargingws/v2'); // Thay bằng URL API thực tế
+    // Gửi dữ liệu qua CURL
+    $ch = curl_init('https://thegiatot.vn/chargingws/v2');
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
     curl_setopt($ch, CURLOPT_POST, true);
     curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($data));
@@ -36,10 +35,24 @@ if (isset($_POST['submit'])) {
 
     $result = json_decode($response, true);
 
-    if ($result['status'] == 1) {
-        echo "Gửi thẻ thành công! Vui lòng chờ duyệt.";
+    if ($result['status'] == 99) {
+        echo "<script>alert('Gửi thẻ thành công, vui lòng đợi duyệt!');</script>";
     } else {
-        echo "Lỗi: " . $result['message'];
+        echo "<script>alert('Lỗi: " . $result['message'] . "');</script>";
     }
 }
 ?>
+
+<form method="POST" action="">
+    <input type="text" name="username" placeholder="Nhập lại tên tài khoản shop" required>
+    <select name="type">
+        <option value="VIETTEL">Viettel</option>
+        <option value="VINAPHONE">Vinaphone</option>
+        <option value="MOBIFONE">Mobifone</option>
+        <option value="ZING">Zing</option>
+    </select>
+    <input type="number" name="amount" placeholder="Mệnh giá" required>
+    <input type="text" name="serial" placeholder="Số Seri" required>
+    <input type="text" name="pin" placeholder="Mã thẻ" required>
+    <button type="submit" name="napthe">NẠP THẺ NGAY</button>
+</form>
