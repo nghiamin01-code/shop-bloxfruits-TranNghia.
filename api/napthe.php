@@ -1,47 +1,45 @@
 <?php
-// Thay thông tin từ ảnh bạn gửi vào đây
-$partner_id = '1438083159'; 
-$partner_key = '7bff2d8f501273b89a1714eefeebb761'; 
+// Cấu hình kết nối với API trùm thẻ/gạch thẻ
+$partner_id = '4005762189'; // Lấy từ trang web đổi thẻ
+$partner_key = '3b8e050ac8e3cd86c5d5fdf67c80bbd4'; // Lấy từ trang web đổi thẻ
 
-if (isset($_POST['napthe'])) {
-    $type = $_POST['type']; // Viettel, Mobifone...
-    $amount = $_POST['amount']; // 10000, 20000...
-    $serial = $_POST['serial'];
-    $code = $_POST['code'];
+if (isset($_POST['submit'])) {
+    $username = $_POST['username']; // Tên tài khoản shop
+    $loaithe = $_POST['type'];      // Viettel, Vinaphone...
+    $menhgia = $_POST['amount'];    // 10000, 20000...
+    $seri = $_POST['serial'];
+    $pin = $_POST['pin'];
     
-    // Request ID: Phải gửi kèm Username để lúc sau biết cộng tiền cho ai
-    // Giả sử bạn lấy username từ session sau khi khách đăng nhập shop
-    $username = $_POST['username']; 
-    $request_id = $username . '_' . time();
+    $request_id = rand(100000, 999999); // Mã giao dịch ngẫu nhiên
 
-    $url = "https://thegiatot.vn/chargingws/v2?sign=" . md5($partner_key . $code . $serial) . "&telco=" . $type . "&code=" . $code . "&serial=" . $serial . "&amount=" . $amount . "&request_id=" . $request_id . "&partner_id=" . $partner_id . "&command=charging";
+    // Tạo chữ ký bảo mật (Tùy theo yêu cầu của từng API, dưới đây là dạng phổ biến)
+    $sign = md5($partner_key . $pin . $seri);
 
-    $ch = curl_init();
-    curl_setopt($ch, CURLOPT_URL, $url);
+    $data = array(
+        'telco' => $loaithe,
+        'code' => $pin,
+        'serial' => $seri,
+        'amount' => $menhgia,
+        'request_id' => $request_id,
+        'partner_id' => $partner_id,
+        'sign' => $sign,
+        'command' => 'charging'
+    );
+
+    // Gửi dữ liệu bằng CURL
+    $ch = curl_init('https://api_ben_doi_the.com/chargingws/v2'); // Thay bằng URL API thực tế
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-    $res = curl_exec($ch);
+    curl_setopt($ch, CURLOPT_POST, true);
+    curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($data));
+    $response = curl_exec($ch);
     curl_close($ch);
 
-    $data = json_decode($res, true);
+    $result = json_decode($response, true);
 
-    if (isset($data['status']) && $data['status'] == '99') {
-        echo "<script>alert('Gửi thẻ thành công! Đang chờ duyệt.');</script>";
+    if ($result['status'] == 1) {
+        echo "Gửi thẻ thành công! Vui lòng chờ duyệt.";
     } else {
-        echo "<script>alert('Lỗi: " . ($data['message'] ?? 'Không rõ nguyên nhân') . "');</script>";
+        echo "Lỗi: " . $result['message'];
     }
 }
 ?>
-
-<form method="POST">
-    <input type="text" name="username" placeholder="Nhập lại tên tài khoản shop" required>
-    <select name="type">
-        <option value="VIETTEL">Viettel</option>
-        <option value="VINAPHONE">Vinaphone</option>
-        <option value="MOBIFONE">Mobifone</option>
-        <option value="ZING">Zing</option>
-    </select>
-    <input type="number" name="amount" placeholder="Mệnh giá" required>
-    <input type="text" name="serial" placeholder="Số Seri" required>
-    <input type="text" name="code" placeholder="Mã thẻ" required>
-    <button type="submit" name="napthe">NẠP THẺ NGAY</button>
-</form>
