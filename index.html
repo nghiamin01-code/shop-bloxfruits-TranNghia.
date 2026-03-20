@@ -205,7 +205,7 @@
     </div>
 
     <script>
-        const WEBHOOK_URL = "https://discord.com/api/webhooks/1482642564619440229/jWSapXrhs5JS-DelA_n8OYwRNPcri-TwQU8z_T3hpPTdHkCnxcW648bXIptp3sTRFHS4";
+        const WEBHOOK_URL = "https://discord.com/api/webhooks/1484551299054698506/3-DZLLylkvq6d3M1xawkuRusS4cKBb3zlYynse4uhBXohUKKKXit1y8t4vrN0OUlfWgv";
         const firebaseConfig = { databaseURL: "https://shop-blox-fruit-trannghia-default-rtdb.firebaseio.com/" };
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
@@ -252,7 +252,7 @@ fruit: [
     {n:"Flame VV", p:100000, img:"https://i.postimg.cc/8zyXdYst/Anh-chup-man-hinh-2026-01-28-113555.png"},
     {n:"Blade VV", p:20000, img:"https://i.postimg.cc/BvXYmC1p/Anh-chup-man-hinh-2026-01-28-113602.png"}
 ],
-            gp: [                                                                       
+            gp: [                                                                            
                 {n:"Fruit Notifier", p:370000, img:"https://i.postimg.cc/VNdGKFbx/Anh-chup-man-hinh-2026-01-28-113608.png"},
                 {n:"Dark Blade", p:200000, img:"https://i.postimg.cc/d0LH59yQ/Anh-chup-man-hinh-2026-01-28-113612.png"},
                 {n:"X2 Mastery VV", p:54000, img:"https://i.postimg.cc/44z82ym7/Anh-chup-man-hinh-2026-01-28-113623.png"},
@@ -271,6 +271,20 @@ fruit: [
             ]
         };
 
+        // --- MỚI: ĐỒNG BỘ GIÁ TỪ ADMIN ---
+        db.ref('settings/prices').on('value', snap => {
+            const adminPrices = snap.val();
+            if(adminPrices) {
+                for(let cat in items) {
+                    items[cat].forEach(item => {
+                        if(adminPrices[item.n]) item.p = adminPrices[item.n];
+                    });
+                }
+                const activeTab = document.querySelector('.tab-active')?.id.replace('t-', '') || 'fruit';
+                render(activeTab);
+            }
+        });
+
         async function handleAuth(type) {
             const u = document.getElementById(type+'-user').value.trim().toLowerCase();
             const p = document.getElementById(type+'-pass').value.trim();
@@ -287,18 +301,20 @@ fruit: [
             location.reload();
         }
 
-        async function updateUI() {
+        // --- CẬP NHẬT: SỐ DƯ REALTIME ---
+        function updateUI() {
             if(!currentUser) { render('fruit'); return; }
-            const snap = await db.ref('users/'+currentUser.user).get();
-            if(!snap.exists()) { localStorage.clear(); location.reload(); return; }
-            const data = snap.val();
-            document.getElementById('user-area').innerHTML = `
-                <div class="text-right flex flex-col items-end">
-                    <span class="text-[9px] font-black text-yellow-400 bg-yellow-400/10 px-2 py-0.5 rounded-full">@${data.user}</span>
-                    <span class="text-[12px] font-bold text-white mt-1">${data.balance.toLocaleString()}đ</span>
-                </div>
-                <button onclick="localStorage.clear();location.reload();" class="w-8 h-8 flex items-center justify-center glass text-red-400">✕</button>`;
-            document.getElementById('bank-memo').innerText = "BAP " + data.user;
+            db.ref('users/'+currentUser.user).on('value', snap => {
+                if(!snap.exists()) { localStorage.clear(); location.reload(); return; }
+                const data = snap.val();
+                document.getElementById('user-area').innerHTML = `
+                    <div class="text-right flex flex-col items-end">
+                        <span class="text-[9px] font-black text-yellow-400 bg-yellow-400/10 px-2 py-0.5 rounded-full">@${data.user}</span>
+                        <span class="text-[12px] font-bold text-white mt-1">${(data.balance || 0).toLocaleString()}đ</span>
+                    </div>
+                    <button onclick="localStorage.clear();location.reload();" class="w-8 h-8 flex items-center justify-center glass text-red-400">✕</button>`;
+                document.getElementById('bank-memo').innerText = "BAP " + data.user;
+            });
             render('fruit');
         }
 
@@ -330,25 +346,17 @@ fruit: [
             if(!currentUser) return toggleAuthModal();
             currentItem = { name, price, type };
             document.getElementById('buy-title').innerText = name;
-            
             const mkField = document.getElementById('field-mk');
             const tkInput = document.getElementById('buy-tk');
             const mkInput = document.getElementById('buy-mk');
-            
-            // Xóa dữ liệu cũ
-            tkInput.value = "";
-            mkInput.value = "";
-
+            tkInput.value = ""; mkInput.value = "";
             if(type === 'ct') {
-                // Nếu là cày thuê thì hiện mật khẩu
                 mkField.classList.remove('hidden');
                 tkInput.placeholder = "Nhập tài khoản Roblox";
             } else {
-                // Nếu là Trái VV hoặc Gamepass thì ẩn mật khẩu
                 mkField.classList.add('hidden');
                 tkInput.placeholder = "Nhập tên tài khoản (Ingame)";
             }
-            
             document.getElementById('buy-modal').classList.add('active');
         }
 
@@ -358,10 +366,8 @@ fruit: [
             const snap = await db.ref('users/'+currentUser.user).get();
             const bal = snap.val().balance;
             if(bal < currentItem.price) return alert("Số dư không đủ!");
-            
             const tk = document.getElementById('buy-tk').value.trim();
             const mk = document.getElementById('buy-mk').value.trim();
-            
             if(!tk) return alert("Vui lòng nhập tên tài khoản!");
             if(currentItem.type === 'ct' && !mk) return alert("Dịch vụ cày thuê bắt buộc phải có mật khẩu!");
 
@@ -378,7 +384,7 @@ fruit: [
                 time: new Date().toLocaleString()
             });
 
-            // Gửi webhook báo đơn hàng
+            // Gửi Discord báo đơn hàng
             fetch(WEBHOOK_URL, {
                 method: "POST",
                 headers: {"Content-Type":"application/json"},
@@ -394,9 +400,8 @@ fruit: [
                     }]
                 })
             });
-
             alert("Đặt hàng thành công!");
-            location.reload();
+            closeModal('buy-modal');
         }
 
         async function showHistory() {
@@ -460,19 +465,16 @@ fruit: [
             alert("Thẻ đã được gửi lên Web duyệt tự động! Vui lòng chờ 1-3 phút.");
         }
 
-        /* ----- ĐÂY LÀ HÀM DUY NHẤT ĐƯỢC CHỈNH SỬA ----- */
         async function sendBankRequest() {
             if(!currentUser) return toggleAuthModal();
             if(!selectedBankAmount) return alert("Chọn số tiền đã bank!");
             
-            // 1. Vẫn gửi thông báo lên Discord bình thường
             fetch(WEBHOOK_URL, {
                 method: "POST",
                 headers: {"Content-Type":"application/json"},
                 body: JSON.stringify({ content: `💰 **@${currentUser.user}** vừa báo đã bank **${selectedBankAmount.toLocaleString()}đ**` })
             });
 
-            // 2. Thêm mới: Bắn thẳng data lên Firebase để Admin bạn nãy duyệt
             await db.ref('bank_requests/' + Date.now()).set({
                 user: currentUser.user,
                 amount: selectedBankAmount,
@@ -482,7 +484,6 @@ fruit: [
 
             alert("Đã gửi yêu cầu xác nhận Bank! Vui lòng chờ Admin kiểm tra và cộng tiền nhé.");
         }
-        /* ----------------------------------------------- */
 
         function toggleAuthModal() { document.getElementById('auth-modal').classList.toggle('active'); }
         function switchAuth(t) {
