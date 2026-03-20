@@ -1,47 +1,27 @@
 <?php
-// Thay thông tin từ ảnh bạn gửi vào đây
-$partner_id = '1438083159'; 
-$partner_key = '7bff2d8f501273b89a1714eefeebb761'; 
+// Nhận dữ liệu từ phía đối tác gửi về
+$status = $_GET['status']; // Trạng thái thẻ
+$message = $_GET['message']; 
+$request_id = $_GET['request_id']; // Mã GD bạn đã gửi đi
+$declared_value = $_GET['declared_value']; // Mệnh giá bạn gửi lên
+$value = $_GET['value']; // Mệnh giá thực của thẻ
+$amount = $_GET['amount']; // Số tiền bạn nhận được sau chiết khấu
+$code = $_GET['code'];
+$serial = $_GET['serial'];
 
-if (isset($_POST['napthe'])) {
-    $type = $_POST['type']; // Viettel, Mobifone...
-    $amount = $_POST['amount']; // 10000, 20000...
-    $serial = $_POST['serial'];
-    $code = $_POST['code'];
+// Kiểm tra nếu thẻ đúng (Status = 1 là thành công ở đa số API)
+if ($status == 1) {
+    /* TẠI ĐÂY BẠN VIẾT CODE ĐỂ CỘNG TIỀN CHO USER
+       Ví dụ: UPDATE users SET money = money + $amount WHERE username = '...'
+    */
     
-    // Request ID: Phải gửi kèm Username để lúc sau biết cộng tiền cho ai
-    // Giả sử bạn lấy username từ session sau khi khách đăng nhập shop
-    $username = $_POST['username']; 
-    $request_id = $username . '_' . time();
-
-    $url = "https://thegiatot.vn/chargingws/v2?sign=" . md5($partner_key . $code . $serial) . "&telco=" . $type . "&code=" . $code . "&serial=" . $serial . "&amount=" . $amount . "&request_id=" . $request_id . "&partner_id=" . $partner_id . "&command=charging";
-
-    $ch = curl_init();
-    curl_setopt($ch, CURLOPT_URL, $url);
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-    $res = curl_exec($ch);
-    curl_close($ch);
-
-    $data = json_decode($res, true);
-
-    if (isset($data['status']) && $data['status'] == '99') {
-        echo "<script>alert('Gửi thẻ thành công! Đang chờ duyệt.');</script>";
-    } else {
-        echo "<script>alert('Lỗi: " . ($data['message'] ?? 'Không rõ nguyên nhân') . "');</script>";
-    }
+    // Ghi log để kiểm tra
+    file_put_contents('log_napthe.txt', "Thẻ $serial thành công: + $amount \n", FILE_APPEND);
+} else {
+    // Thẻ sai, thẻ ảo hoặc sai mệnh giá
+    file_put_contents('log_napthe.txt', "Thẻ $serial thất bại: $message \n", FILE_APPEND);
 }
-?>
 
-<form method="POST">
-    <input type="text" name="username" placeholder="Nhập lại tên tài khoản shop" required>
-    <select name="type">
-        <option value="VIETTEL">Viettel</option>
-        <option value="VINAPHONE">Vinaphone</option>
-        <option value="MOBIFONE">Mobifone</option>
-        <option value="ZING">Zing</option>
-    </select>
-    <input type="number" name="amount" placeholder="Mệnh giá" required>
-    <input type="text" name="serial" placeholder="Số Seri" required>
-    <input type="text" name="code" placeholder="Mã thẻ" required>
-    <button type="submit" name="napthe">NẠP THẺ NGAY</button>
-</form>
+// Trả về kết quả cho phía API biết là bạn đã nhận được dữ liệu
+echo json_encode(['status' => 200]); 
+?>
