@@ -20,11 +20,27 @@
         th, td { padding: 12px; text-align: left; border-bottom: 1px solid #334155; font-size: 13px; }
         .tab-active { border-bottom: 3px solid #facc15; color: #facc15; }
         .hidden { display: none; }
+
+        /* Style cho màn hình khóa */
+        #admin-lock {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: #0f172a; display: flex; justify-content: center;
+            align-items: center; z-index: 9999;
+        }
     </style>
 </head>
 <body class="p-4 md:p-8">
 
-    <div class="max-w-5xl mx-auto">
+    <div id="admin-lock">
+        <div class="card w-80 text-center">
+            <h2 class="text-xl font-black text-yellow-400 mb-4">XÁC MINH ADMIN</h2>
+            <input type="password" id="admin-pass" class="w-full mb-4 text-center" placeholder="Nhập mật khẩu...">
+            <button onclick="checkPass()" class="btn btn-blue w-full">VÀO HỆ THỐNG</button>
+            <p id="error-msg" class="text-red-500 text-xs mt-2 hidden">Mật khẩu không đúng!</p>
+        </div>
+    </div>
+
+    <div id="main-content" class="hidden max-w-5xl mx-auto">
         <header class="flex justify-between items-center mb-8 border-b border-white/5 pb-4">
             <div>
                 <h1 class="text-2xl font-black text-yellow-400">QUẢN TRỊ VIÊN</h1>
@@ -108,12 +124,29 @@
     </div>
 
     <script>
-        // Cấu hình Firebase của bạn
+        // --- PHẦN MẬT KHẨU ---
+        const MY_PASS = "nghia672011"; // BẠN SỬA MẬT KHẨU Ở ĐÂY
+
+        function checkPass() {
+            const input = document.getElementById('admin-pass').value;
+            if(input === MY_PASS) {
+                document.getElementById('admin-lock').classList.add('hidden');
+                document.getElementById('main-content').classList.remove('hidden');
+            } else {
+                document.getElementById('error-msg').classList.remove('hidden');
+            }
+        }
+
+        // Cho phép nhấn Enter để nhập mật khẩu
+        document.getElementById('admin-pass').addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') checkPass();
+        });
+
+        // --- GIỮ NGUYÊN CODE FIREBASE CỦA BẠN ---
         const firebaseConfig = { databaseURL: "https://shop-blox-fruit-trannghia-default-rtdb.firebaseio.com/" };
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
-        // Chuyển Tab
         function showTab(tabId) {
             document.querySelectorAll('.tab-content').forEach(t => t.classList.add('hidden'));
             document.querySelectorAll('button[id^="btn-"]').forEach(b => b.classList.remove('tab-active'));
@@ -121,7 +154,6 @@
             document.getElementById('btn-' + tabId.split('-')[1]).classList.add('tab-active');
         }
 
-        // --- 1. XỬ LÝ BANKING ---
         db.ref('bank_requests').on('value', snap => {
             let html = '';
             snap.forEach(s => {
@@ -157,7 +189,6 @@
             }
         }
 
-        // --- 2. XỬ LÝ ĐƠN HÀNG ---
         db.ref('orders').on('value', snap => {
             let html = '';
             snap.forEach(s => {
@@ -184,7 +215,6 @@
             alert("Trạng thái đơn: " + status);
         }
 
-        // --- 3. CHỈNH GIÁ ---
         async function updatePrice() {
             const name = document.getElementById('price-name').value.trim();
             const val = parseInt(document.getElementById('price-val').value);
