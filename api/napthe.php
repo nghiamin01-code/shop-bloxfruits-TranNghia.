@@ -1,17 +1,16 @@
 <?php
-// Cấu hình thông tin từ THEGIATOT.VN
-$partner_id = '4005762189'; // Lấy tại mục Tích hợp API trên web thegiatot
-$partner_key = '3b8e050ac8e3cd86c5d5fdf67c80bbd4'; // Lấy tại mục Tích hợp API trên web thegiatot
+// Cấu hình từ thegiatot.vn
+$partner_id = '4005762189'; 
+$partner_key = '3b8e050ac8e3cd86c5d5fdf67c80bbd4'; 
 
-if (isset($_POST['napthe'])) {
+if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $username = $_POST['username'];
     $loaithe = $_POST['type'];
     $menhgia = $_POST['amount'];
     $seri = $_POST['serial'];
     $pin = $_POST['pin'];
-    $request_id = rand(100000, 999999); // Mã đơn hàng ngẫu nhiên
-
-    // Tạo chữ ký bảo mật theo yêu cầu của Thegiatot
+    
+    $request_id = rand(100000, 999999);
     $sign = md5($partner_key . $pin . $seri);
 
     $data = array(
@@ -25,7 +24,6 @@ if (isset($_POST['napthe'])) {
         'command' => 'charging'
     );
 
-    // Gửi dữ liệu qua CURL
     $ch = curl_init('https://thegiatot.vn/chargingws/v2');
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
     curl_setopt($ch, CURLOPT_POST, true);
@@ -36,23 +34,22 @@ if (isset($_POST['napthe'])) {
     $result = json_decode($response, true);
 
     if ($result['status'] == 99) {
-        echo "<script>alert('Gửi thẻ thành công, vui lòng đợi duyệt!');</script>";
+        echo "<p style='color:green;'>Thẻ đang được duyệt cho tài khoản: $username. Vui lòng đợi!</p>";
     } else {
-        echo "<script>alert('Lỗi: " . $result['message'] . "');</script>";
+        echo "<p style='color:red;'>Lỗi: " . $result['message'] . "</p>";
     }
 }
 ?>
 
-<form method="POST" action="">
+<form method="POST">
     <input type="text" name="username" placeholder="Nhập lại tên tài khoản shop" required>
     <select name="type">
         <option value="VIETTEL">Viettel</option>
         <option value="VINAPHONE">Vinaphone</option>
         <option value="MOBIFONE">Mobifone</option>
-        <option value="ZING">Zing</option>
     </select>
     <input type="number" name="amount" placeholder="Mệnh giá" required>
     <input type="text" name="serial" placeholder="Số Seri" required>
     <input type="text" name="pin" placeholder="Mã thẻ" required>
-    <button type="submit" name="napthe">NẠP THẺ NGAY</button>
+    <button type="submit">NẠP THẺ NGAY</button>
 </form>
