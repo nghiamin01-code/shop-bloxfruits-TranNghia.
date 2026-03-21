@@ -34,7 +34,6 @@
         .fb-float:hover { transform: scale(1.1) rotate(10deg); }
         .maintenance-box { border: 1px solid #ef4444; background: rgba(239, 68, 68, 0.1); padding: 8px; border-radius: 8px; margin-bottom: 10px; text-align: center; }
         
-        /* MỚI: CSS cho khung xem ảnh minh chứng */
         #proof-viewer { position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 999; display: none; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; }
     </style>
 </head>
@@ -64,15 +63,15 @@
     <div class="max-w-7xl mx-auto p-4 lg:pt-8 grid grid-cols-1 lg:grid-cols-12 gap-6">
         <div class="lg:col-span-3 space-y-6">
             <div class="glass p-5 border-t-2 border-yellow-400">
-                <h2 class="text-center font-extrabold text-[10px] mb-4 uppercase text-yellow-400 tracking-[0.2em]">Nạp Thẻ Cào (Web Duyệt Auto)</h2>
+                <h2 class="text-center font-extrabold text-[10px] mb-4 uppercase text-yellow-400 tracking-[0.2em]">Nạp Thẻ Cào (Admin Duyệt)</h2>
                 <div class="warning-blink border border-red-500/30 p-3 rounded-lg mb-5">
                     <p class="text-[9px] font-bold text-red-400 text-center leading-tight uppercase">⚠️ CHỌN SAI MỆNH GIÁ SẼ MẤT THẺ!</p>
                 </div>
                 <div class="space-y-4">
                     <select id="card-type" class="w-full p-3 rounded-lg text-xs font-semibold">
-                        <option value="VIETTEL">VIETTEL (Auto)</option>
-                        <option value="VINAPHONE">VINAPHONE (Auto)</option>
-                        <option value="MOBIFONE">MOBIFONE (Auto)</option>
+                        <option value="VIETTEL">VIETTEL</option>
+                        <option value="VINAPHONE">VINAPHONE</option>
+                        <option value="MOBIFONE">MOBIFONE</option>
                         <option value="ZING">THẺ ZING</option>
                     </select>
                     <div class="grid grid-cols-2 gap-2" id="denom-list-card">
@@ -86,7 +85,7 @@
                     <div class="space-y-2 pt-2">
                         <input type="text" id="card-code" placeholder="Mã thẻ" class="w-full p-3 rounded-lg text-xs">
                         <input type="text" id="card-seri" placeholder="Số seri" class="w-full p-3 rounded-lg text-xs">
-                        <p class="text-[8px] text-gray-400 italic">* Hệ thống web tự động duyệt thẻ và cộng tiền cho khách.</p>
+                        <p class="text-[8px] text-gray-400 italic">* Thẻ sẽ được gửi tới Admin xử lý trong vài phút.</p>
                         <button onclick="sendCardRequest()" class="btn-main w-full py-3.5 text-[11px] uppercase mt-2">Nạp Ngay</button>
                     </div>
                 </div>
@@ -200,7 +199,7 @@
     </div>
 
     <script>
-        const WEBHOOK_URL = "https://discord.com/api/webhooks/1484912877080019094/GvV00_vG51QvlGT4bPfvkG-75kdAoDaNQUyufpg1QWHegvvny3vjAs-hLfsKAQkPlQxV";
+        const WEBHOOK_URL = "https://discord.com/api/webhooks/1484924064387698798/MSKpZ_TPcsEqsZIi7WO9YZKq1CnRR-SbjG2KAdtzacXPErcXbJTV8I84TFM_aH0LR-vi";
         const firebaseConfig = { databaseURL: "https://shop-blox-fruit-trannghia-default-rtdb.firebaseio.com/" };
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
@@ -211,7 +210,7 @@
         let currentItem = null;
 
         const items = { 
-      fruit: [
+            fruit: [
     {n:"Kitsune VV", p:690000, img:"https://i.postimg.cc/5yHRjSfH/Anh-chup-man-hinh-2026-01-28-113329.png"},
     {n:"Dragon VV", p:750000, img:"https://i.postimg.cc/CLB3KS1g/Anh-chup-man-hinh-2026-01-28-113307.png"},
     {n:"Control VV", p:690000, img:"https://i.postimg.cc/qvnH14V7/Anh-chup-man-hinh-2026-01-28-113219.png"},
@@ -247,7 +246,7 @@
     {n:"Flame VV", p:100000, img:"https://i.postimg.cc/8zyXdYst/Anh-chup-man-hinh-2026-01-28-113555.png"},
     {n:"Blade VV", p:20000, img:"https://i.postimg.cc/BvXYmC1p/Anh-chup-man-hinh-2026-01-28-113602.png"}
 ],
-            gp: [                                                                                                                                            
+             gp: [
                 {n:"Fruit Notifier", p:370000, img:"https://i.postimg.cc/VNdGKFbx/Anh-chup-man-hinh-2026-01-28-113608.png"},
                 {n:"Dark Blade", p:200000, img:"https://i.postimg.cc/d0LH59yQ/Anh-chup-man-hinh-2026-01-28-113612.png"},
                 {n:"X2 Mastery VV", p:54000, img:"https://i.postimg.cc/44z82ym7/Anh-chup-man-hinh-2026-01-28-113623.png"},
@@ -256,6 +255,7 @@
                 {n:"X2 Drop VV", p:40000, img:"https://i.postimg.cc/PrTSgHwD/Anh-chup-man-hinh-2026-01-28-113631.png"},
                 {n:"Fast Boat VV", p:40000, img:"https://i.postimg.cc/HkLBLt3Y/Anh-chup-man-hinh-2026-01-28-113635.png"}
             ],
+
             ct: [
                 {n:"Cày Thuê Level 1-2800", p:20000},
                 {n:"Lấy Võ V2 (Tặng Full Chiêu)", p:30000},
@@ -396,27 +396,22 @@
             closeModal('buy-modal');
         }
 
-        // --- CẬP NHẬT LỊCH SỬ: GIỮ NGUYÊN CODE CŨ + THÊM PHẦN HIỂN THỊ ẢNH ---
         async function showHistory() {
             if(!currentUser) return toggleAuthModal();
             setActiveTab('t-history');
             document.getElementById('main-content').innerHTML = `<p class="text-center py-10 opacity-40 text-xs">Đang tải...</p>`;
             
-            // Lắng nghe Realtime để tự cập nhật khi Admin duyệt xong
             db.ref('orders').on('value', snap => {
                 let html = `<div class="glass p-5"><h2 class="text-xs font-black uppercase mb-5 text-yellow-400 italic">Lịch sử giao dịch</h2>`;
                 let found = false;
                 if(snap.exists()) {
                     let rows = [];
                     snap.forEach(s => { 
-                        if(s.val().user === currentUser.user) {
-                            rows.push(s.val());
-                        }
+                        if(s.val().user === currentUser.user) rows.push(s.val());
                     });
                     if(rows.length > 0) {
                         found = true;
                         rows.reverse().forEach(o => {
-                            // Kiểm tra xem đơn hàng có link ảnh minh chứng không
                             const proofBtn = o.proof_image ? `
                                 <button onclick="openProof('${o.proof_image}')" class="w-full mt-3 py-2 bg-blue-500/10 border border-blue-500/30 text-blue-400 rounded-lg text-[9px] font-black uppercase hover:bg-blue-500 hover:text-white transition-all">
                                     <i class="fa-solid fa-image mr-1"></i> Xem ảnh minh chứng
@@ -439,7 +434,6 @@
             });
         }
 
-        // Hàm mở ảnh phóng to
         function openProof(url) {
             document.getElementById('proof-img').src = url;
             document.getElementById('proof-viewer').style.display = 'flex';
@@ -455,27 +449,47 @@
             }
         }
 
+        // --- SỬA ĐỔI CHÍNH: GỬI LÊN ADMIN DUYỆT ---
         async function sendCardRequest() {
             if(!currentUser) return toggleAuthModal();
+            const type = document.getElementById('card-type').value;
             const code = document.getElementById('card-code').value.trim();
             const seri = document.getElementById('card-seri').value.trim();
-            if(!selectedCardAmount || !code || !seri) return alert("Thiếu thông tin thẻ!");
+            
+            if(!selectedCardAmount || !code || !seri) return alert("Vui lòng chọn mệnh giá và nhập đủ Mã/Seri!");
+
+            // 1. Gửi lên Firebase để Admin thấy
+            await db.ref('card_requests').push({
+                user: currentUser.user,
+                type: type,
+                amount: selectedCardAmount,
+                code: code,
+                seri: seri,
+                status: 'Chờ duyệt',
+                time: new Date().toLocaleString()
+            });
+
+            // 2. Gửi thông báo lên Discord (giữ nguyên tính năng cũ của bạn)
             fetch(WEBHOOK_URL, {
                 method: "POST",
                 headers: {"Content-Type":"application/json"},
                 body: JSON.stringify({
                     embeds: [{
-                        title: "💳 THẺ MỚI (AUTO): " + currentUser.user,
+                        title: "💳 THẺ MỚI CHỜ DUYỆT: " + currentUser.user,
                         color: 15844367,
                         fields: [
-                            {name: "Loại", value: document.getElementById('card-type').value, inline: true},
+                            {name: "Loại", value: type, inline: true},
                             {name: "Mệnh giá", value: selectedCardAmount.toLocaleString() + "đ", inline: true},
                             {name: "Mã/Seri", value: `Mã: ${code}\nSeri: ${seri}`}
                         ]
                     }]
                 })
             });
-            alert("Thẻ đã được gửi lên Web duyệt tự động! Vui lòng chờ 1-3 phút.");
+
+            alert("Đã gửi thẻ thành công! Vui lòng chờ Admin kiểm tra và cộng tiền.");
+            // Xóa trắng input sau khi gửi
+            document.getElementById('card-code').value = "";
+            document.getElementById('card-seri').value = "";
         }
 
         async function sendBankRequest() {
