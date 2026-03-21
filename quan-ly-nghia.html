@@ -19,10 +19,10 @@
         table { width: 100%; border-collapse: collapse; margin-top: 10px; }
         th, td { padding: 12px; text-align: left; border-bottom: 1px solid #334155; font-size: 13px; }
         .tab-active { border-bottom: 3px solid #facc15; color: #facc15; }
-        .hidden { display: none; }
+        .hidden { display: none !important; }
 
-        /* Style cho màn hình khóa */
-        #admin-lock {
+        /* Lớp phủ mật khẩu */
+        #lock-screen {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: #0f172a; display: flex; justify-content: center;
             align-items: center; z-index: 9999;
@@ -31,16 +31,21 @@
 </head>
 <body class="p-4 md:p-8">
 
-    <div id="admin-lock">
-        <div class="card w-80 text-center">
-            <h2 class="text-xl font-black text-yellow-400 mb-4">XÁC MINH ADMIN</h2>
-            <input type="password" id="admin-pass" class="w-full mb-4 text-center" placeholder="Nhập mật khẩu...">
-            <button onclick="checkPass()" class="btn btn-blue w-full">VÀO HỆ THỐNG</button>
-            <p id="error-msg" class="text-red-500 text-xs mt-2 hidden">Mật khẩu không đúng!</p>
+    <div id="lock-screen">
+        <div class="card w-80 text-center border-2 border-yellow-500/30">
+            <h2 class="text-xl font-black text-yellow-400 mb-2 tracking-tighter">XÁC MINH ADMIN</h2>
+            <p class="text-[10px] opacity-40 mb-6 uppercase">Hệ thống Shop Bắp - Roblox</p>
+            
+            <input type="password" id="pass-input" 
+                   class="w-full mb-4 text-center border-white/10 focus:border-yellow-500" 
+                   placeholder="Nhập mật khẩu...">
+            
+            <button onclick="checkPass()" class="btn btn-blue w-full shadow-lg shadow-blue-500/20">TRUY CẬP</button>
+            <p id="err-msg" class="text-red-500 text-xs mt-3 hidden animate-pulse">Mật khẩu không chính xác!</p>
         </div>
     </div>
 
-    <div id="main-content" class="hidden max-w-5xl mx-auto">
+    <div id="admin-main" class="hidden max-w-5xl mx-auto">
         <header class="flex justify-between items-center mb-8 border-b border-white/5 pb-4">
             <div>
                 <h1 class="text-2xl font-black text-yellow-400">QUẢN TRỊ VIÊN</h1>
@@ -114,35 +119,33 @@
                     
                     <div class="bg-black/30 p-4 rounded-xl border border-white/5">
                         <h3 class="text-sm font-bold mb-3 uppercase text-gray-400">Giá đang hiển thị trên Web:</h3>
-                        <div id="current-prices" class="text-xs space-y-2 max-h-[300px] overflow-y-auto pr-2">
-                            </div>
+                        <div id="current-prices" class="text-xs space-y-2 max-h-[300px] overflow-y-auto pr-2"></div>
                     </div>
                 </div>
             </div>
         </div>
-
     </div>
 
     <script>
-        // --- PHẦN MẬT KHẨU ---
-        const MY_PASS = "nghia672011"; // BẠN SỬA MẬT KHẨU Ở ĐÂY
+        // --- CÀI ĐẶT MẬT KHẨU CỦA NGHĨA ---
+        const ADMIN_PASSWORD = "nghia672011"; 
 
         function checkPass() {
-            const input = document.getElementById('admin-pass').value;
-            if(input === MY_PASS) {
-                document.getElementById('admin-lock').classList.add('hidden');
-                document.getElementById('main-content').classList.remove('hidden');
+            const val = document.getElementById('pass-input').value;
+            if(val === ADMIN_PASSWORD) {
+                document.getElementById('lock-screen').classList.add('hidden');
+                document.getElementById('admin-main').classList.remove('hidden');
             } else {
-                document.getElementById('error-msg').classList.remove('hidden');
+                document.getElementById('err-msg').classList.remove('hidden');
             }
         }
 
-        // Cho phép nhấn Enter để nhập mật khẩu
-        document.getElementById('admin-pass').addEventListener('keypress', function (e) {
-            if (e.key === 'Enter') checkPass();
+        // Nhấn Enter để vào nhanh
+        document.getElementById('pass-input').addEventListener('keypress', (e) => {
+            if(e.key === 'Enter') checkPass();
         });
 
-        // --- GIỮ NGUYÊN CODE FIREBASE CỦA BẠN ---
+        // --- GIỮ NGUYÊN CODE FIREBASE GỐC CỦA BẠN ---
         const firebaseConfig = { databaseURL: "https://shop-blox-fruit-trannghia-default-rtdb.firebaseio.com/" };
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
@@ -172,7 +175,7 @@
                     </tr>`;
                 }
             });
-            document.getElementById('list-bank').innerHTML = html || '<tr><td colspan="4" class="text-center opacity-30 py-10 text-xs italic">Hiện không có yêu cầu nạp tiền nào mới.</td></tr>';
+            document.getElementById('list-bank').innerHTML = html || '<tr><td colspan="4" class="text-center opacity-30 py-10 text-xs italic">Không có yêu cầu nạp mới.</td></tr>';
         });
 
         async function approveBank(id, user, amount) {
@@ -183,9 +186,9 @@
                 const newBal = (userSnap.val().balance || 0) + amount;
                 await userRef.update({ balance: newBal });
                 await db.ref('bank_requests/' + id).update({ status: 'Thành công' });
-                alert("Thành công: Đã cộng tiền cho " + user);
+                alert("Đã cộng tiền xong!");
             } else {
-                alert("Lỗi: Không tìm thấy tài khoản người dùng này!");
+                alert("Không tìm thấy user!");
             }
         }
 
@@ -200,28 +203,26 @@
                         <td class="text-[11px] font-mono bg-black/40 p-2 rounded">${data.info}</td>
                         <td>
                             <div class="flex flex-col gap-1">
-                                <button onclick="updateOrderStatus('${s.key}', 'Thành công')" class="btn btn-green text-[10px] py-1">HOÀN TẤT</button>
-                                <button onclick="updateOrderStatus('${s.key}', 'Hủy')" class="btn btn-red text-[10px] py-1">HỦY ĐƠN</button>
+                                <button onclick="updateOrderStatus('${s.key}', 'Thành công')" class="btn btn-green text-[10px] py-1">XONG</button>
+                                <button onclick="updateOrderStatus('${s.key}', 'Hủy')" class="btn btn-red text-[10px] py-1">HỦY</button>
                             </div>
                         </td>
                     </tr>`;
                 }
             });
-            document.getElementById('list-order').innerHTML = html || '<tr><td colspan="4" class="text-center opacity-30 py-10 text-xs italic">Tất cả đơn hàng đã được xử lý xong!</td></tr>';
+            document.getElementById('list-order').innerHTML = html || '<tr><td colspan="4" class="text-center opacity-30 py-10 text-xs italic">Sạch đơn!</td></tr>';
         });
 
         async function updateOrderStatus(id, status) {
             await db.ref('orders/' + id).update({ status: status });
-            alert("Trạng thái đơn: " + status);
         }
 
         async function updatePrice() {
             const name = document.getElementById('price-name').value.trim();
             const val = parseInt(document.getElementById('price-val').value);
-            if(!name || isNaN(val)) return alert("Vui lòng nhập tên vật phẩm và số tiền hợp lệ!");
-            
+            if(!name || isNaN(val)) return alert("Nhập đủ tin!");
             await db.ref('settings/prices/' + name).set(val);
-            alert(`Đã đổi giá ${name} thành ${val.toLocaleString()}đ`);
+            alert("Đã đổi giá!");
             document.getElementById('price-name').value = "";
             document.getElementById('price-val').value = "";
         }
@@ -239,19 +240,15 @@
                     </div>`;
                 });
             }
-            document.getElementById('current-prices').innerHTML = html || 'Chưa có giá tùy chỉnh nào.';
+            document.getElementById('current-prices').innerHTML = html || 'Trống.';
         });
 
         async function deletePrice(name) {
-            if(confirm(`Xóa giá tùy chỉnh của ${name}?`)) {
-                await db.ref('settings/prices/' + name).remove();
-            }
+            if(confirm(`Xóa giá ${name}?`)) await db.ref('settings/prices/' + name).remove();
         }
 
         async function rejectAction(path, id) {
-            if(confirm("Hủy yêu cầu này?")) {
-                await db.ref(path + '/' + id).update({ status: 'Hủy' });
-            }
+            if(confirm("Hủy yêu cầu?")) await db.ref(path + '/' + id).update({ status: 'Hủy' });
         }
     </script>
 </body>
