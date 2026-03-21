@@ -12,6 +12,7 @@
         input { background: #0f172a; border: 1px solid #334155; color: white; padding: 8px; border-radius: 6px; }
         .btn-green { background: #22c55e; color: black; font-weight: bold; padding: 8px 16px; border-radius: 6px; }
         .btn-red { background: #ef4444; color: white; font-weight: bold; padding: 8px 16px; border-radius: 6px; }
+        .btn-orange { background: #f97316; color: white; font-weight: bold; padding: 8px 16px; border-radius: 6px; }
     </style>
 </head>
 <body class="p-4 lg:p-10">
@@ -35,6 +36,11 @@
         </div>
 
         <div class="card">
+            <h2 class="text-xl font-bold mb-4 border-b border-white/10 pb-2 text-yellow-500">💳 Duyệt thẻ cào chờ</h2>
+            <div id="card-list" class="space-y-4"></div>
+        </div>
+
+        <div class="card">
             <h2 class="text-xl font-bold mb-4 border-b border-white/10 pb-2 text-purple-400">🏦 Yêu cầu Bank</h2>
             <div id="bank-list" class="space-y-4"></div>
         </div>
@@ -46,12 +52,11 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
-        // Lấy danh sách đơn hàng
+        // --- GIỮ NGUYÊN LOGIC ĐƠN HÀNG ---
         db.ref('orders').on('value', snap => {
             const list = document.getElementById('order-list');
             list.innerHTML = "";
             if(!snap.exists()) { list.innerHTML = "Không có đơn nào."; return; }
-
             snap.forEach(s => {
                 const o = s.val();
                 if(o.status === 'Chờ xử lý') {
@@ -59,12 +64,10 @@
                         <div class="bg-black/30 p-4 rounded-lg border border-white/5">
                             <p><b>Khách:</b> ${o.user} | <b>Món:</b> ${o.item}</p>
                             <p class="text-sm opacity-60 mb-3">${o.info}</p>
-                            
                             <div class="mb-3">
                                 <p class="text-[10px] text-yellow-400 uppercase font-bold mb-1">Dán link ảnh minh chứng (nếu có):</p>
                                 <input type="text" id="proof-${s.key}" placeholder="https://anh-da-giao-do.jpg" class="w-full text-xs">
                             </div>
-
                             <div class="flex gap-2">
                                 <button onclick="approveOrder('${s.key}', '${o.user}')" class="btn-green text-xs">Hoàn thành</button>
                                 <button onclick="cancelOrder('${s.key}', '${o.user}', ${o.price || 0})" class="btn-red text-xs">Hủy & Hoàn tiền</button>
@@ -75,21 +78,14 @@
             });
         });
 
-        // Hàm Hoàn thành đơn có kèm ảnh
         async function approveOrder(key, user) {
             const proofLink = document.getElementById('proof-'+key).value.trim();
             const updateData = { status: 'Thành công' };
-            
-            // Nếu có dán link ảnh thì mới thêm vào database
-            if(proofLink) {
-                updateData.proof_image = proofLink;
-            }
-
+            if(proofLink) { updateData.proof_image = proofLink; }
             await db.ref('orders/'+key).update(updateData);
             alert("Đã duyệt đơn cho " + user);
         }
 
-        // Hàm Hủy đơn
         async function cancelOrder(key, user, refund) {
             if(!confirm("Bạn có chắc muốn hủy đơn này?")) return;
             const userSnap = await db.ref('users/'+user).get();
@@ -101,22 +97,20 @@
             alert("Đã hủy đơn và hoàn lại " + refund + "đ cho " + user);
         }
 
-        // Hàm cộng tiền
+        // --- GIỮ NGUYÊN LOGIC CỘNG TIỀN ---
         async function updateBalance() {
             const user = document.getElementById('target-user').value.trim().toLowerCase();
             const amount = parseInt(document.getElementById('target-amount').value);
             if(!user || isNaN(amount)) return alert("Nhập đủ thông tin!");
-            
             const ref = db.ref('users/'+user);
             const snap = await ref.get();
             if(!snap.exists()) return alert("Không tìm thấy User này!");
-            
             const newBal = (snap.val().balance || 0) + amount;
             await ref.update({ balance: newBal });
             alert("Đã cộng tiền thành công! Số dư mới: " + newBal + "đ");
         }
 
-        // Duyệt Bank (Lấy danh sách yêu cầu bank)
+        // --- GIỮ NGUYÊN LOGIC BANK ---
         db.ref('bank_requests').on('value', snap => {
             const list = document.getElementById('bank-list');
             list.innerHTML = "";
@@ -144,6 +138,46 @@
                 await db.ref('bank_requests/'+key).update({ status: 'Đã duyệt' });
                 alert("Đã duyệt tiền bank cho " + user);
             }
+        }
+
+        // --- THÊM MỚI: LOGIC DUYỆT THẺ CÀO ---
+        db.ref('card_requests').on('value', snap => {
+            const list = document.getElementById('card-list');
+            list.innerHTML = "";
+            if(!snap.exists()) { list.innerHTML = "Không có thẻ nào."; return; }
+            snap.forEach(s => {
+                const c = s.val();
+                if(c.status === 'Chờ duyệt') {
+                    list.innerHTML += `
+                        <div class="bg-black/30 p-4 rounded-lg border border-white/5">
+                            <p class="text-yellow-500 font-bold">${c.type} - ${parseInt(c.amount).toLocaleString()}đ</p>
+                            <p class="text-xs opacity-80">Mã: ${c.code} | Seri: ${c.seri}</p>
+                            <p class="text-[10px] opacity-40 mb-3 text-white">Người nạp: ${c.user}</p>
+                            <div class="flex gap-2">
+                                <button onclick="approveCard('${s.key}', '${c.user}', ${c.amount})" class="btn-green text-[10px]">DUYỆT THẺ</button>
+                                <button onclick="rejectCard('${s.key}')" class="btn-red text-[10px]">THẺ SAI</button>
+                            </div>
+                        </div>
+                    `;
+                }
+            });
+        });
+
+        async function approveCard(key, user, amount) {
+            const ref = db.ref('users/'+user);
+            const snap = await ref.get();
+            if(snap.exists()) {
+                const currentBal = snap.val().balance || 0;
+                await ref.update({ balance: currentBal + parseInt(amount) });
+                await db.ref('card_requests/'+key).update({ status: 'Thành công' });
+                alert("Đã nạp " + amount + "đ cho " + user);
+            }
+        }
+
+        async function rejectCard(key) {
+            if(!confirm("Xác nhận thẻ này sai?")) return;
+            await db.ref('card_requests/'+key).update({ status: 'Thẻ sai' });
+            alert("Đã từ chối thẻ.");
         }
     </script>
 </body>
