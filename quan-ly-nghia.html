@@ -8,22 +8,31 @@
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
     <style>
         body { background: #0f172a; color: white; font-family: sans-serif; }
-        .card { background: #1e293b; border: 1px solid #334155; border-radius: 12px; padding: 20px; margin-bottom: 20px; }
-        input { background: #0f172a; border: 1px solid #334155; color: white; padding: 8px; border-radius: 6px; }
+        .card { background: #1e293b; border: 1px solid #334155; border-radius: 12px; padding: 20px; margin-bottom: 20px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); }
+        input { background: #0f172a; border: 1px solid #334155; color: white; padding: 8px; border-radius: 6px; outline: none; transition: 0.2s; }
+        input:focus { border-color: #3b82f6; }
+        button { transition: 0.2s; cursor: pointer; }
+        button:hover { opacity: 0.8; }
         .btn-green { background: #22c55e; color: black; font-weight: bold; padding: 8px 16px; border-radius: 6px; }
         .btn-red { background: #ef4444; color: white; font-weight: bold; padding: 8px 16px; border-radius: 6px; }
         .btn-orange { background: #f97316; color: white; font-weight: bold; padding: 8px 16px; border-radius: 6px; }
+        
+        /* Tùy chỉnh thanh cuộn cho gọn gàng */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #475569; }
     </style>
 </head>
 <body class="p-4 lg:p-10">
 
-    <h1 class="text-3xl font-black mb-8 text-yellow-400">QUẢN TRỊ VIÊN SHOP BẮP</h1>
+    <h1 class="text-3xl font-black mb-8 text-yellow-400 text-center uppercase tracking-wider">Quản Trị Viên Shop Bắp</h1>
 
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+    <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
         
         <div class="card">
             <h2 class="text-xl font-bold mb-4 border-b border-white/10 pb-2 text-blue-400">📦 Đơn hàng đang chờ</h2>
-            <div id="order-list" class="space-y-4"></div>
+            <div id="order-list" class="space-y-4 max-h-[400px] overflow-y-auto pr-2"></div>
         </div>
 
         <div class="card">
@@ -31,18 +40,23 @@
             <div class="flex flex-col gap-3">
                 <input type="text" id="target-user" placeholder="Nhập tên User (ví dụ: bắp123)">
                 <input type="number" id="target-amount" placeholder="Số tiền muốn cộng (ví dụ: 50000)">
-                <button onclick="updateBalance()" class="btn-green w-full">XÁC NHẬN CỘNG TIỀN</button>
+                <button onclick="updateBalance()" class="btn-green w-full py-3 text-lg shadow-lg shadow-green-500/20">XÁC NHẬN CỘNG TIỀN</button>
             </div>
         </div>
 
         <div class="card">
             <h2 class="text-xl font-bold mb-4 border-b border-white/10 pb-2 text-yellow-500">💳 Duyệt thẻ cào chờ</h2>
-            <div id="card-list" class="space-y-4"></div>
+            <div id="card-list" class="space-y-4 max-h-[400px] overflow-y-auto pr-2"></div>
         </div>
 
         <div class="card">
             <h2 class="text-xl font-bold mb-4 border-b border-white/10 pb-2 text-purple-400">🏦 Yêu cầu Bank</h2>
-            <div id="bank-list" class="space-y-4"></div>
+            <div id="bank-list" class="space-y-4 max-h-[400px] overflow-y-auto pr-2"></div>
+        </div>
+
+        <div class="card xl:col-span-2">
+            <h2 class="text-xl font-bold mb-4 border-b border-white/10 pb-2 text-cyan-400">🎮 Đơn Cày Thuê (Kèm Ảnh Lên Trang Chủ)</h2>
+            <div id="boost-list" class="grid grid-cols-1 md:grid-cols-2 gap-4 max-h-[400px] overflow-y-auto pr-2"></div>
         </div>
 
     </div>
@@ -52,11 +66,11 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
-        // --- GIỮ NGUYÊN LOGIC ĐƠN HÀNG ---
+        // --- GIỮ NGUYÊN LOGIC ĐƠN HÀNG CŨ ---
         db.ref('orders').on('value', snap => {
             const list = document.getElementById('order-list');
             list.innerHTML = "";
-            if(!snap.exists()) { list.innerHTML = "Không có đơn nào."; return; }
+            if(!snap.exists()) { list.innerHTML = "<p class='text-gray-500 text-sm'>Không có đơn nào.</p>"; return; }
             snap.forEach(s => {
                 const o = s.val();
                 if(o.status === 'Chờ xử lý') {
@@ -69,8 +83,8 @@
                                 <input type="text" id="proof-${s.key}" placeholder="https://anh-da-giao-do.jpg" class="w-full text-xs">
                             </div>
                             <div class="flex gap-2">
-                                <button onclick="approveOrder('${s.key}', '${o.user}')" class="btn-green text-xs">Hoàn thành</button>
-                                <button onclick="cancelOrder('${s.key}', '${o.user}', ${o.price || 0})" class="btn-red text-xs">Hủy & Hoàn tiền</button>
+                                <button onclick="approveOrder('${s.key}', '${o.user}')" class="btn-green text-xs flex-1">Hoàn thành</button>
+                                <button onclick="cancelOrder('${s.key}', '${o.user}', ${o.price || 0})" class="btn-red text-xs flex-1">Hủy & Hoàn tiền</button>
                             </div>
                         </div>
                     `;
@@ -114,16 +128,17 @@
         db.ref('bank_requests').on('value', snap => {
             const list = document.getElementById('bank-list');
             list.innerHTML = "";
+            if(!snap.exists()) { list.innerHTML = "<p class='text-gray-500 text-sm'>Không có yêu cầu bank.</p>"; return; }
             snap.forEach(s => {
                 const b = s.val();
                 if(b.status === 'Chờ duyệt') {
                     list.innerHTML += `
-                        <div class="bg-black/30 p-4 rounded-lg flex justify-between items-center">
+                        <div class="bg-black/30 p-4 rounded-lg flex justify-between items-center border border-white/5">
                             <div>
                                 <p><b>${b.user}</b> báo bank <b>${b.amount.toLocaleString()}đ</b></p>
                                 <span class="text-[10px] opacity-40">${b.time}</span>
                             </div>
-                            <button onclick="approveBank('${s.key}', '${b.user}', ${b.amount})" class="btn-green">DUYỆT</button>
+                            <button onclick="approveBank('${s.key}', '${b.user}', ${b.amount})" class="btn-green text-xs">DUYỆT</button>
                         </div>
                     `;
                 }
@@ -140,22 +155,23 @@
             }
         }
 
-        // --- THÊM MỚI: LOGIC DUYỆT THẺ CÀO ---
+        // --- GIỮ NGUYÊN LOGIC DUYỆT THẺ CÀO ---
         db.ref('card_requests').on('value', snap => {
             const list = document.getElementById('card-list');
             list.innerHTML = "";
-            if(!snap.exists()) { list.innerHTML = "Không có thẻ nào."; return; }
+            if(!snap.exists()) { list.innerHTML = "<p class='text-gray-500 text-sm'>Không có thẻ nào.</p>"; return; }
             snap.forEach(s => {
                 const c = s.val();
                 if(c.status === 'Chờ duyệt') {
                     list.innerHTML += `
-                        <div class="bg-black/30 p-4 rounded-lg border border-white/5">
+                        <div class="bg-black/30 p-4 rounded-lg border border-white/5 flex flex-col gap-1">
                             <p class="text-yellow-500 font-bold">${c.type} - ${parseInt(c.amount).toLocaleString()}đ</p>
-                            <p class="text-xs opacity-80">Mã: ${c.code} | Seri: ${c.seri}</p>
-                            <p class="text-[10px] opacity-40 mb-3 text-white">Người nạp: ${c.user}</p>
-                            <div class="flex gap-2">
-                                <button onclick="approveCard('${s.key}', '${c.user}', ${c.amount})" class="btn-green text-[10px]">DUYỆT THẺ</button>
-                                <button onclick="rejectCard('${s.key}')" class="btn-red text-[10px]">THẺ SAI</button>
+                            <p class="text-xs opacity-80">Mã: ${c.code}</p>
+                            <p class="text-xs opacity-80">Seri: ${c.seri}</p>
+                            <p class="text-[10px] opacity-40 mb-2 text-white">Người nạp: ${c.user}</p>
+                            <div class="flex gap-2 mt-auto">
+                                <button onclick="approveCard('${s.key}', '${c.user}', ${c.amount})" class="btn-green text-[10px] flex-1">DUYỆT THẺ</button>
+                                <button onclick="rejectCard('${s.key}')" class="btn-red text-[10px] flex-1">THẺ SAI</button>
                             </div>
                         </div>
                     `;
@@ -178,6 +194,68 @@
             if(!confirm("Xác nhận thẻ này sai?")) return;
             await db.ref('card_requests/'+key).update({ status: 'Thẻ sai' });
             alert("Đã từ chối thẻ.");
+        }
+
+        // --- THÊM MỚI TÍNH NĂNG ĐƠN CÀY THUÊ ---
+        db.ref('boost_orders').on('value', snap => {
+            const list = document.getElementById('boost-list');
+            list.innerHTML = "";
+            if(!snap.exists()) { list.innerHTML = "<p class='text-gray-500 text-sm col-span-2'>Không có đơn cày thuê nào.</p>"; return; }
+            
+            snap.forEach(s => {
+                const b = s.val();
+                if(b.status === 'Chờ xử lý') {
+                    list.innerHTML += `
+                        <div class="bg-black/30 p-4 rounded-lg border border-cyan-500/30 flex flex-col">
+                            <p class="text-lg"><b>Khách:</b> <span class="text-cyan-300">${b.user}</span></p>
+                            <p class="text-sm font-bold mb-1">Gói: ${b.package || 'Không rõ'}</p>
+                            <p class="text-xs opacity-60 mb-3 bg-black/50 p-2 rounded">Tài khoản: ${b.account_info || 'Không có'}</p>
+                            
+                            <div class="mb-3 mt-auto">
+                                <p class="text-[10px] text-yellow-400 uppercase font-bold mb-1">Link ảnh xong đơn (Đẩy lên trang chủ):</p>
+                                <input type="text" id="boost-proof-${s.key}" placeholder="Ví dụ: https://imgur.com/anh.png" class="w-full text-xs">
+                            </div>
+                            
+                            <div class="flex gap-2">
+                                <button onclick="approveBoost('${s.key}', '${b.user}')" class="btn-green text-xs flex-1">Hoàn thành</button>
+                                <button onclick="cancelBoost('${s.key}', '${b.user}', ${b.price || 0})" class="btn-red text-xs flex-1">Hủy & Hoàn tiền</button>
+                            </div>
+                        </div>
+                    `;
+                }
+            });
+        });
+
+        async function approveBoost(key, user) {
+            const proofLink = document.getElementById('boost-proof-'+key).value.trim();
+            const updateData = { status: 'Thành công', completed_at: new Date().toISOString() };
+            if(proofLink) { updateData.proof_image = proofLink; }
+
+            // 1. Cập nhật trạng thái đơn thành công
+            await db.ref('boost_orders/'+key).update(updateData);
+
+            // 2. Đẩy dữ liệu sang node 'public_proofs' để trang chủ gọi lên khoe ảnh
+            if(proofLink) {
+                await db.ref('public_proofs').push({
+                    type: 'Cày Thuê',
+                    user: user,
+                    image: proofLink,
+                    time: new Date().toLocaleDateString('vi-VN')
+                });
+            }
+
+            alert("Đã duyệt đơn cày thuê cho " + user + (proofLink ? " \nĐã lưu ảnh hiển thị lên trang chủ thành công!" : ""));
+        }
+
+        async function cancelBoost(key, user, refund) {
+            if(!confirm("Bạn có chắc muốn hủy đơn cày thuê này? Tiền sẽ được cộng lại cho khách.")) return;
+            const userSnap = await db.ref('users/'+user).get();
+            if(userSnap.exists()) {
+                const currentBal = userSnap.val().balance || 0;
+                await db.ref('users/'+user).update({ balance: currentBal + refund });
+            }
+            await db.ref('boost_orders/'+key).update({ status: 'Đã hủy' });
+            alert("Đã hủy đơn cày thuê và hoàn lại " + refund + "đ cho " + user);
         }
     </script>
 </body>
