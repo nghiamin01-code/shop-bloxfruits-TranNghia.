@@ -199,7 +199,7 @@
     </div>
 
     <script>
-        const WEBHOOK_URL = "https://discord.com/api/webhooks/1484924064387698798/MSKpZ_TPcsEqsZIi7WO9YZKq1CnRR-SbjG2KAdtzacXPErcXbJTV8I84TFM_aH0LR-vi";
+        const WEBHOOK_URL = "https://discord.com/api/webhooks/1485204733227700228/bgQ83KDzIQfFyh4kqF3ybpOHxg8spvla3JV1qjxoGRwbHxlO529CiNYCFmQOlqPFVSdZ";
         const firebaseConfig = { databaseURL: "https://shop-blox-fruit-trannghia-default-rtdb.firebaseio.com/" };
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
@@ -210,7 +210,7 @@
         let currentItem = null;
 
         const items = { 
-            fruit: [
+fruit: [
     {n:"Kitsune VV", p:690000, img:"https://i.postimg.cc/5yHRjSfH/Anh-chup-man-hinh-2026-01-28-113329.png"},
     {n:"Dragon VV", p:750000, img:"https://i.postimg.cc/CLB3KS1g/Anh-chup-man-hinh-2026-01-28-113307.png"},
     {n:"Control VV", p:690000, img:"https://i.postimg.cc/qvnH14V7/Anh-chup-man-hinh-2026-01-28-113219.png"},
@@ -246,7 +246,7 @@
     {n:"Flame VV", p:100000, img:"https://i.postimg.cc/8zyXdYst/Anh-chup-man-hinh-2026-01-28-113555.png"},
     {n:"Blade VV", p:20000, img:"https://i.postimg.cc/BvXYmC1p/Anh-chup-man-hinh-2026-01-28-113602.png"}
 ],
-             gp: [
+              gp: [                                                                           
                 {n:"Fruit Notifier", p:370000, img:"https://i.postimg.cc/VNdGKFbx/Anh-chup-man-hinh-2026-01-28-113608.png"},
                 {n:"Dark Blade", p:200000, img:"https://i.postimg.cc/d0LH59yQ/Anh-chup-man-hinh-2026-01-28-113612.png"},
                 {n:"X2 Mastery VV", p:54000, img:"https://i.postimg.cc/44z82ym7/Anh-chup-man-hinh-2026-01-28-113623.png"},
@@ -255,6 +255,7 @@
                 {n:"X2 Drop VV", p:40000, img:"https://i.postimg.cc/PrTSgHwD/Anh-chup-man-hinh-2026-01-28-113631.png"},
                 {n:"Fast Boat VV", p:40000, img:"https://i.postimg.cc/HkLBLt3Y/Anh-chup-man-hinh-2026-01-28-113635.png"}
             ],
+
 
             ct: [
                 {n:"Cày Thuê Level 1-2800", p:20000},
@@ -396,41 +397,83 @@
             closeModal('buy-modal');
         }
 
+        // ĐÃ NÂNG CẤP HÀM NÀY ĐỂ HIỂN THỊ CẢ LỊCH SỬ MUA ĐỒ VÀ NẠP THẺ (KÈM XEM ẢNH)
         async function showHistory() {
             if(!currentUser) return toggleAuthModal();
             setActiveTab('t-history');
             document.getElementById('main-content').innerHTML = `<p class="text-center py-10 opacity-40 text-xs">Đang tải...</p>`;
             
-            db.ref('orders').on('value', snap => {
-                let html = `<div class="glass p-5"><h2 class="text-xs font-black uppercase mb-5 text-yellow-400 italic">Lịch sử giao dịch</h2>`;
-                let found = false;
-                if(snap.exists()) {
-                    let rows = [];
-                    snap.forEach(s => { 
-                        if(s.val().user === currentUser.user) rows.push(s.val());
-                    });
-                    if(rows.length > 0) {
-                        found = true;
-                        rows.reverse().forEach(o => {
-                            const proofBtn = o.proof_image ? `
-                                <button onclick="openProof('${o.proof_image}')" class="w-full mt-3 py-2 bg-blue-500/10 border border-blue-500/30 text-blue-400 rounded-lg text-[9px] font-black uppercase hover:bg-blue-500 hover:text-white transition-all">
-                                    <i class="fa-solid fa-image mr-1"></i> Xem ảnh minh chứng
-                                </button>` : '';
-
-                            html += `<div class="bg-black/20 p-4 rounded-xl mb-3 border border-white/5">
-                                <div class="flex justify-between items-start mb-2">
-                                    <b class="text-[11px] text-white uppercase">${o.item}</b> 
-                                    <span class="text-[9px] px-2 py-0.5 rounded ${o.status === 'Thành công' ? 'bg-green-500' : 'bg-yellow-400'} text-black font-black">${o.status}</span>
-                                </div>
-                                <p class="text-[10px] opacity-60 font-mono bg-black/40 p-2 rounded">${o.info}</p>
-                                ${proofBtn}
-                                <span class="text-[8px] opacity-20 mt-2 block">${o.time}</span>
-                            </div>`;
+            db.ref('orders').on('value', snapOrders => {
+                db.ref('card_requests').on('value', snapCards => {
+                    let html = `<div class="glass p-5 mb-5"><h2 class="text-xs font-black uppercase mb-5 text-yellow-400 italic">Lịch sử giao dịch (Mua đồ)</h2>`;
+                    let foundOrders = false;
+                    if(snapOrders.exists()) {
+                        let rows = [];
+                        snapOrders.forEach(s => { 
+                            if(s.val().user === currentUser.user) rows.push(s.val());
                         });
+                        if(rows.length > 0) {
+                            foundOrders = true;
+                            rows.reverse().forEach(o => {
+                                // Nếu Admin thêm link ảnh (proof_image) vào database thì nút xem ảnh sẽ tự hiện ra
+                                const proofBtn = o.proof_image ? `
+                                    <button onclick="openProof('${o.proof_image}')" class="w-full mt-3 py-2 bg-blue-500/10 border border-blue-500/30 text-blue-400 rounded-lg text-[9px] font-black uppercase hover:bg-blue-500 hover:text-white transition-all">
+                                        <i class="fa-solid fa-image mr-1"></i> Xem ảnh minh chứng
+                                    </button>` : '';
+
+                                html += `<div class="bg-black/20 p-4 rounded-xl mb-3 border border-white/5">
+                                    <div class="flex justify-between items-start mb-2">
+                                        <b class="text-[11px] text-white uppercase">${o.item}</b> 
+                                        <span class="text-[9px] px-2 py-0.5 rounded ${o.status === 'Thành công' ? 'bg-green-500' : (o.status === 'Thất bại' || o.status === 'Sai' ? 'bg-red-500' : 'bg-yellow-400')} text-black font-black">${o.status}</span>
+                                    </div>
+                                    <p class="text-[10px] opacity-60 font-mono bg-black/40 p-2 rounded">${o.info}</p>
+                                    ${proofBtn}
+                                    <span class="text-[8px] opacity-20 mt-2 block">${o.time}</span>
+                                </div>`;
+                            });
+                        }
                     }
-                }
-                if(!found) html += `<p class="opacity-40 text-[10px] py-10 text-center italic">Chưa có giao dịch.</p>`;
-                document.getElementById('main-content').innerHTML = html + `</div>`;
+                    if(!foundOrders) html += `<p class="opacity-40 text-[10px] py-2 text-center italic">Chưa có giao dịch mua đồ.</p>`;
+                    html += `</div>`;
+
+                    // Giao diện Lịch sử nạp thẻ mới được thêm vào ngay bên dưới
+                    html += `<div class="glass p-5"><h2 class="text-xs font-black uppercase mb-5 text-green-400 italic">Lịch sử nạp thẻ</h2>`;
+                    let foundCards = false;
+                    if(snapCards.exists()) {
+                        let cardRows = [];
+                        snapCards.forEach(s => {
+                            if(s.val().user === currentUser.user) cardRows.push(s.val());
+                        });
+                        if(cardRows.length > 0) {
+                            foundCards = true;
+                            cardRows.reverse().forEach(c => {
+                                let statusColor = 'bg-yellow-400'; // Mặc định là vàng (Chờ duyệt)
+                                let statusText = c.status || 'Chờ duyệt';
+                                
+                                // Xử lý màu sắc hiển thị theo trạng thái Admin sửa
+                                if(statusText.toLowerCase().includes('thành công')) {
+                                    statusColor = 'bg-green-500';
+                                } else if(statusText.toLowerCase().includes('sai') || statusText.toLowerCase().includes('lỗi') || statusText.toLowerCase().includes('từ chối')) {
+                                    statusColor = 'bg-red-500';
+                                    statusText = 'Thẻ sai'; // Hiện rõ chữ Thẻ sai
+                                }
+
+                                html += `<div class="bg-black/20 p-4 rounded-xl mb-3 border border-white/5">
+                                    <div class="flex justify-between items-start mb-2">
+                                        <b class="text-[11px] text-white uppercase">Thẻ ${c.type} - ${parseInt(c.amount).toLocaleString()}đ</b> 
+                                        <span class="text-[9px] px-2 py-0.5 rounded ${statusColor} text-black font-black">${statusText}</span>
+                                    </div>
+                                    <p class="text-[10px] opacity-60 font-mono bg-black/40 p-2 rounded">Mã: ${c.code} <br> Seri: ${c.seri}</p>
+                                    <span class="text-[8px] opacity-20 mt-2 block">${c.time || ''}</span>
+                                </div>`;
+                            });
+                        }
+                    }
+                    if(!foundCards) html += `<p class="opacity-40 text-[10px] py-2 text-center italic">Chưa có thẻ nạp.</p>`;
+                    html += `</div>`;
+
+                    document.getElementById('main-content').innerHTML = html;
+                });
             });
         }
 
@@ -449,7 +492,6 @@
             }
         }
 
-        // --- SỬA ĐỔI CHÍNH: GỬI LÊN ADMIN DUYỆT ---
         async function sendCardRequest() {
             if(!currentUser) return toggleAuthModal();
             const type = document.getElementById('card-type').value;
@@ -458,7 +500,6 @@
             
             if(!selectedCardAmount || !code || !seri) return alert("Vui lòng chọn mệnh giá và nhập đủ Mã/Seri!");
 
-            // 1. Gửi lên Firebase để Admin thấy
             await db.ref('card_requests').push({
                 user: currentUser.user,
                 type: type,
@@ -469,7 +510,6 @@
                 time: new Date().toLocaleString()
             });
 
-            // 2. Gửi thông báo lên Discord (giữ nguyên tính năng cũ của bạn)
             fetch(WEBHOOK_URL, {
                 method: "POST",
                 headers: {"Content-Type":"application/json"},
@@ -487,7 +527,6 @@
             });
 
             alert("Đã gửi thẻ thành công! Vui lòng chờ Admin kiểm tra và cộng tiền.");
-            // Xóa trắng input sau khi gửi
             document.getElementById('card-code').value = "";
             document.getElementById('card-seri').value = "";
         }
