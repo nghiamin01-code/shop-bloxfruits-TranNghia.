@@ -71,7 +71,7 @@
                 <div id="tab-price" class="tab-content">
                     <h2 class="text-xl font-bold mb-6 text-orange-400 border-b border-white/10 pb-2">🏷️ Thay đổi giá sản phẩm</h2>
                     <div class="max-w-md mx-auto space-y-4 bg-black/20 p-6 rounded-xl border border-white/5">
-                        <input type="text" id="product-id" placeholder="ID Sản Phẩm">
+                        <input type="text" id="product-id" placeholder="Nhập Tên Sản Phẩm (Ví dụ: Dragon VV)">
                         <input type="number" id="new-price" placeholder="Giá mới">
                         <button onclick="changeProductPrice()" class="btn-green w-full py-3">CẬP NHẬT GIÁ</button>
                     </div>
@@ -163,17 +163,34 @@
             });
         });
 
-        // HÀM ĐỔI GIÁ
+        // HÀM ĐỔI GIÁ (ĐÃ SỬA ĐỂ TÌM THEO TÊN)
         async function changeProductPrice() {
-            const id = document.getElementById('product-id').value.trim();
+            const inputName = document.getElementById('product-id').value.trim();
             const p = parseInt(document.getElementById('new-price').value);
-            if(!id || isNaN(p)) return alert("Vui lòng điền đủ!");
-            const ref = db.ref('products/' + id);
-            const snap = await ref.get();
-            if(!snap.exists()) return alert("ID này không tồn tại!");
-            await ref.update({ price: p });
-            alert("Đã cập nhật giá mới: " + p.toLocaleString() + "đ");
-            document.getElementById('product-id').value = ""; document.getElementById('new-price').value = "";
+            if(!inputName || isNaN(p)) return alert("Vui lòng điền đủ Tên sản phẩm và Giá!");
+
+            const productsRef = db.ref('products');
+            const snap = await productsRef.once('value');
+            let found = false;
+            let targetId = null;
+
+            // Vòng lặp tìm sản phẩm có tên khớp với input
+            snap.forEach(childSnap => {
+                const product = childSnap.val();
+                if (product.name && product.name.toLowerCase() === inputName.toLowerCase()) {
+                    found = true;
+                    targetId = childSnap.key; // Lấy ID của sản phẩm đó
+                }
+            });
+
+            if (found && targetId) {
+                await db.ref('products/' + targetId).update({ price: p });
+                alert("Thành công! Đã cập nhật giá mới cho '" + inputName + "' là " + p.toLocaleString() + "đ");
+                document.getElementById('product-id').value = ""; 
+                document.getElementById('new-price').value = "";
+            } else {
+                alert("Không tìm thấy sản phẩm nào có tên là: " + inputName + ". Lưu ý phải nhập chính xác tên hiển thị trên shop!");
+            }
         }
 
         // HÀM DUYỆT ĐƠN
