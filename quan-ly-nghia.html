@@ -127,8 +127,8 @@
                 <section id="tab-orders" class="tab-content">
                     <div class="glass-card p-8"><p class="text-slate-400 italic">Tính năng quản lý đơn hàng đang được cập nhật giao diện...</p></div>
                 </section>
-                <section id="tab-cards" class="tab-content"><div class="glass-card p-8">Giao diện duyệt thẻ...</div></section>
-                <section id="tab-bank" class="tab-content"><div class="glass-card p-8">Giao diện duyệt bank...</div></section>
+                <section id="tab-cards" class="tab-content"><div class="glass-card p-8 text-slate-400">Giao diện duyệt thẻ...</div></section>
+                <section id="tab-bank" class="tab-content"><div class="glass-card p-8 text-slate-400">Giao diện duyệt bank...</div></section>
             </div>
         </main>
     </div>
@@ -161,6 +161,7 @@
             if(evt) evt.currentTarget.classList.add("active");
         }
 
+        // ĐOẠN XỬ LÝ ĐÃ ĐƯỢC TỐI ƯU ĐỂ NHẬN DIỆN TÊN CHÍNH XÁC HƠN
         async function updatePriceByName() {
             const inputVal = document.getElementById('product-name-input').value.trim();
             const inputLow = inputVal.toLowerCase();
@@ -172,22 +173,26 @@
             const snapshot = await ref.once('value');
             let foundKey = null;
 
+            // Duyệt toàn bộ danh sách để tìm TÊN khớp (không phân biệt hoa thường)
             snapshot.forEach((child) => {
                 const data = child.val();
-                if (data.name && data.name.toLowerCase() === inputLow) {
+                if (data.name && data.name.toString().toLowerCase() === inputLow) {
                     foundKey = child.key;
                 }
             });
 
-            if (!foundKey && snapshot.hasChild(inputVal)) foundKey = inputVal;
+            // Nếu không tìm thấy TÊN, thì mới kiểm tra xem input có phải là ID trực tiếp không
+            if (!foundKey && snapshot.hasChild(inputVal)) {
+                foundKey = inputVal;
+            }
 
             if (foundKey) {
                 await db.ref('products/' + foundKey).update({ price: newPrice });
-                alert("✨ Tuyệt vời! Đã cập nhật giá mới thành công.");
+                alert("✨ Thành công! Đã đổi giá cho: " + inputVal);
                 document.getElementById('product-name-input').value = "";
                 document.getElementById('new-price-input').value = "";
             } else {
-                alert("❌ Không tìm thấy sản phẩm này trên hệ thống.");
+                alert("❌ Lỗi: Không tìm thấy sản phẩm nào có tên hoặc ID là '" + inputVal + "'");
             }
         }
 
