@@ -2,197 +2,139 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ADMIN DASHBOARD - SHOP BẮP</title>
+    <title>ADMIN - SHOP BẮP</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap');
-        body { font-family: 'Inter', sans-serif; background: #0f172a; color: #f8fafc; }
-        .glass-card { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.1); border-radius: 16px; }
-        .sidebar-item { transition: all 0.3s; border-radius: 10px; margin-bottom: 5px; cursor: pointer; }
-        .sidebar-item:hover { background: rgba(59, 130, 246, 0.1); color: #60a5fa; }
-        .sidebar-item.active { background: #3b82f6; color: white; box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4); }
-        .custom-input { background: rgba(15, 23, 42, 0.6); border: 1px solid #334155; transition: 0.3s; }
-        .custom-input:focus { border-color: #3b82f6; box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2); outline: none; }
-        .tab-content { display: none; animation: slideUp 0.4s ease-out; }
-        .tab-content.active { display: block; }
-        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-        ::-webkit-scrollbar { width: 6px; }
-        ::-webkit-scrollbar-track { background: #0f172a; }
-        ::-webkit-scrollbar-thumb { background: #334155; border-radius: 10px; }
+        body { background: #0f172a; color: white; font-family: sans-serif; overflow-x: hidden; }
+        #admin-content { display: none; }
+        .card { background: #1e293b; border: 1px solid #334155; border-radius: 12px; padding: 20px; }
+        input { background: #0f172a; border: 1px solid #334155; color: white; padding: 10px; border-radius: 6px; width: 100%; outline: none; }
+        input:focus { border-color: #3b82f6; }
+        .btn-tab { padding: 10px 20px; border-radius: 8px; font-weight: bold; transition: 0.3s; background: #334155; color: #94a3b8; white-space: nowrap; }
+        .btn-tab.active { background: #3b82f6; color: white; box-shadow: 0 4px 14px rgba(59, 130, 246, 0.4); }
+        .btn-green { background: #22c55e; color: black; font-weight: bold; padding: 8px 16px; border-radius: 6px; transition: 0.2s; }
+        .btn-green:hover { background: #16a34a; transform: scale(1.02); }
+        .btn-red { background: #ef4444; color: white; font-weight: bold; padding: 8px 16px; border-radius: 6px; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; animation: fadeIn 0.3s ease; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .info-box { background: rgba(255,255,255,0.05); border: 1px ridge rgba(255,255,255,0.1); padding: 10px; border-radius: 8px; font-family: monospace; font-size: 13px; margin: 10px 0; }
     </style>
 </head>
-<body class="overflow-hidden">
+<body>
 
-    <div id="lock-screen" class="fixed inset-0 bg-[#0f172a] z-[9999] flex items-center justify-center p-6">
-        <div class="max-w-md w-full glass-card p-10 text-center shadow-2xl border-t-4 border-blue-500">
-            <div class="w-20 h-20 bg-blue-500/20 rounded-full flex items-center justify-center mx-auto mb-6">
-                <i class="fas fa-user-shield text-3xl text-blue-500"></i>
-            </div>
-            <h2 class="text-3xl font-bold mb-2">Admin Login</h2>
-            <p class="text-gray-400 mb-8">Vui lòng xác minh quyền truy cập</p>
-            <input type="password" id="admin-pass" placeholder="Mật khẩu quản trị..." class="custom-input w-full p-4 rounded-xl text-center mb-4 text-xl tracking-widest">
-            <button onclick="checkPass()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-xl shadow-lg transition duration-300">
-                <i class="fas fa-sign-in-alt mr-2"></i> ĐĂNG NHẬP
-            </button>
-            <p id="fail-msg" class="text-red-400 mt-4 hidden font-semibold animate-pulse">Mật khẩu không chính xác!</p>
+    <div id="lock-screen" class="fixed inset-0 bg-[#0f172a] z-[999] flex items-center justify-center p-6">
+        <div class="max-w-sm w-full bg-[#1e293b] p-8 rounded-2xl shadow-2xl border border-blue-500/30 text-center">
+            <h2 class="text-2xl font-bold text-blue-400 mb-6 uppercase">Xác minh Admin</h2>
+            <input type="password" id="admin-pass" placeholder="Nhập mật khẩu..." class="text-center mb-4 text-lg">
+            <button onclick="checkPass()" class="btn-green w-full py-3 text-lg">ĐĂNG NHẬP</button>
+            <p id="fail-msg" class="text-red-500 mt-4 hidden text-sm font-bold">Mật khẩu không chính xác!</p>
         </div>
     </div>
 
-    <div id="admin-content" class="flex h-screen">
-        <aside class="w-72 bg-[#1e293b]/50 border-r border-slate-800 p-6 flex flex-col hidden md:flex">
-            <div class="flex items-center gap-3 mb-10 px-2">
-                <div class="w-10 h-10 bg-yellow-500 rounded-lg flex items-center justify-center shadow-lg">
-                    <i class="fas fa-store text-slate-900"></i>
-                </div>
-                <span class="text-xl font-bold tracking-tight text-yellow-500">SHOP BẮP</span>
+    <div id="admin-content" class="p-4 lg:p-10">
+        <div class="max-w-6xl mx-auto">
+            <h1 class="text-3xl font-black mb-8 text-yellow-400 text-center uppercase tracking-tighter">Hệ Thống Quản Trị Shop Bắp</h1>
+
+            <div class="flex overflow-x-auto gap-2 mb-8 pb-2 justify-start md:justify-center no-scrollbar">
+                <button class="btn-tab active" onclick="openTab(event, 'tab-orders')">📦 Đơn Acc</button>
+                <button class="btn-tab" onclick="event, 'tab-boost', openTab(event, 'tab-boost')">🎮 Đơn Cày Thuê</button>
+                <button class="btn-tab" onclick="openTab(event, 'tab-cards')">💳 Duyệt Thẻ</button>
+                <button class="btn-tab" onclick="openTab(event, 'tab-bank')">🏦 Duyệt Bank</button>
+                <button class="btn-tab" onclick="openTab(event, 'tab-price')">🏷️ Đổi Giá Shop</button>
+                <button class="btn-tab" onclick="openTab(event, 'tab-money')">💰 Cộng Tiền User</button>
             </div>
-            
-            <nav class="flex-1">
-                <div class="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-4 px-2">Quản lý chính</div>
-                <div class="sidebar-item active p-4 flex items-center gap-3" onclick="openTab(event, 'tab-price')">
-                    <i class="fas fa-tags w-5"></i> <span>Đổi Giá Shop</span>
+
+            <div class="card min-h-[400px]">
+                <div id="tab-price" class="tab-content active">
+                    <h2 class="text-xl font-bold mb-6 text-orange-400 border-b border-white/10 pb-2">🏷️ Thay đổi giá sản phẩm</h2>
+                    <div class="max-w-md mx-auto space-y-4 bg-black/20 p-6 rounded-xl border border-white/5">
+                        <p class="text-xs text-gray-400">Nhập đúng tên hiển thị trên Shop (VD: Dragon VV)</p>
+                        <input type="text" id="product-name-input" placeholder="Tên sản phẩm...">
+                        <input type="number" id="new-price-input" placeholder="Giá mới (VD: 800000)">
+                        <button onclick="updatePriceByName()" class="btn-green w-full py-3">CẬP NHẬT GIÁ NGAY</button>
+                    </div>
                 </div>
-                <div class="sidebar-item p-4 flex items-center gap-3" onclick="openTab(event, 'tab-money')">
-                    <i class="fas fa-wallet w-5"></i> <span>Cộng Tiền User</span>
-                </div>
-                <div class="sidebar-item p-4 flex items-center gap-3" onclick="openTab(event, 'tab-orders')">
-                    <i class="fas fa-box w-5"></i> <span>Đơn Acc</span>
+
+                <div id="tab-orders" class="tab-content">
+                    <h2 class="text-xl font-bold mb-6 text-blue-400 border-b border-white/10 pb-2">📦 Đơn hàng Acc (Mới)</h2>
+                    <div id="order-list" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
                 </div>
                 
-                <div class="text-xs font-semibold text-slate-500 uppercase tracking-wider mt-10 mb-4 px-2">Giao dịch</div>
-                <div class="sidebar-item p-4 flex items-center gap-3" onclick="openTab(event, 'tab-cards')">
-                    <i class="fas fa-credit-card w-5"></i> <span>Duyệt Thẻ</span>
-                </div>
-                <div class="sidebar-item p-4 flex items-center gap-3" onclick="openTab(event, 'tab-bank')">
-                    <i class="fas fa-university w-5"></i> <span>Duyệt Bank</span>
-                </div>
-            </nav>
-
-            <div class="glass-card p-4 mt-auto">
-                <p class="text-xs text-slate-400">Đang hoạt động</p>
-                <p class="text-sm font-semibold text-green-400 flex items-center gap-2">
-                    <span class="relative flex h-2 w-2"><span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span><span class="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span></span>
-                    Admin Nghĩa
-                </p>
-            </div>
-        </aside>
-
-        <main class="flex-1 overflow-y-auto p-4 md:p-8 bg-gradient-to-br from-[#0f172a] to-[#1e293b]">
-            <header class="flex justify-between items-center mb-8">
-                <h2 id="page-title" class="text-2xl font-bold text-white">🏷️ Quản Lý Giá Sản Phẩm</h2>
-                <div class="flex items-center gap-4">
-                    <button class="bg-slate-800 p-2 rounded-full hover:bg-slate-700 transition"><i class="fas fa-bell"></i></button>
-                    <div class="h-10 w-10 rounded-full bg-blue-600 flex items-center justify-center font-bold">N</div>
-                </div>
-            </header>
-
-            <div class="max-w-4xl mx-auto">
-                <section id="tab-price" class="tab-content active">
-                    <div class="glass-card p-8">
-                        <div class="flex items-center gap-4 mb-6">
-                            <i class="fas fa-info-circle text-blue-400 text-xl"></i>
-                            <p class="text-slate-400 text-sm">Bạn có thể nhập tên sản phẩm (VD: Dragon VV) hoặc ID đều được. Hệ thống sẽ tự động tìm kiếm và cập nhật giá mới.</p>
-                        </div>
-                        <div class="space-y-6">
-                            <div>
-                                <label class="block text-sm font-medium text-slate-400 mb-2">Tên sản phẩm hoặc ID</label>
-                                <input type="text" id="product-name-input" placeholder="Ví dụ: Dragon VV" class="custom-input w-full p-4 rounded-xl text-white">
-                            </div>
-                            <div>
-                                <label class="block text-sm font-medium text-slate-400 mb-2">Giá tiền muốn đổi (VNĐ)</label>
-                                <input type="number" id="new-price-input" placeholder="Ví dụ: 800000" class="custom-input w-full p-4 rounded-xl text-white">
-                            </div>
-                            <button onclick="updatePriceByName()" class="w-full bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-slate-900 font-bold py-4 rounded-xl shadow-lg transform transition active:scale-95">
-                                <i class="fas fa-save mr-2"></i> CẬP NHẬT GIÁ NGAY
-                            </button>
-                        </div>
+                <div id="tab-money" class="tab-content">
+                    <h2 class="text-xl font-bold mb-6 text-green-400 border-b border-white/10 pb-2">💰 Cộng tiền User</h2>
+                    <div class="max-w-md mx-auto space-y-4 bg-black/20 p-6 rounded-xl border border-white/5">
+                        <input type="text" id="target-user" placeholder="Tên User">
+                        <input type="number" id="target-amount" placeholder="Số tiền cộng">
+                        <button onclick="updateBalance()" class="btn-green w-full py-3">XÁC NHẬN CỘNG</button>
                     </div>
-                </section>
-
-                <section id="tab-money" class="tab-content">
-                    <div class="glass-card p-8">
-                        <h3 class="text-xl font-bold mb-6 text-green-400">💰 Nạp tiền cho người dùng</h3>
-                        <div class="space-y-6">
-                            <input type="text" id="target-user" placeholder="Tên tài khoản người dùng..." class="custom-input w-full p-4 rounded-xl">
-                            <input type="number" id="target-amount" placeholder="Số tiền cần cộng..." class="custom-input w-full p-4 rounded-xl">
-                            <button onclick="updateBalance()" class="w-full bg-green-500 text-slate-900 font-bold py-4 rounded-xl">XÁC NHẬN NẠP TIỀN</button>
-                        </div>
-                    </div>
-                </section>
-
-                <section id="tab-orders" class="tab-content">
-                    <div class="glass-card p-8"><p class="text-slate-400 italic">Tính năng quản lý đơn hàng đang được cập nhật giao diện...</p></div>
-                </section>
-                <section id="tab-cards" class="tab-content"><div class="glass-card p-8 text-slate-400">Giao diện duyệt thẻ...</div></section>
-                <section id="tab-bank" class="tab-content"><div class="glass-card p-8 text-slate-400">Giao diện duyệt bank...</div></section>
+                </div>
             </div>
-        </main>
+        </div>
     </div>
 
     <script>
+        // FIREBASE CONFIG
         const firebaseConfig = { databaseURL: "https://shop-blox-fruit-trannghia-default-rtdb.firebaseio.com/" };
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
         function checkPass() {
-            if(document.getElementById('admin-pass').value === 'nghia672011') {
-                document.getElementById('lock-screen').style.opacity = '0';
-                setTimeout(() => {
-                    document.getElementById('lock-screen').style.display = 'none';
-                    document.body.style.overflow = 'auto';
-                }, 300);
+            const p = document.getElementById('admin-pass').value;
+            if(p === 'nghia672011') {
+                document.getElementById('lock-screen').style.display = 'none';
+                document.getElementById('admin-content').style.display = 'block';
             } else {
                 document.getElementById('fail-msg').classList.remove('hidden');
             }
         }
 
         function openTab(evt, tabName) {
-            let tabContents = document.getElementsByClassName("tab-content");
-            for (let content of tabContents) content.classList.remove("active");
-            
-            let sidebarItems = document.getElementsByClassName("sidebar-item");
-            for (let item of sidebarItems) item.classList.remove("active");
-
+            var i, tabContent, btnTab;
+            tabContent = document.getElementsByClassName("tab-content");
+            for (i = 0; i < tabContent.length; i++) { tabContent[i].classList.remove("active"); }
+            btnTab = document.getElementsByClassName("btn-tab");
+            for (i = 0; i < btnTab.length; i++) { btnTab[i].classList.remove("active"); }
             document.getElementById(tabName).classList.add("active");
-            if(evt) evt.currentTarget.classList.add("active");
+            evt.currentTarget.classList.add("active");
         }
 
-        // ĐOẠN XỬ LÝ ĐÃ ĐƯỢC TỐI ƯU ĐỂ NHẬN DIỆN TÊN CHÍNH XÁC HƠN
+        // --- HÀM ĐÃ SỬA: TÌM THEO TÊN, NẾU KHÔNG CÓ THÌ TÌM THEO ID ---
         async function updatePriceByName() {
             const inputVal = document.getElementById('product-name-input').value.trim();
             const inputLow = inputVal.toLowerCase();
             const newPrice = parseInt(document.getElementById('new-price-input').value);
 
-            if (!inputVal || isNaN(newPrice)) return alert("Vui lòng điền đủ thông tin!");
+            if (!inputVal || isNaN(newPrice)) return alert("Vui lòng nhập đủ Tên và Giá!");
 
             const ref = db.ref('products');
             const snapshot = await ref.once('value');
             let foundKey = null;
 
-            // Duyệt toàn bộ danh sách để tìm TÊN khớp (không phân biệt hoa thường)
+            // Bước 1: Quét tìm theo Tên (name)
             snapshot.forEach((child) => {
                 const data = child.val();
-                if (data.name && data.name.toString().toLowerCase() === inputLow) {
+                if (data.name && data.name.toLowerCase() === inputLow) {
                     foundKey = child.key;
                 }
             });
 
-            // Nếu không tìm thấy TÊN, thì mới kiểm tra xem input có phải là ID trực tiếp không
-            if (!foundKey && snapshot.hasChild(inputVal)) {
-                foundKey = inputVal;
+            // Bước 2: Nếu không thấy Tên, kiểm tra xem nó có phải là ID trực tiếp không
+            if (!foundKey) {
+                if (snapshot.hasChild(inputVal)) {
+                    foundKey = inputVal;
+                }
             }
 
             if (foundKey) {
                 await db.ref('products/' + foundKey).update({ price: newPrice });
-                alert("✨ Thành công! Đã đổi giá cho: " + inputVal);
+                alert("Đã đổi giá thành công cho: " + inputVal);
                 document.getElementById('product-name-input').value = "";
                 document.getElementById('new-price-input').value = "";
             } else {
-                alert("❌ Lỗi: Không tìm thấy sản phẩm nào có tên hoặc ID là '" + inputVal + "'");
+                alert("KHÔNG TÌM THẤY sản phẩm nào có Tên hoặc ID là: " + inputVal);
             }
         }
 
@@ -200,9 +142,9 @@
             const u = document.getElementById('target-user').value.trim().toLowerCase();
             const a = parseInt(document.getElementById('target-amount').value);
             const snap = await db.ref('users/'+u).get();
-            if(!snap.exists()) return alert("Tài khoản không tồn tại!");
+            if(!snap.exists()) return alert("User không đúng!");
             await db.ref('users/'+u).update({ balance: (snap.val().balance || 0) + a });
-            alert("✅ Đã cộng tiền thành công cho " + u);
+            alert("Cộng tiền thành công!");
         }
     </script>
 </body>
