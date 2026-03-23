@@ -142,7 +142,7 @@
     </div>
 
     <script>
-        // CẤU HÌNH FIREBASE - Đã liên kết chính xác URL của bạn
+        // FIREBASE CONFIG - Chỉ kết nối dữ liệu, không làm gì khác
         const firebaseConfig = { databaseURL: "https://shop-blox-fruit-trannghia-default-rtdb.firebaseio.com/" };
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
@@ -166,18 +166,14 @@
         }
 
         function loadAllData() {
-            // Duyệt Cày Thuê - Liên kết path 'cay_thue'
+            // Liên kết các đường dẫn (paths) khớp với trang chủ
             db.ref('cay_thue').on('value', s => renderOrderTable(s, 'list-boost', 'package'));
-            
-            // Duyệt Trái Ác Quỷ / GP - Liên kết path 'items_game'
             db.ref('items_game').on('value', s => renderOrderTable(s, 'list-items', 'item_name'));
-
-            // Duyệt Thẻ - Liên kết path 'nap_the'
+            
             db.ref('nap_the').on('value', s => {
                 const b = document.getElementById('list-cards'); b.innerHTML = "";
                 s.forEach(c => {
                     const d = c.val();
-                    // Nhận diện trạng thái đơn từ trang chủ
                     if(d.status === "pending" || d.status === "chờ duyệt") {
                         b.innerHTML += `<tr><td>${d.username}</td><td>${d.type}<br>${Number(d.amount).toLocaleString()}đ</td><td>Mã: ${d.pin}<br>Seri: ${d.serial}</td>
                         <td><button onclick="approvePay('nap_the','${c.key}',${d.amount},'${d.username}')" class="btn-green text-xs">Duyệt</button></td></tr>`;
@@ -185,7 +181,6 @@
                 });
             });
 
-            // Duyệt Bank - Liên kết path 'nap_bank'
             db.ref('nap_bank').on('value', s => {
                 const b = document.getElementById('list-bank'); b.innerHTML = "";
                 s.forEach(c => {
@@ -217,51 +212,44 @@
 
         async function completeWithProof(path, id) {
             const proof = document.getElementById('proof-' + id).value.trim();
-            if(!proof && !confirm("Bạn chưa nhập ảnh minh chứng Gift, vẫn tiếp tục?")) return;
-            
             await db.ref(path + '/' + id).update({ 
                 status: 'Hoàn thành',
                 admin_proof: proof,
                 time_done: new Date().toLocaleString()
             });
-            alert("✅ Đã hoàn thành đơn hàng!");
+            alert("Đã hoàn thành!");
         }
 
         async function approvePay(path, id, amount, user) {
             const uRef = db.ref('users/' + user.toLowerCase());
             const s = await uRef.get();
             if(s.exists()){
-                const newBalance = (s.val().balance || 0) + parseInt(amount);
-                await uRef.update({ balance: newBalance });
+                await uRef.update({ balance: (s.val().balance || 0) + parseInt(amount) });
                 await db.ref(path+'/'+id).update({ status: 'thành công' });
-                alert("Đã duyệt đơn và cộng tiền cho: " + user);
-            } else {
-                alert("Lỗi: Không tìm thấy người dùng này trên hệ thống!");
+                alert("Đã duyệt đơn!");
             }
         }
 
         async function updatePriceByName() {
             const name = document.getElementById('product-name-input').value.trim();
             const price = parseInt(document.getElementById('new-price-input').value);
-            if (!name || isNaN(price)) return alert("Vui lòng nhập đủ thông tin!");
             const snap = await db.ref('products').once('value');
             let key = null;
             snap.forEach(c => { if(c.val().name && c.val().name.toLowerCase() === name.toLowerCase()) key = c.key; });
-            if(!key && snap.hasChild(name)) key = name;
             if(key) {
                 await db.ref('products/'+key).update({ price: price });
-                alert("Đã cập nhật giá mới!");
-            } else { alert("Không tìm thấy sản phẩm này!"); }
+                alert("Đã đổi giá!");
+            }
         }
 
         async function updateBalance() {
             const u = document.getElementById('target-user').value.trim().toLowerCase();
             const a = parseInt(document.getElementById('target-amount').value);
-            if(!u || isNaN(a)) return alert("Nhập đủ tên và số tiền!");
             const snap = await db.ref('users/'+u).get();
-            if(!snap.exists()) return alert("User không tồn tại!");
-            await db.ref('users/'+u).update({ balance: (snap.val().balance || 0) + a });
-            alert("Đã cộng tiền thành công!");
+            if(snap.exists()) {
+                await db.ref('users/'+u).update({ balance: (snap.val().balance || 0) + a });
+                alert("Đã cộng tiền!");
+            }
         }
     </script>
 </body>
