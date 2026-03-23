@@ -6,6 +6,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
         body { background: #0f172a; color: white; font-family: sans-serif; overflow-x: hidden; }
         #admin-content { display: none; }
@@ -21,6 +22,9 @@
         .tab-content.active { display: block; animation: fadeIn 0.3s ease; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         .info-box { background: rgba(255,255,255,0.05); border: 1px ridge rgba(255,255,255,0.1); padding: 10px; border-radius: 8px; font-family: monospace; font-size: 13px; margin: 10px 0; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        th, td { padding: 12px; border-bottom: 1px solid #334155; text-align: left; }
+        th { color: #94a3b8; font-size: 13px; text-transform: uppercase; }
     </style>
 </head>
 <body>
@@ -39,8 +43,7 @@
             <h1 class="text-3xl font-black mb-8 text-yellow-400 text-center uppercase tracking-tighter">Hệ Thống Quản Trị Shop Bắp</h1>
 
             <div class="flex overflow-x-auto gap-2 mb-8 pb-2 justify-start md:justify-center no-scrollbar">
-                <button class="btn-tab active" onclick="openTab(event, 'tab-orders')">📦 Đơn Acc</button>
-                <button class="btn-tab" onclick="event, 'tab-boost', openTab(event, 'tab-boost')">🎮 Đơn Cày Thuê</button>
+                <button class="btn-tab active" onclick="openTab(event, 'tab-boost')">🎮 Đơn Cày Thuê</button>
                 <button class="btn-tab" onclick="openTab(event, 'tab-cards')">💳 Duyệt Thẻ</button>
                 <button class="btn-tab" onclick="openTab(event, 'tab-bank')">🏦 Duyệt Bank</button>
                 <button class="btn-tab" onclick="openTab(event, 'tab-price')">🏷️ Đổi Giá Shop</button>
@@ -48,7 +51,7 @@
             </div>
 
             <div class="card min-h-[400px]">
-                <div id="tab-price" class="tab-content active">
+                <div id="tab-price" class="tab-content">
                     <h2 class="text-xl font-bold mb-6 text-orange-400 border-b border-white/10 pb-2">🏷️ Thay đổi giá sản phẩm</h2>
                     <div class="max-w-md mx-auto space-y-4 bg-black/20 p-6 rounded-xl border border-white/5">
                         <p class="text-xs text-gray-400">Nhập đúng tên hiển thị trên Shop (VD: Dragon VV)</p>
@@ -58,9 +61,56 @@
                     </div>
                 </div>
 
-                <div id="tab-orders" class="tab-content">
-                    <h2 class="text-xl font-bold mb-6 text-blue-400 border-b border-white/10 pb-2">📦 Đơn hàng Acc (Mới)</h2>
-                    <div id="order-list" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
+                <div id="tab-boost" class="tab-content active">
+                    <h2 class="text-xl font-bold mb-6 text-blue-400 border-b border-white/10 pb-2">🎮 Quản lý đơn Cày Thuê</h2>
+                    <div class="overflow-x-auto">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>User</th>
+                                    <th>Gói Cày</th>
+                                    <th>Tài khoản / MK</th>
+                                    <th>Trạng thái</th>
+                                    <th>Hành động</th>
+                                </tr>
+                            </thead>
+                            <tbody id="list-boost"></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div id="tab-cards" class="tab-content">
+                    <h2 class="text-xl font-bold mb-6 text-pink-400 border-b border-white/10 pb-2">💳 Danh sách thẻ nạp</h2>
+                    <div class="overflow-x-auto">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>User</th>
+                                    <th>Loại/Mệnh giá</th>
+                                    <th>Mã/Seri</th>
+                                    <th>Hành động</th>
+                                </tr>
+                            </thead>
+                            <tbody id="list-cards"></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div id="tab-bank" class="tab-content">
+                    <h2 class="text-xl font-bold mb-6 text-emerald-400 border-b border-white/10 pb-2">🏦 Duyệt Bank / MoMo</h2>
+                    <div class="overflow-x-auto">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>User</th>
+                                    <th>Số tiền</th>
+                                    <th>Nội dung</th>
+                                    <th>Hành động</th>
+                                </tr>
+                            </thead>
+                            <tbody id="list-bank"></tbody>
+                        </table>
+                    </div>
                 </div>
                 
                 <div id="tab-money" class="tab-content">
@@ -76,7 +126,6 @@
     </div>
 
     <script>
-        // FIREBASE CONFIG
         const firebaseConfig = { databaseURL: "https://shop-blox-fruit-trannghia-default-rtdb.firebaseio.com/" };
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
@@ -86,6 +135,7 @@
             if(p === 'nghia672011') {
                 document.getElementById('lock-screen').style.display = 'none';
                 document.getElementById('admin-content').style.display = 'block';
+                loadData(); // Tải dữ liệu khi vào admin
             } else {
                 document.getElementById('fail-msg').classList.remove('hidden');
             }
@@ -101,40 +151,104 @@
             evt.currentTarget.classList.add("active");
         }
 
-        // --- HÀM ĐÃ SỬA: TÌM THEO TÊN, NẾU KHÔNG CÓ THÌ TÌM THEO ID ---
+        // TẢI DỮ LIỆU TỪ FIREBASE
+        function loadData() {
+            // Load Cày Thuê
+            db.ref('cay_thue').on('value', snap => {
+                const list = document.getElementById('list-boost');
+                list.innerHTML = "";
+                snap.forEach(child => {
+                    const d = child.val();
+                    if(d.status === "đang chờ") {
+                        list.innerHTML += `<tr>
+                            <td>${d.username}</td>
+                            <td>${d.package}</td>
+                            <td>TK: ${d.acc}<br>MK: ${d.pass}</td>
+                            <td><span class="text-yellow-500">${d.status}</span></td>
+                            <td>
+                                <button onclick="handleStatus('cay_thue', '${child.key}', 'Hoàn thành')" class="btn-green text-xs">Xong</button>
+                            </td>
+                        </tr>`;
+                    }
+                });
+            });
+
+            // Load Thẻ Cào
+            db.ref('nap_the').on('value', snap => {
+                const list = document.getElementById('list-cards');
+                list.innerHTML = "";
+                snap.forEach(child => {
+                    const d = child.val();
+                    if(d.status === "chờ duyệt") {
+                        list.innerHTML += `<tr>
+                            <td>${d.username}</td>
+                            <td>${d.type} - ${Number(d.amount).toLocaleString()}đ</td>
+                            <td class="text-xs">Mã: ${d.pin}<br>Seri: ${d.serial}</td>
+                            <td>
+                                <button onclick="handlePay('nap_the', '${child.key}', 'thành công', ${d.amount}, '${d.username}')" class="btn-green text-xs">Duyệt</button>
+                                <button onclick="handleStatus('nap_the', '${child.key}', 'thất bại')" class="btn-red text-xs">Hủy</button>
+                            </td>
+                        </tr>`;
+                    }
+                });
+            });
+
+            // Load Bank
+            db.ref('nap_bank').on('value', snap => {
+                const list = document.getElementById('list-bank');
+                list.innerHTML = "";
+                snap.forEach(child => {
+                    const d = child.val();
+                    if(d.status === "chờ duyệt") {
+                        list.innerHTML += `<tr>
+                            <td>${d.username}</td>
+                            <td>${Number(d.amount).toLocaleString()}đ</td>
+                            <td>${d.content}</td>
+                            <td>
+                                <button onclick="handlePay('nap_bank', '${child.key}', 'thành công', ${d.amount}, '${d.username}')" class="btn-green text-xs">Duyệt</button>
+                                <button onclick="handleStatus('nap_bank', '${child.key}', 'thất bại')" class="btn-red text-xs">Hủy</button>
+                            </td>
+                        </tr>`;
+                    }
+                });
+            });
+        }
+
+        async function handleStatus(path, id, status) {
+            await db.ref(path + '/' + id).update({ status: status });
+            alert("Đã cập nhật trạng thái!");
+        }
+
+        async function handlePay(path, id, status, amount, user) {
+            const userRef = db.ref('users/' + user.toLowerCase());
+            const snap = await userRef.get();
+            if(snap.exists()) {
+                await userRef.update({ balance: (snap.val().balance || 0) + amount });
+                await db.ref(path + '/' + id).update({ status: status });
+                alert("Đã cộng tiền và duyệt đơn!");
+            }
+        }
+
         async function updatePriceByName() {
             const inputVal = document.getElementById('product-name-input').value.trim();
             const inputLow = inputVal.toLowerCase();
             const newPrice = parseInt(document.getElementById('new-price-input').value);
-
             if (!inputVal || isNaN(newPrice)) return alert("Vui lòng nhập đủ Tên và Giá!");
-
             const ref = db.ref('products');
             const snapshot = await ref.once('value');
             let foundKey = null;
-
-            // Bước 1: Quét tìm theo Tên (name)
             snapshot.forEach((child) => {
                 const data = child.val();
-                if (data.name && data.name.toLowerCase() === inputLow) {
-                    foundKey = child.key;
-                }
+                if (data.name && data.name.toLowerCase() === inputLow) { foundKey = child.key; }
             });
-
-            // Bước 2: Nếu không thấy Tên, kiểm tra xem nó có phải là ID trực tiếp không
-            if (!foundKey) {
-                if (snapshot.hasChild(inputVal)) {
-                    foundKey = inputVal;
-                }
-            }
-
+            if (!foundKey && snapshot.hasChild(inputVal)) { foundKey = inputVal; }
             if (foundKey) {
                 await db.ref('products/' + foundKey).update({ price: newPrice });
                 alert("Đã đổi giá thành công cho: " + inputVal);
                 document.getElementById('product-name-input').value = "";
                 document.getElementById('new-price-input').value = "";
             } else {
-                alert("KHÔNG TÌM THẤY sản phẩm nào có Tên hoặc ID là: " + inputVal);
+                alert("KHÔNG TÌM THẤY sản phẩm!");
             }
         }
 
