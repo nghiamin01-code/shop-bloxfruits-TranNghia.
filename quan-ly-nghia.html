@@ -143,22 +143,37 @@
             evt.currentTarget.classList.add("active");
         }
 
+        // ==========================================
+        // HÀM ĐỔI GIÁ ĐÃ ĐƯỢC CHỈNH SỬA (THÔNG MINH HƠN)
+        // ==========================================
         async function updatePrice() {
             const name = document.getElementById('product-name').value.trim();
             const newPrice = parseInt(document.getElementById('product-price').value);
+            
             if(!name || isNaN(newPrice)) return alert("Vui lòng nhập đủ Tên và Giá!");
+            
             const productRef = db.ref('products');
             const snap = await productRef.once('value');
             let found = false;
+            
+            // Chuyển từ khóa tìm kiếm về chữ thường
+            const searchName = name.toLowerCase();
+
             snap.forEach(child => {
-                if(child.val().name === name) {
-                    child.ref.update({ price: newPrice });
-                    found = true;
+                // Đảm bảo lấy đúng tên từ db và chuyển về chữ thường để so sánh
+                if(child.val().name) {
+                    const dbName = child.val().name.toString().toLowerCase();
+                    if(dbName === searchName) {
+                        child.ref.update({ price: newPrice });
+                        found = true;
+                    }
                 }
             });
+            
             if(found) alert("Đã cập nhật giá mới cho: " + name);
-            else alert("Không tìm thấy vật phẩm nào tên là: " + name);
+            else alert("Không tìm thấy vật phẩm nào tên là: " + name + ". Bạn hãy kiểm tra lại xem đã tạo trên Firebase chưa nhé!");
         }
+        // ==========================================
 
         db.ref('orders').on('value', snap => {
             const list = document.getElementById('order-list');
